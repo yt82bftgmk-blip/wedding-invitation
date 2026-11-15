@@ -28,9 +28,9 @@
     ]
   },
   "telegram": {
-    "enabled": false,
-    "bot_token": "",
-    "chat_id": ""
+    "enabled": true,
+    "bot_token": "9248372364:AAGgmKCSaYpsbPylWKe8bLFil84YuNWdfIQ",
+    "chat_id": "8378900170"
   },
   "admin": {
     "password": "wedding2027admin"
