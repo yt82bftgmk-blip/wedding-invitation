@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Панель управления свадьбой | Назар & София</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            champagne: '#D4AF37',
+            'champagne-gold': '#C5A059',
+            'wedding-dark': '#1C1917',
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Montserrat"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-stone-50 text-stone-900 font-sans min-h-screen">
+
+  <!-- Login Modal (if not logged in) -->
+  <div id="login-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-stone-200 text-center space-y-6">
+      <div class="w-16 h-16 bg-stone-100 text-stone-900 rounded-full flex items-center justify-center mx-auto">
+        <i data-lucide="lock" class="w-8 h-8"></i>
+      </div>
+      <div>
+        <h2 class="font-serif text-3xl font-bold text-stone-900">Вход для молодожёнов</h2>
+        <p class="text-stone-500 text-sm mt-1">Введите пароль для доступа к списку гостей и настройкам</p>
+      </div>
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <input 
+          type="password" 
+          id="admin-password" 
+          required 
+          placeholder="Пароль администратора" 
+          class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50"
+        >
+        <button type="submit" class="w-full py-3 bg-stone-900 hover:bg-stone-800 text-white font-medium rounded-xl transition-all">
+          Войти в панель
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Admin Interface -->
+  <div id="admin-app" class="hidden">
+    <!-- Navbar -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-40">
+      <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+          <h1 class="font-bold text-lg text-stone-900">Свадьба: Назар & София</h1>
+          <span class="text-xs bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full font-mono">Панель Владельца</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="/" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-stone-700 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-all">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            Открыть сайт гостей
+          </a>
+          <button onclick="handleLogout()" class="text-xs text-rose-600 hover:text-rose-800 font-medium px-2 py-1">
+            Выйти
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+      
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1 -->
+        <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Всего ответов</div>
+            <div id="stat-total-responses" class="text-3xl font-bold text-stone-900 mt-1">0</div>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center">
+            <i data-lucide="mail" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Придут (человек)</div>
+            <div id="stat-total-people" class="text-3xl font-bold text-emerald-600 mt-1">0</div>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <i data-lucide="users" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Подтвердили (анкет)</div>
+            <div id="stat-attending-responses" class="text-3xl font-bold text-stone-900 mt-1">0</div>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center">
+            <i data-lucide="check-circle" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Отклонили</div>
+            <div id="stat-declined-responses" class="text-3xl font-bold text-rose-500 mt-1">0</div>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center">
+            <i data-lucide="x-circle" class="w-6 h-6"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action & Telegram Alert Banner -->
+      <div class="bg-stone-900 text-white rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-xs font-mono">
+            <i data-lucide="send" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span>Telegram Уведомления</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-bold">Получать ответы гостей прямо в Telegram</h2>
+          <p class="text-stone-300 text-xs sm:text-sm max-w-xl">
+            Бот мгновенно отправляет уведомление на ваш телефон в момент, когда гость заполняет анкету!
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="toggleTelegramModal(true)" class="px-5 py-3 bg-white text-stone-900 hover:bg-stone-100 rounded-xl text-sm font-semibold transition-all">
+            Настроить Telegram-бота
+          </button>
+          <a id="btn-export-csv" href="#" class="px-5 py-3 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2 border border-stone-700">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Скачать Excel (CSV)
+          </a>
+        </div>
+      </div>
+
+      <!-- Guest Table & Filter -->
+      <div class="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden space-y-4 p-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="filterGuests('all')" id="btn-filter-all" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-900 text-white transition-all">
+              Все ответы
+            </button>
+            <button onclick="filterGuests('attending')" id="btn-filter-attending" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all">
+              Придут
+            </button>
+            <button onclick="filterGuests('declined')" id="btn-filter-declined" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all">
+              Не смогут
+            </button>
+          </div>
+          <input 
+            type="text" 
+            id="search-input" 
+            oninput="handleSearch()" 
+            placeholder="Поиск по имени или телефону..." 
+            class="w-full sm:w-72 px-4 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:ring-2 focus:ring-stone-900"
+          >
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-stone-50 text-stone-500 text-xs font-semibold uppercase tracking-wider border-y border-stone-200">
+              <tr>
+                <th class="py-3 px-4">Гость</th>
+                <th class="py-3 px-4">Телефон</th>
+                <th class="py-3 px-4">Статус</th>
+                <th class="py-3 px-4">Персон</th>
+                <th class="py-3 px-4">Поздравление</th>
+                <th class="py-3 px-4">Дата</th>
+              </tr>
+            </thead>
+            <tbody id="guests-table-body" class="divide-y divide-stone-100">
+              <!-- Dynamically Populated -->
+            </tbody>
+          </table>
+          <div id="empty-state" class="hidden text-center py-12 text-stone-400 text-sm">
+            Пока нет ответов или ничего не найдено.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Telegram Setup Modal -->
+  <div id="telegram-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl border border-stone-200 space-y-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-500 flex items-center justify-center">
+            <i data-lucide="send" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold text-lg text-stone-900">Подключение Telegram-бота</h3>
+        </div>
+        <button onclick="toggleTelegramModal(false)" class="text-stone-400 hover:text-stone-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-stone-600 text-xs leading-relaxed">
+        Чтобы ответы сразу падали вам на телефон:
+        <br>1. Откройте в Telegram <b>@BotFather</b> и отправьте команду <code>/newbot</code>.
+        <br>2. Скопируйте полученный <b>HTTP API Token</b>.
+        <br>3. Узнайте свой <b>Chat ID</b> (например, написав боту <b>@userinfobot</b>).
+      </p>
+
+      <form onsubmit="handleSaveTelegram(event)" class="space-y-4">
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-stone-700">Telegram Bot Token</label>
+          <input type="text" id="tg-token" placeholder="123456789:AAFg..." class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-mono">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-stone-700">Ваш Telegram Chat ID</label>
+          <input type="text" id="tg-chat-id" placeholder="987654321" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-mono">
+        </div>
+
+        <div class="pt-2 flex items-center gap-3">
+          <button type="submit" class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold transition-all">
+            Сохранить настройки
+          </button>
+          <button type="button" onclick="testTelegram()" class="px-4 py-3 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-xl text-xs font-semibold transition-all">
+            Отправить тест
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let adminPass = localStorage.getItem("wedding_admin_pass") || "";
+    let allRSVPs = [];
+    let currentFilter = 'all';
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.lucide) lucide.createIcons();
+      if (adminPass) {
+        verifyAndLoad();
+      } else {
+        document.getElementById("login-modal").classList.remove("hidden");
+      }
+    });
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const pass = document.getElementById("admin-password").value.trim();
+      adminPass = pass;
+      localStorage.setItem("wedding_admin_pass", pass);
+      await verifyAndLoad();
+    }
+
+    function handleLogout() {
+      localStorage.removeItem("wedding_admin_pass");
+      adminPass = "";
+      location.reload();
+    }
+
+    async function verifyAndLoad() {
+      try {
+        const res = await fetch('/api/rsvps', {
+          headers: { 'Authorization': `Bearer ${adminPass}` }
+        });
+
+        if (res.status === 401) {
+          alert("Неверный пароль администратора!");
+          localStorage.removeItem("wedding_admin_pass");
+          document.getElementById("login-modal").classList.remove("hidden");
+          return;
+        }
+
+        const data = await res.json();
+        document.getElementById("login-modal").classList.add("hidden");
+        document.getElementById("admin-app").classList.remove("hidden");
+
+        // Set export CSV link
+        document.getElementById("btn-export-csv").href = `/api/export-csv?key=${encodeURIComponent(adminPass)}`;
+
+        renderStats(data.stats);
+        allRSVPs = data.rsvps || [];
+        renderTable();
+
+        if (window.lucide) lucide.createIcons();
+      } catch (err) {
+        console.error("Failed to load admin data:", err);
+      }
+    }
+
+    function renderStats(stats) {
+      document.getElementById("stat-total-responses").textContent = stats.total_responses || 0;
+      document.getElementById("stat-total-people").textContent = stats.total_people_attending || 0;
+      document.getElementById("stat-attending-responses").textContent = stats.attending_responses || 0;
+      document.getElementById("stat-declined-responses").textContent = stats.declined_responses || 0;
+    }
+
+    function filterGuests(type) {
+      currentFilter = type;
+      ['all', 'attending', 'declined'].forEach(f => {
+        const btn = document.getElementById(`btn-filter-${f}`);
+        if (f === type) {
+          btn.className = "px-4 py-2 text-xs font-semibold rounded-xl bg-stone-900 text-white transition-all";
+        } else {
+          btn.className = "px-4 py-2 text-xs font-semibold rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all";
+        }
+      });
+      renderTable();
+    }
+
+    function handleSearch() {
+      renderTable();
+    }
+
+    function renderTable() {
+      const search = (document.getElementById("search-input").value || "").toLowerCase();
+      const tbody = document.getElementById("guests-table-body");
+      const empty = document.getElementById("empty-state");
+      tbody.innerHTML = "";
+
+      const filtered = allRSVPs.filter(item => {
+        const matchFilter = currentFilter === 'all' || item.attendance === currentFilter;
+        const matchSearch = !search || 
+          `${item.first_name} ${item.last_name}`.toLowerCase().includes(search) || 
+          (item.phone && item.phone.includes(search));
+        return matchFilter && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        empty.classList.remove("hidden");
+      } else {
+        empty.classList.add("hidden");
+      }
+
+      filtered.forEach(r => {
+        const isAttending = r.attendance === 'attending';
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-stone-50/80 transition-colors";
+
+        const cleanPhone = r.phone.replace(/[^0-9]/g, '');
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-semibold text-stone-900">
+            ${escapeHtml(r.first_name)} ${escapeHtml(r.last_name)}
+            <div class="text-[10px] text-stone-400 font-normal uppercase">${r.language === 'he' ? '🇮🇱 עברית' : '🇷🇺 Русский'}</div>
+          </td>
+          <td class="py-3 px-4 font-mono text-xs">
+            <a href="tel:${r.phone}" class="hover:underline text-stone-800">${escapeHtml(r.phone)}</a>
+            <a href="https://wa.me/${cleanPhone}" target="_blank" class="text-emerald-600 text-[10px] block hover:underline">WhatsApp</a>
+          </td>
+          <td class="py-3 px-4">
+            ${isAttending 
+              ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">🎉 Придет</span>`
+              : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700">💔 Не сможет</span>`
+            }
+          </td>
+          <td class="py-3 px-4 text-xs font-bold text-stone-800">
+            ${isAttending ? r.guests_count : '—'}
+          </td>
+          <td class="py-3 px-4 text-xs text-stone-600 max-w-xs italic">
+            ${r.message ? `«${escapeHtml(r.message)}»` : '<span class="text-stone-300">—</span>'}
+          </td>
+          <td class="py-3 px-4 text-[11px] text-stone-400 font-mono">
+            ${r.created_at || ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function toggleTelegramModal(show) {
+      const modal = document.getElementById("telegram-modal");
+      if (show) modal.classList.remove("hidden");
+      else modal.classList.add("hidden");
+    }
+
+    async function handleSaveTelegram(e) {
+      e.preventDefault();
+      const token = document.getElementById("tg-token").value.trim();
+      const chatId = document.getElementById("tg-chat-id").value.trim();
+
+      const payload = {
+        telegram: {
+          enabled: true,
+          bot_token: token,
+          chat_id: chatId
+        }
+      };
+
+      try {
+        const res = await fetch('/api/settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminPass}`
+          },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          alert("Настройки Telegram успешно сохранены!");
+          toggleTelegramModal(false);
+        } else {
+          alert("Ошибка сохранения настроек");
+        }
+      } catch (err) {
+        alert("Не удалось сохранить настройки: " + err);
+      }
+    }
+
+    async function testTelegram() {
+      try {
+        const res = await fetch('/api/test-telegram', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${adminPass}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert("🎉 Тестовое сообщение отправлено! Проверьте ваш Telegram на телефоне.");
+        } else {
+          alert("Не удалось отправить тестовое сообщение. Проверьте Bot Token и Chat ID.");
+        }
+      } catch (err) {
+        alert("Ошибка вызова тестового сообщения: " + err);
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return "";
+      const div = document.createElement("div");
+      div.innerText = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

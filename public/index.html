@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Свадьба Назара и Софии | חתונת נזר וסופיה</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&family=Heebo:wght@300;400;500;700&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            champagne: '#D4AF37',
+            'champagne-light': '#FDFBF7',
+            'champagne-gold': '#C5A059',
+            'rose-gold': '#B76E79',
+            'wedding-dark': '#1C1917',
+            'wedding-cream': '#FAF7F2',
+            'bit-blue': '#00A8B5'
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', '"Frank Ruhl Libre"', 'serif'],
+            sans: ['"Montserrat"', '"Heebo"', 'sans-serif'],
+            hebrewSerif: ['"Frank Ruhl Libre"', 'serif'],
+            hebrewSans: ['"Heebo"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="bg-wedding-cream text-stone-800 font-sans antialiased selection:bg-champagne selection:text-white">
+
+  <!-- Top Language Switcher Bar -->
+  <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md bg-white/80 border-b border-stone-200/50">
+    <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="#hero" class="font-serif text-2xl font-bold tracking-wide text-stone-900 flex items-center gap-2">
+        <span>N & S</span>
+      </a>
+
+      <!-- Lang Toggle -->
+      <div class="flex items-center gap-2 bg-stone-100 p-1 rounded-full border border-stone-200">
+        <button id="btn-lang-ru" onclick="setLanguage('ru')" class="px-3 py-1 text-xs font-medium rounded-full transition-all bg-white text-stone-900 shadow-sm">
+          🇷🇺 Русский
+        </button>
+        <button id="btn-lang-he" onclick="setLanguage('he')" class="px-3 py-1 text-xs font-medium rounded-full transition-all text-stone-600 hover:text-stone-900">
+          🇮🇱 עברית
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="hero" class="relative min-h-screen flex items-center justify-center text-center px-4 pt-20 pb-16 overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] opacity-40"></div>
+    <div class="absolute top-1/4 -left-20 w-80 h-80 bg-champagne-gold/10 rounded-full blur-3xl -z-10"></div>
+    <div class="absolute bottom-1/4 -right-20 w-96 h-96 bg-rose-gold/10 rounded-full blur-3xl -z-10"></div>
+
+    <div class="max-w-3xl mx-auto space-y-8">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 border border-champagne-gold/30 shadow-sm text-xs font-medium tracking-widest text-champagne-gold uppercase">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+        <span data-i18n="hero_badge">Приглашение на свадьбу</span>
+      </div>
+
+      <div class="space-y-4">
+        <h1 class="font-serif text-5xl sm:text-7xl lg:text-8xl font-normal text-stone-900 leading-tight">
+          <span id="names-title">Назар & София</span>
+        </h1>
+        <p class="text-stone-600 text-lg sm:text-xl font-light tracking-wide max-w-xl mx-auto" data-i18n="hero_subtitle">
+          Мы приглашаем вас разделить радость самого счастливого дня нашей жизни!
+        </p>
+      </div>
+
+      <!-- Hero Couple Photo -->
+      <div class="relative w-72 h-96 sm:w-80 sm:h-[440px] mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-white group">
+        <img 
+          id="hero-img"
+          src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80" 
+          alt="Назар и София" 
+          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        >
+        <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-transparent to-transparent flex items-end justify-center p-6 text-white">
+          <div class="text-center">
+            <span class="text-xs uppercase tracking-widest text-stone-200" data-i18n="wedding_day_label">День нашей свадьбы</span>
+            <div class="font-serif text-2xl font-bold mt-1" id="wedding-display-date">15 Сентября 2027</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Countdown Timer -->
+      <div class="bg-white/90 backdrop-blur-sm p-6 rounded-2xl border border-stone-200/80 shadow-md max-w-lg mx-auto">
+        <div class="text-xs uppercase tracking-wider text-stone-500 font-medium mb-4" data-i18n="timer_title">
+          До торжества осталось:
+        </div>
+        <div class="grid grid-cols-4 gap-2 text-center">
+          <div class="bg-stone-50 p-2 sm:p-3 rounded-xl border border-stone-100">
+            <div id="days" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900">00</div>
+            <div class="text-[10px] sm:text-xs text-stone-500 uppercase mt-1" data-i18n="timer_days">Дней</div>
+          </div>
+          <div class="bg-stone-50 p-2 sm:p-3 rounded-xl border border-stone-100">
+            <div id="hours" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900">00</div>
+            <div class="text-[10px] sm:text-xs text-stone-500 uppercase mt-1" data-i18n="timer_hours">Часов</div>
+          </div>
+          <div class="bg-stone-50 p-2 sm:p-3 rounded-xl border border-stone-100">
+            <div id="minutes" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900">00</div>
+            <div class="text-[10px] sm:text-xs text-stone-500 uppercase mt-1" data-i18n="timer_minutes">Минут</div>
+          </div>
+          <div class="bg-stone-50 p-2 sm:p-3 rounded-xl border border-stone-100">
+            <div id="seconds" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900">00</div>
+            <div class="text-[10px] sm:text-xs text-stone-500 uppercase mt-1" data-i18n="timer_seconds">Секунд</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick RSVP Button -->
+      <div>
+        <a href="#rsvp" class="inline-flex items-center gap-2 px-8 py-4 bg-stone-900 text-white rounded-full text-base font-medium shadow-xl hover:bg-champagne-gold hover:text-white transition-all transform hover:-translate-y-0.5">
+          <i data-lucide="heart" class="w-5 h-5 text-rose-400"></i>
+          <span data-i18n="btn_rsvp_hero">Подтвердить присутствие</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Story Section ("Наша история") -->
+  <section id="story" class="py-20 px-4 bg-white/70 border-y border-stone-200/60">
+    <div class="max-w-4xl mx-auto space-y-12">
+      <div class="text-center space-y-3">
+        <span class="text-champagne-gold font-medium text-xs uppercase tracking-widest" data-i18n="story_tag">Как всё начиналось</span>
+        <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="story_title">Наша история</h2>
+        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+      </div>
+
+      <!-- Timeline Cards -->
+      <div class="space-y-8 relative before:absolute before:inset-0 before:left-1/2 before:-translate-x-1/2 before:w-0.5 before:bg-stone-200 max-w-2xl mx-auto">
+        <!-- Event 1 -->
+        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-champagne-gold text-white shadow-md z-10 shrink-0 md:order-1 md:mx-auto">
+            <i data-lucide="compass" class="w-4 h-4"></i>
+          </div>
+          <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-2xl border border-stone-200/80 shadow-sm hover:shadow-md transition-shadow">
+            <span class="text-xs font-semibold text-champagne-gold uppercase tracking-wider" data-i18n="story_event1_date">2023 год</span>
+            <h3 class="font-serif text-xl font-bold text-stone-900 mt-1 mb-2" data-i18n="story_event1_title">Первая встреча</h3>
+            <p class="text-stone-600 text-sm leading-relaxed" data-i18n="story_event1_text">
+              Случайный разговор, который перевернул наши жизни. С первого взгляда стало ясно: впереди нас ждёт нечто невероятное.
+            </p>
+          </div>
+        </div>
+
+        <!-- Event 2 -->
+        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-champagne-gold text-white shadow-md z-10 shrink-0 md:order-1 md:mx-auto">
+            <i data-lucide="plane" class="w-4 h-4"></i>
+          </div>
+          <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-2xl border border-stone-200/80 shadow-sm hover:shadow-md transition-shadow">
+            <span class="text-xs font-semibold text-champagne-gold uppercase tracking-wider" data-i18n="story_event2_date">2024 год</span>
+            <h3 class="font-serif text-xl font-bold text-stone-900 mt-1 mb-2" data-i18n="story_event2_title">Первое путешествие</h3>
+            <p class="text-stone-600 text-sm leading-relaxed" data-i18n="story_event2_text">
+              Незабываемые закаты, тысячи фотографий, смех и понимание того, что мы идеальная команда в любом уголке мира.
+            </p>
+          </div>
+        </div>
+
+        <!-- Event 3 -->
+        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-champagne-gold text-white shadow-md z-10 shrink-0 md:order-1 md:mx-auto">
+            <i data-lucide="gem" class="w-4 h-4"></i>
+          </div>
+          <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-2xl border border-stone-200/80 shadow-sm hover:shadow-md transition-shadow">
+            <span class="text-xs font-semibold text-champagne-gold uppercase tracking-wider" data-i18n="story_event3_date">2025 год</span>
+            <h3 class="font-serif text-xl font-bold text-stone-900 mt-1 mb-2" data-i18n="story_event3_title">Она сказала «Да!»</h3>
+            <p class="text-stone-600 text-sm leading-relaxed" data-i18n="story_event3_text">
+              Самый романтический вечер, трепетное биение сердец и самое главное слово, открывшее новую главу нашей семьи.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Photo Gallery -->
+  <section class="py-20 px-4">
+    <div class="max-w-5xl mx-auto space-y-12">
+      <div class="text-center space-y-3">
+        <span class="text-champagne-gold font-medium text-xs uppercase tracking-widest" data-i18n="gallery_tag">Наши моменты</span>
+        <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="gallery_title">Фотогалерея</h2>
+        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="space-y-4">
+          <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-64 object-cover rounded-2xl shadow-sm hover:opacity-95 transition-all">
+          <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-44 object-cover rounded-2xl shadow-sm hover:opacity-95 transition-all">
+        </div>
+        <div class="space-y-4">
+          <img src="https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-44 object-cover rounded-2xl shadow-sm hover:opacity-95 transition-all">
+          <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-64 object-cover rounded-2xl shadow-sm hover:opacity-95 transition-all">
+        </div>
+        <div class="space-y-4">
+          <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-64 object-cover rounded-2xl shadow-sm hover:opacity-95 transition-all">
+          <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-44 object-cover rounded-2xl shadow-sm hover:opacity-95 transition-all">
+        </div>
+        <div class="space-y-4">
+          <img src="https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-44 object-cover rounded-2xl shadow-sm hover:opacity-95 transition-all">
+          <img src="https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-64 object-cover rounded-2xl shadow-sm hover:opacity-95 transition-all">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Schedule of the Day -->
+  <section class="py-20 px-4 bg-white/70 border-y border-stone-200/60">
+    <div class="max-w-3xl mx-auto space-y-12">
+      <div class="text-center space-y-3">
+        <span class="text-champagne-gold font-medium text-xs uppercase tracking-widest" data-i18n="schedule_tag">Торжественный день</span>
+        <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="schedule_title">Программа свадьбы</h2>
+        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <!-- Item 1 -->
+        <div class="p-6 rounded-2xl bg-white border border-stone-200/80 shadow-sm flex items-start gap-4">
+          <div class="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center text-champagne-gold shrink-0">
+            <i data-lucide="wine" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-champagne-gold tracking-wider">18:30</div>
+            <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_1_title">Сбор гостей & Фуршет</h3>
+            <p class="text-stone-500 text-xs mt-1" data-i18n="sched_1_desc">Приветственные напитки, закуски и тёплые встречи</p>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="p-6 rounded-2xl bg-white border border-stone-200/80 shadow-sm flex items-start gap-4">
+          <div class="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center text-champagne-gold shrink-0">
+            <i data-lucide="heart-handshake" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-champagne-gold tracking-wider">19:30</div>
+            <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_2_title">Хупа / Церемония</h3>
+            <p class="text-stone-500 text-xs mt-1" data-i18n="sched_2_desc">Торжественная церемония бракосочетания</p>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="p-6 rounded-2xl bg-white border border-stone-200/80 shadow-sm flex items-start gap-4">
+          <div class="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center text-champagne-gold shrink-0">
+            <i data-lucide="utensils" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-champagne-gold tracking-wider">20:15</div>
+            <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_3_title">Праздничный ужин</h3>
+            <p class="text-stone-500 text-xs mt-1" data-i18n="sched_3_desc">Банкет, изысканные блюда и тосты за молодых</p>
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="p-6 rounded-2xl bg-white border border-stone-200/80 shadow-sm flex items-start gap-4">
+          <div class="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center text-champagne-gold shrink-0">
+            <i data-lucide="music" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-champagne-gold tracking-wider">21:30</div>
+            <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_4_title">Танцы и вечеринка</h3>
+            <p class="text-stone-500 text-xs mt-1" data-i18n="sched_4_desc">Зажигательная музыка, свадебный торт и веселье</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Location & Navigation Section -->
+  <section class="py-20 px-4">
+    <div class="max-w-3xl mx-auto space-y-8 text-center">
+      <div class="space-y-3">
+        <span class="text-champagne-gold font-medium text-xs uppercase tracking-widest" data-i18n="location_tag">Где нас найти</span>
+        <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="location_title">Место проведения</h2>
+        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+      </div>
+
+      <div class="bg-white p-8 rounded-3xl border border-stone-200/80 shadow-lg space-y-6">
+        <div class="w-16 h-16 bg-champagne-gold/10 text-champagne-gold rounded-full flex items-center justify-center mx-auto">
+          <i data-lucide="map-pin" class="w-8 h-8"></i>
+        </div>
+
+        <div class="space-y-2">
+          <h3 id="venue-title" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900">Зал торжеств «Royal Garden»</h3>
+          <p id="venue-city" class="text-stone-600">Тель-Авив / Центр Израиля</p>
+        </div>
+
+        <!-- Navigation Buttons: Waze & Google Maps -->
+        <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a id="btn-waze" href="https://waze.com/ul" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-[#33CCFF] hover:bg-[#20b4e6] text-white font-medium rounded-full shadow-md transition-all">
+            <i data-lucide="navigation" class="w-5 h-5"></i>
+            <span data-i18n="btn_waze">Открыть в Waze</span>
+          </a>
+          <a id="btn-maps" href="https://maps.google.com" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-stone-900 hover:bg-stone-800 text-white font-medium rounded-full shadow-md transition-all">
+            <i data-lucide="map" class="w-5 h-5"></i>
+            <span data-i18n="btn_maps">Открыть в Google Maps</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Israeli Bit Gift Card Section -->
+  <section class="py-20 px-4 bg-white/70 border-y border-stone-200/60">
+    <div class="max-w-2xl mx-auto space-y-8 text-center">
+      <div class="space-y-3">
+        <span class="text-champagne-gold font-medium text-xs uppercase tracking-widest" data-i18n="gift_tag">Подарки</span>
+        <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="gift_title">Свадебный подарок</h2>
+        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+      </div>
+
+      <p class="text-stone-600 max-w-lg mx-auto leading-relaxed" data-i18n="gift_description">
+        Ваше присутствие и тёплые улыбки — самый ценный подарок для нас! Но если вы хотите сделать памятный вклад в нашу молодую семью, вы можете легко воспользоваться израильским приложением <b>Bit</b>.
+      </p>
+
+      <!-- Bit Card Container -->
+      <div class="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 text-white p-8 rounded-3xl shadow-2xl relative overflow-hidden text-left border border-stone-700">
+        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-bit-blue/20 rounded-full blur-2xl"></div>
+
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-full bg-bit-blue flex items-center justify-center text-white font-black text-sm tracking-wider">
+              bit
+            </div>
+            <span class="font-bold tracking-wide text-lg">bit payment</span>
+          </div>
+          <span class="text-xs bg-white/10 px-3 py-1 rounded-full text-stone-300 font-mono">Israel</span>
+        </div>
+
+        <div class="space-y-1 mb-6">
+          <div class="text-xs text-stone-400 uppercase tracking-widest" data-i18n="bit_recipient">Получатель</div>
+          <div id="bit-name-display" class="font-serif text-2xl font-bold text-champagne-gold">Назар & София</div>
+          <div id="bit-phone-display" class="text-xl font-mono text-white tracking-wider mt-1">+972 50-000-0000</div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button onclick="copyBitNumber()" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-white text-stone-900 hover:bg-stone-100 rounded-xl font-medium transition-all shadow-md">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            <span id="btn-copy-bit-text" data-i18n="bit_copy_btn">Скопировать номер</span>
+          </button>
+          <a id="btn-open-bit" href="bit://" class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-bit-blue hover:bg-[#00929d] text-white rounded-xl font-medium transition-all shadow-md">
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            <span data-i18n="bit_open_app">Открыть Bit</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RSVP Section (Бланк регистрации) -->
+  <section id="rsvp" class="py-24 px-4 relative">
+    <div class="max-w-2xl mx-auto space-y-8">
+      <div class="text-center space-y-3">
+        <span class="text-champagne-gold font-medium text-xs uppercase tracking-widest" data-i18n="rsvp_tag">Будем счастливы вас видеть</span>
+        <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="rsvp_title">Подтверждение присутствия</h2>
+        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+        <p class="text-stone-600 max-w-md mx-auto text-sm" data-i18n="rsvp_desc">
+          Пожалуйста, ответьте на приглашение, чтобы мы могли позаботиться о вашем комфорте!
+        </p>
+      </div>
+
+      <!-- RSVP Card -->
+      <div class="bg-white p-8 sm:p-10 rounded-3xl border border-stone-200/80 shadow-2xl relative">
+        <form id="rsvp-form" onsubmit="submitRSVP(event)" class="space-y-6">
+          
+          <!-- Name & Surname -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_first_name">Имя *</label>
+              <input 
+                type="text" 
+                id="first_name" 
+                required 
+                placeholder="Давид" 
+                class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
+              >
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_last_name">Фамилия *</label>
+              <input 
+                type="text" 
+                id="last_name" 
+                required 
+                placeholder="Леви" 
+                class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
+              >
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_phone">Номер телефона *</label>
+            <div class="relative">
+              <input 
+                type="tel" 
+                id="phone" 
+                required 
+                placeholder="+972 50-123-4567" 
+                class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all font-mono"
+              >
+            </div>
+          </div>
+
+          <!-- Coming / Not Coming choice -->
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_attendance">Сможете ли вы прийти? *</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="flex items-center gap-3 p-4 rounded-xl border-2 border-stone-200 cursor-pointer hover:border-champagne-gold transition-all has-[:checked]:border-stone-900 has-[:checked]:bg-stone-50">
+                <input type="radio" name="attendance" value="attending" checked onchange="toggleGuestCount(true)" class="accent-stone-900 w-4 h-4">
+                <div class="font-medium text-sm text-stone-900 flex items-center gap-2">
+                  <span>🎉</span>
+                  <span data-i18n="choice_yes">Я обязательно приду!</span>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 p-4 rounded-xl border-2 border-stone-200 cursor-pointer hover:border-champagne-gold transition-all has-[:checked]:border-stone-900 has-[:checked]:bg-stone-50">
+                <input type="radio" name="attendance" value="declined" onchange="toggleGuestCount(false)" class="accent-stone-900 w-4 h-4">
+                <div class="font-medium text-sm text-stone-900 flex items-center gap-2">
+                  <span>💔</span>
+                  <span data-i18n="choice_no">К сожалению, не смогу</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Guest count -->
+          <div id="guest-count-container" class="space-y-1.5 transition-all">
+            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_guests_count">Количество человек</label>
+            <select id="guests_count" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all bg-white">
+              <option value="1" data-i18n="guest_opt_1">1 человек (только я)</option>
+              <option value="2" data-i18n="guest_opt_2">2 человека (+1 гость)</option>
+              <option value="3" data-i18n="guest_opt_3">3 человека</option>
+              <option value="4" data-i18n="guest_opt_4">4+ человека (с семьёй)</option>
+            </select>
+          </div>
+
+          <!-- Warm Congratulations / Wishes -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between">
+              <span data-i18n="field_message">Тёплые слова молодожёнам (мини-поздравление)</span>
+              <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
+            </label>
+            <textarea 
+              id="message" 
+              rows="3" 
+              placeholder="Дорогие Назар и София! От всей души поздравляем вас..." 
+              class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <button 
+            type="submit" 
+            id="btn-submit"
+            class="w-full py-4 px-6 bg-stone-900 hover:bg-champagne-gold text-white font-medium rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 text-base group"
+          >
+            <i data-lucide="send" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+            <span data-i18n="btn_submit_rsvp">Отправить подтверждение</span>
+          </button>
+        </form>
+
+        <!-- Success Message (Initially Hidden) -->
+        <div id="rsvp-success" class="hidden text-center py-12 space-y-4">
+          <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto shadow-inner">
+            <i data-lucide="heart" class="w-10 h-10 fill-rose-500"></i>
+          </div>
+          <h3 class="font-serif text-3xl font-bold text-stone-900" data-i18n="success_title">Спасибо за ваш ответ!</h3>
+          <p class="text-stone-600 max-w-md mx-auto text-sm leading-relaxed" data-i18n="success_desc">
+            Ваше подтверждение и поздравление успешно отправлены Назару и Софии! До встречи на празднике любви!
+          </p>
+          <button onclick="resetRSVPForm()" class="px-6 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-full text-xs font-semibold uppercase tracking-wider transition-all">
+            <span data-i18n="btn_send_another">Заполнить ещё один ответ</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-stone-200/60 text-center text-stone-500 text-xs space-y-3">
+    <div class="font-serif text-xl font-bold text-stone-900">Назар & София</div>
+    <div data-i18n="footer_love">С любовью и благодарностью к каждому гостю ❤️</div>
+    <div class="pt-4">
+      <a href="/admin" class="text-stone-400 hover:text-stone-700 underline text-[11px]" data-i18n="footer_admin_link">Вход для молодожёнов (Админка)</a>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
