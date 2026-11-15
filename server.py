@@ -95,7 +95,17 @@ def send_telegram_notification(rsvp_data):
         return False
 
     bot_token = tg["bot_token"]
-    chat_id = tg["chat_id"]
+    raw_chat_id = tg["chat_id"]
+
+    if isinstance(raw_chat_id, list):
+        chat_ids = [str(x).strip() for x in raw_chat_id if str(x).strip()]
+    elif isinstance(raw_chat_id, str):
+        chat_ids = [x.strip() for x in raw_chat_id.replace(",", " ").split() if x.strip()]
+    else:
+        chat_ids = [str(raw_chat_id)] if raw_chat_id else []
+
+    if not chat_ids:
+        return False
 
     status_icon = "🎉" if rsvp_data.get("attendance") == "attending" else "💔"
     status_text = "БУДЕТ ПРИСУТСТВОВАТЬ" if rsvp_data.get("attendance") == "attending" else "НЕ СМОЖЕТ ПРИЙТИ"
@@ -116,22 +126,24 @@ def send_telegram_notification(rsvp_data):
     msg_lines.append(f"⏰ {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
     full_text = "\n".join(msg_lines)
-
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": full_text,
-        "parse_mode": "HTML"
-    }
 
-    try:
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=5) as response:
-            return True
-    except Exception as e:
-        print(f"Failed to send Telegram alert: {e}")
-        return False
+    success_any = False
+    for cid in chat_ids:
+        payload = {
+            "chat_id": cid,
+            "text": full_text,
+            "parse_mode": "HTML"
+        }
+        try:
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=5) as response:
+                success_any = True
+        except Exception as e:
+            print(f"Failed to send Telegram alert to {cid}: {e}")
+
+    return success_any
 
 
 class WeddingHandler(SimpleHTTPRequestHandler):
