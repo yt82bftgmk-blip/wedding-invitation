@@ -1,7 +1,7 @@
 {
   "wedding": {
-    "groom": "Назар",
-    "bride": "София",
+    "groom_ru": "Назар",
+    "bride_ru": "София",
     "groom_he": "נזר",
     "bride_he": "סופיה",
     "date": "2027-09-15T18:00:00",
@@ -14,10 +14,23 @@
     "bit_phone": "+972 50-000-0000",
     "bit_name": "Nazar & Sofia"
   },
+  "photos": {
+    "hero": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=600&q=80"
+    ]
+  },
   "telegram": {
     "enabled": false,
-    "bot_token": "YOUR_TELEGRAM_BOT_TOKEN_HERE",
-    "chat_id": "YOUR_TELEGRAM_CHAT_ID_HERE"
+    "bot_token": "",
+    "chat_id": ""
   },
   "admin": {
     "password": "wedding2027admin"

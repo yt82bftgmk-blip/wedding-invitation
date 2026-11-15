@@ -77,8 +77,7 @@ const translations = {
     success_desc: "Ваше подтверждение и поздравление успешно отправлены Назару и Софии! До встречи на празднике любви!",
     btn_send_another: "Заполнить ещё один ответ",
 
-    footer_love: "С любовью и благодарностью к каждому гостю ❤️",
-    footer_admin_link: "Вход для молодожёнов (Админка)"
+    footer_love: "С любовью и благодарностью к каждому гостю ❤️"
   },
 
   he: {
@@ -158,16 +157,15 @@ const translations = {
     success_desc: "אישור ההגעה והברכה שלכם התקבלו בהצלחה אצל נזר וסופיה! מצפים לחגוג יחד!",
     btn_send_another: "מילוי אישור נוסף",
 
-    footer_love: "באהבה והערכה רבה לכל אחד ואחת מכם ❤️",
-    footer_admin_link: "כניסת חתן וכלה (ניהול)"
+    footer_love: "באהבה והערכה רבה לכל אחד ואחת מכם ❤️"
   }
 };
 
 let currentLang = 'ru';
 let weddingConfig = null;
+let weddingPhotos = null;
 let weddingTargetDate = new Date("2027-09-15T18:00:00").getTime();
 
-// Initialize
 document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) {
     lucide.createIcons();
@@ -176,32 +174,94 @@ document.addEventListener("DOMContentLoaded", () => {
   startCountdown();
 });
 
-// Fetch Config from Backend
 async function fetchConfig() {
   try {
     const res = await fetch('/api/config');
     if (res.ok) {
       const data = await res.json();
       weddingConfig = data.wedding;
-      if (weddingConfig.date) {
+      weddingPhotos = data.photos;
+      if (weddingConfig && weddingConfig.date) {
         weddingTargetDate = new Date(weddingConfig.date).getTime();
+        formatDisplayDate(weddingConfig.date);
       }
       applyConfig();
+      applyPhotos();
     }
   } catch (err) {
-    console.log("Using default wedding config:", err);
+    console.log("Using default config:", err);
   }
+}
+
+function formatDisplayDate(dateStr) {
+  try {
+    const d = new Date(dateStr);
+    const monthsRu = ["Января","Февраля","Марта","Апреля","Мая","Июня","Июля","Августа","Сентября","Октября","Ноября","Декабря"];
+    const monthsHe = ["בינואר","בפברואר","במרץ","באפריל","במאי","ביוני","ביולי","באוגוסט","בספטמבר","באוקטובר","בנובמבר","בדצמבר"];
+    const day = d.getDate();
+    const year = d.getFullYear();
+    const isHe = currentLang === 'he';
+
+    const dateDisplay = document.getElementById("wedding-display-date");
+    if (dateDisplay) {
+      dateDisplay.textContent = isHe 
+        ? `${day} ${monthsHe[d.getMonth()]} ${year}`
+        : `${day} ${monthsRu[d.getMonth()]} ${year}`;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function applyPhotos() {
+  if (!weddingPhotos) return;
+
+  // Hero Photo
+  if (weddingPhotos.hero) {
+    const heroImg = document.getElementById("hero-img");
+    if (heroImg) heroImg.src = weddingPhotos.hero;
+  }
+
+  // Gallery Photos
+  if (weddingPhotos.gallery && weddingPhotos.gallery.length > 0) {
+    const galleryGrid = document.getElementById("gallery-grid");
+    if (galleryGrid) {
+      galleryGrid.innerHTML = "";
+      galleryPhotosToColumns(weddingPhotos.gallery, galleryGrid);
+    }
+  }
+}
+
+function galleryPhotosToColumns(photos, container) {
+  // Distribute photos into 4 columns for masonry look
+  const colCount = window.innerWidth >= 768 ? 4 : 2;
+  const cols = [];
+  for (let i = 0; i < colCount; i++) {
+    const col = document.createElement("div");
+    col.className = "space-y-4";
+    container.appendChild(col);
+    cols.push(col);
+  }
+
+  photos.forEach((src, idx) => {
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = "Wedding Moment";
+    img.className = (idx % 2 === 0 ? "w-full h-64" : "w-full h-44") + " object-cover rounded-2xl shadow-sm hover:opacity-95 transition-all";
+    cols[idx % colCount].appendChild(img);
+  });
 }
 
 function applyConfig() {
   if (!weddingConfig) return;
   const isHe = currentLang === 'he';
 
+  const groom = isHe ? (weddingConfig.groom_he || "נזר") : (weddingConfig.groom_ru || weddingConfig.groom || "Назар");
+  const bride = isHe ? (weddingConfig.bride_he || "סופיה") : (weddingConfig.bride_ru || weddingConfig.bride || "София");
+
   const namesEl = document.getElementById("names-title");
   if (namesEl) {
-    namesEl.textContent = isHe 
-      ? `${weddingConfig.bride_he || 'סופיה'} ו${weddingConfig.groom_he || 'נזר'}`
-      : `${weddingConfig.groom || 'Назар'} & ${weddingConfig.bride || 'София'}`;
+    namesEl.textContent = isHe ? `${bride} ו${groom}` : `${groom} & ${bride}`;
   }
 
   const venueTitle = document.getElementById("venue-title");
@@ -216,7 +276,7 @@ function applyConfig() {
 
   const bitName = document.getElementById("bit-name-display");
   if (bitName) {
-    bitName.textContent = weddingConfig.bit_name || "Nazar & Sofia";
+    bitName.textContent = weddingConfig.bit_name || `${groom} & ${bride}`;
   }
 
   const bitPhone = document.getElementById("bit-phone-display");
@@ -233,15 +293,17 @@ function applyConfig() {
   if (btnMaps && weddingConfig.google_maps_link) {
     btnMaps.href = weddingConfig.google_maps_link;
   }
+
+  if (weddingConfig.date) {
+    formatDisplayDate(weddingConfig.date);
+  }
 }
 
-// Language Switcher Function
 function setLanguage(lang) {
   currentLang = lang;
   const html = document.documentElement;
   const dict = translations[lang];
 
-  // Update HTML dir and lang
   if (lang === 'he') {
     html.setAttribute('dir', 'rtl');
     html.setAttribute('lang', 'he');
@@ -254,7 +316,6 @@ function setLanguage(lang) {
     document.getElementById('btn-lang-he').className = "px-3 py-1 text-xs font-medium rounded-full transition-all text-stone-600 hover:text-stone-900";
   }
 
-  // Update all data-i18n elements
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (dict[key]) {
@@ -262,7 +323,6 @@ function setLanguage(lang) {
     }
   });
 
-  // Update placeholders
   const fName = document.getElementById('first_name');
   const lName = document.getElementById('last_name');
   const msg = document.getElementById('message');
@@ -283,7 +343,6 @@ function setLanguage(lang) {
   }
 }
 
-// Countdown Timer
 function startCountdown() {
   function update() {
     const now = new Date().getTime();
@@ -312,7 +371,6 @@ function startCountdown() {
   setInterval(update, 1000);
 }
 
-// Copy Bit Number
 function copyBitNumber() {
   const phoneEl = document.getElementById("bit-phone-display");
   const phone = phoneEl ? phoneEl.textContent.trim() : "+972 50-000-0000";
@@ -329,18 +387,12 @@ function copyBitNumber() {
   });
 }
 
-// Toggle Guest Count if Declining
 function toggleGuestCount(isAttending) {
   const container = document.getElementById("guest-count-container");
   if (!container) return;
-  if (isAttending) {
-    container.style.display = "block";
-  } else {
-    container.style.display = "none";
-  }
+  container.style.display = isAttending ? "block" : "none";
 }
 
-// Submit RSVP
 async function submitRSVP(event) {
   event.preventDefault();
   const btn = document.getElementById("btn-submit");
@@ -377,7 +429,6 @@ async function submitRSVP(event) {
     const data = await response.json();
 
     if (response.ok && data.success) {
-      // Confetti explosion
       if (window.confetti && attendance === 'attending') {
         confetti({
           particleCount: 90,
@@ -386,7 +437,6 @@ async function submitRSVP(event) {
         });
       }
 
-      // Show success screen
       document.getElementById("rsvp-form").classList.add("hidden");
       document.getElementById("rsvp-success").classList.remove("hidden");
     } else {
@@ -401,7 +451,6 @@ async function submitRSVP(event) {
   }
 }
 
-// Reset Form
 function resetRSVPForm() {
   document.getElementById("rsvp-form").reset();
   document.getElementById("rsvp-form").classList.remove("hidden");

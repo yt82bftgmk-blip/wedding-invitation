@@ -32,7 +32,7 @@
 </head>
 <body class="bg-stone-50 text-stone-900 font-sans min-h-screen">
 
-  <!-- Login Modal (if not logged in) -->
+  <!-- Login Modal -->
   <div id="login-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-stone-200 text-center space-y-6">
       <div class="w-16 h-16 bg-stone-100 text-stone-900 rounded-full flex items-center justify-center mx-auto">
@@ -40,7 +40,7 @@
       </div>
       <div>
         <h2 class="font-serif text-3xl font-bold text-stone-900">Вход для молодожёнов</h2>
-        <p class="text-stone-500 text-sm mt-1">Введите пароль для доступа к списку гостей и настройкам</p>
+        <p class="text-stone-500 text-sm mt-1">Введите пароль для управления сайтом и списком гостей</p>
       </div>
       <form onsubmit="handleLogin(event)" class="space-y-4">
         <input 
@@ -79,123 +79,316 @@
       </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <!-- Navigation Tabs -->
+    <div class="bg-white border-b border-stone-200">
+      <div class="max-w-6xl mx-auto px-4 flex gap-8">
+        <button onclick="switchTab('guests')" id="tab-btn-guests" class="py-4 text-sm font-semibold border-b-2 border-stone-900 text-stone-900 flex items-center gap-2">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Список гостей и ответы</span>
+        </button>
+        <button onclick="switchTab('cms')" id="tab-btn-cms" class="py-4 text-sm font-semibold border-b-2 border-transparent text-stone-500 hover:text-stone-900 flex items-center gap-2">
+          <i data-lucide="layout" class="w-4 h-4"></i>
+          <span>Редактор сайта и фото</span>
+        </button>
+      </div>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
       
-      <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Card 1 -->
-        <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-          <div>
-            <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Всего ответов</div>
-            <div id="stat-total-responses" class="text-3xl font-bold text-stone-900 mt-1">0</div>
+      <!-- TAB 1: GUESTS & STATS -->
+      <div id="tab-guests" class="space-y-8">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+            <div>
+              <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Всего ответов</div>
+              <div id="stat-total-responses" class="text-3xl font-bold text-stone-900 mt-1">0</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center">
+              <i data-lucide="mail" class="w-6 h-6"></i>
+            </div>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center">
-            <i data-lucide="mail" class="w-6 h-6"></i>
+
+          <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+            <div>
+              <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Придут (человек)</div>
+              <div id="stat-total-people" class="text-3xl font-bold text-emerald-600 mt-1">0</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+            <div>
+              <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Подтвердили (анкет)</div>
+              <div id="stat-attending-responses" class="text-3xl font-bold text-stone-900 mt-1">0</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center">
+              <i data-lucide="check-circle" class="w-6 h-6"></i>
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+            <div>
+              <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Отклонили</div>
+              <div id="stat-declined-responses" class="text-3xl font-bold text-rose-500 mt-1">0</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center">
+              <i data-lucide="x-circle" class="w-6 h-6"></i>
+            </div>
           </div>
         </div>
 
-        <!-- Card 2 -->
-        <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-          <div>
-            <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Придут (человек)</div>
-            <div id="stat-total-people" class="text-3xl font-bold text-emerald-600 mt-1">0</div>
+        <!-- Action Banner -->
+        <div class="bg-stone-900 text-white rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl">
+          <div class="space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-xs font-mono">
+              <i data-lucide="send" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>Telegram Уведомления</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-bold">Получать ответы гостей прямо в Telegram</h2>
+            <p class="text-stone-300 text-xs sm:text-sm max-w-xl">
+              Бот мгновенно отправляет уведомление на ваш телефон в момент, когда гость заполняет анкету!
+            </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <i data-lucide="users" class="w-6 h-6"></i>
+          <div class="flex flex-wrap items-center gap-3">
+            <button onclick="toggleTelegramModal(true)" class="px-5 py-3 bg-white text-stone-900 hover:bg-stone-100 rounded-xl text-sm font-semibold transition-all">
+              Настроить бота
+            </button>
+            <a id="btn-export-csv" href="#" class="px-5 py-3 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2 border border-stone-700">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              Скачать Excel
+            </a>
+            <button onclick="clearAllResponses()" class="px-4 py-3 bg-rose-900/60 hover:bg-rose-900 text-rose-200 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              Очистить ответы
+            </button>
           </div>
         </div>
 
-        <!-- Card 3 -->
-        <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-          <div>
-            <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Подтвердили (анкет)</div>
-            <div id="stat-attending-responses" class="text-3xl font-bold text-stone-900 mt-1">0</div>
+        <!-- Guest Table & Filter -->
+        <div class="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden space-y-4 p-6">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <button onclick="filterGuests('all')" id="btn-filter-all" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-900 text-white transition-all">
+                Все ответы
+              </button>
+              <button onclick="filterGuests('attending')" id="btn-filter-attending" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all">
+                Придут
+              </button>
+              <button onclick="filterGuests('declined')" id="btn-filter-declined" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all">
+                Не смогут
+              </button>
+            </div>
+            <input 
+              type="text" 
+              id="search-input" 
+              oninput="handleSearch()" 
+              placeholder="Поиск по имени или телефону..." 
+              class="w-full sm:w-72 px-4 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:ring-2 focus:ring-stone-900"
+            >
           </div>
-          <div class="w-12 h-12 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center">
-            <i data-lucide="check-circle" class="w-6 h-6"></i>
-          </div>
-        </div>
 
-        <!-- Card 4 -->
-        <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-          <div>
-            <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Отклонили</div>
-            <div id="stat-declined-responses" class="text-3xl font-bold text-rose-500 mt-1">0</div>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center">
-            <i data-lucide="x-circle" class="w-6 h-6"></i>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-stone-50 text-stone-500 text-xs font-semibold uppercase tracking-wider border-y border-stone-200">
+                <tr>
+                  <th class="py-3 px-4">Гость</th>
+                  <th class="py-3 px-4">Телефон</th>
+                  <th class="py-3 px-4">Статус</th>
+                  <th class="py-3 px-4">Персон</th>
+                  <th class="py-3 px-4">Поздравление</th>
+                  <th class="py-3 px-4">Дата</th>
+                  <th class="py-3 px-4 text-right">Действие</th>
+                </tr>
+              </thead>
+              <tbody id="guests-table-body" class="divide-y divide-stone-100"></tbody>
+            </table>
+            <div id="empty-state" class="hidden text-center py-12 text-stone-400 text-sm">
+              Список пуст. Новые ответы гостей будут отображаться здесь автоматически!
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Action & Telegram Alert Banner -->
-      <div class="bg-stone-900 text-white rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl">
-        <div class="space-y-2">
-          <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-xs font-mono">
-            <i data-lucide="send" class="w-3.5 h-3.5 text-sky-400"></i>
-            <span>Telegram Уведомления</span>
+      <!-- TAB 2: SITE CMS & PHOTOS -->
+      <div id="tab-cms" class="hidden space-y-8">
+        <form onsubmit="handleSaveCMS(event)" class="space-y-8">
+
+          <!-- 1. Photo Management Section -->
+          <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm space-y-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-champagne-gold/10 text-champagne-gold flex items-center justify-center">
+                <i data-lucide="image" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg text-stone-900">Управление фотографиями</h3>
+                <p class="text-stone-500 text-xs">Загружайте ваши фотографии жениха и невесты с компьютера</p>
+              </div>
+            </div>
+
+            <!-- Hero Photo -->
+            <div class="pt-2 border-t border-stone-100">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
+                Главное фото пары (Первый экран)
+              </label>
+              <div class="flex flex-col sm:flex-row items-center gap-6">
+                <div class="relative w-40 h-52 rounded-2xl overflow-hidden border-2 border-stone-200 shadow-md shrink-0 bg-stone-100">
+                  <img id="preview-hero" src="" alt="Hero" class="w-full h-full object-cover">
+                </div>
+                <div class="space-y-3 flex-1">
+                  <div class="flex items-center gap-3">
+                    <label class="cursor-pointer px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-2 shadow-sm transition-all">
+                      <i data-lucide="upload" class="w-4 h-4"></i>
+                      <span>Загрузить фото с компьютера</span>
+                      <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'hero')">
+                    </label>
+                    <span id="upload-status-hero" class="text-xs text-stone-400"></span>
+                  </div>
+                  <div class="space-y-1">
+                    <span class="text-[11px] text-stone-400">Или укажите прямую ссылку на фото:</span>
+                    <input type="text" id="cms-photo-hero" placeholder="https://..." oninput="updateHeroPreview(this.value)" class="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs font-mono">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gallery Photos -->
+            <div class="pt-6 border-t border-stone-100 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-stone-700">
+                    Фотогалерея воспоминаний
+                  </label>
+                  <p class="text-[11px] text-stone-400">Фотографии для блока галереи на сайте</p>
+                </div>
+                <label class="cursor-pointer px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 transition-all">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                  <span>Добавить фото в галерею</span>
+                  <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'gallery')">
+                </label>
+              </div>
+
+              <!-- Gallery Grid -->
+              <div id="cms-gallery-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3"></div>
+            </div>
           </div>
-          <h2 class="text-xl sm:text-2xl font-bold">Получать ответы гостей прямо в Telegram</h2>
-          <p class="text-stone-300 text-xs sm:text-sm max-w-xl">
-            Бот мгновенно отправляет уведомление на ваш телефон в момент, когда гость заполняет анкету!
-          </p>
-        </div>
-        <div class="flex items-center gap-3">
-          <button onclick="toggleTelegramModal(true)" class="px-5 py-3 bg-white text-stone-900 hover:bg-stone-100 rounded-xl text-sm font-semibold transition-all">
-            Настроить Telegram-бота
-          </button>
-          <a id="btn-export-csv" href="#" class="px-5 py-3 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2 border border-stone-700">
-            <i data-lucide="download" class="w-4 h-4"></i>
-            Скачать Excel (CSV)
-          </a>
-        </div>
+
+          <!-- 2. Wedding Details & Names -->
+          <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm space-y-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-champagne-gold/10 text-champagne-gold flex items-center justify-center">
+                <i data-lucide="heart" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg text-stone-900">Имена и дата торжества</h3>
+                <p class="text-stone-500 text-xs">Данные для обоих языков (Русский и Иврит)</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Имя жениха (Русский)</label>
+                <input type="text" id="cms-groom-ru" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
+              </div>
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Имя жениха (Иврит)</label>
+                <input type="text" id="cms-groom-he" dir="rtl" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
+              </div>
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Имя невесты (Русский)</label>
+                <input type="text" id="cms-bride-ru" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
+              </div>
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Имя невесты (Иврит)</label>
+                <input type="text" id="cms-bride-he" dir="rtl" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-xs font-semibold text-stone-700">Дата и время свадьбы (для таймера отсчёта)</label>
+              <input type="datetime-local" id="cms-date" class="w-full sm:w-80 px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
+            </div>
+          </div>
+
+          <!-- 3. Venue & Navigation -->
+          <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm space-y-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-champagne-gold/10 text-champagne-gold flex items-center justify-center">
+                <i data-lucide="map-pin" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg text-stone-900">Место проведения и навигация</h3>
+                <p class="text-stone-500 text-xs">Зал торжеств и кнопки Waze / Google Maps</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Название зала (Русский)</label>
+                <input type="text" id="cms-venue-ru" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
+              </div>
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Название зала (Иврит)</label>
+                <input type="text" id="cms-venue-he" dir="rtl" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
+              </div>
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Город / Регион (Русский)</label>
+                <input type="text" id="cms-city-ru" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
+              </div>
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Город / Регион (Иврит)</label>
+                <input type="text" id="cms-city-he" dir="rtl" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Ссылка на Waze</label>
+                <input type="url" id="cms-waze" placeholder="https://waze.com/ul?..." class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-mono">
+              </div>
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Ссылка на Google Maps</label>
+                <input type="url" id="cms-maps" placeholder="https://maps.google.com/..." class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-mono">
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Bit Payment Info -->
+          <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm space-y-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-black text-xs">
+                bit
+              </div>
+              <div>
+                <h3 class="font-bold text-lg text-stone-900">Подарок в Bit (Израиль)</h3>
+                <p class="text-stone-500 text-xs">Номер телефона для получения подарков через приложение Bit</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Номер телефона для Bit</label>
+                <input type="text" id="cms-bit-phone" placeholder="+972 50-000-0000" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-mono">
+              </div>
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-stone-700">Имя получателя в карточке</label>
+                <input type="text" id="cms-bit-name" placeholder="Nazar & Sofia" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="sticky bottom-6 z-30 flex justify-end">
+            <button type="submit" id="btn-save-cms" class="px-8 py-4 bg-stone-900 hover:bg-champagne-gold text-white font-semibold rounded-2xl shadow-2xl transition-all flex items-center gap-2 text-base">
+              <i data-lucide="save" class="w-5 h-5"></i>
+              <span>Сохранить изменения на сайте</span>
+            </button>
+          </div>
+        </form>
       </div>
 
-      <!-- Guest Table & Filter -->
-      <div class="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden space-y-4 p-6">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div class="flex items-center gap-2 w-full sm:w-auto">
-            <button onclick="filterGuests('all')" id="btn-filter-all" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-900 text-white transition-all">
-              Все ответы
-            </button>
-            <button onclick="filterGuests('attending')" id="btn-filter-attending" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all">
-              Придут
-            </button>
-            <button onclick="filterGuests('declined')" id="btn-filter-declined" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all">
-              Не смогут
-            </button>
-          </div>
-          <input 
-            type="text" 
-            id="search-input" 
-            oninput="handleSearch()" 
-            placeholder="Поиск по имени или телефону..." 
-            class="w-full sm:w-72 px-4 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:ring-2 focus:ring-stone-900"
-          >
-        </div>
-
-        <!-- Table -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-stone-50 text-stone-500 text-xs font-semibold uppercase tracking-wider border-y border-stone-200">
-              <tr>
-                <th class="py-3 px-4">Гость</th>
-                <th class="py-3 px-4">Телефон</th>
-                <th class="py-3 px-4">Статус</th>
-                <th class="py-3 px-4">Персон</th>
-                <th class="py-3 px-4">Поздравление</th>
-                <th class="py-3 px-4">Дата</th>
-              </tr>
-            </thead>
-            <tbody id="guests-table-body" class="divide-y divide-stone-100">
-              <!-- Dynamically Populated -->
-            </tbody>
-          </table>
-          <div id="empty-state" class="hidden text-center py-12 text-stone-400 text-sm">
-            Пока нет ответов или ничего не найдено.
-          </div>
-        </div>
-      </div>
     </main>
   </div>
 
@@ -216,9 +409,9 @@
 
       <p class="text-stone-600 text-xs leading-relaxed">
         Чтобы ответы сразу падали вам на телефон:
-        <br>1. Откройте в Telegram <b>@BotFather</b> и отправьте команду <code>/newbot</code>.
+        <br>1. Откройте в Telegram <b>@BotFather</b> и отправьте <code>/newbot</code>.
         <br>2. Скопируйте полученный <b>HTTP API Token</b>.
-        <br>3. Узнайте свой <b>Chat ID</b> (например, написав боту <b>@userinfobot</b>).
+        <br>3. Узнайте свой <b>Chat ID</b> (например, у бота <b>@userinfobot</b>).
       </p>
 
       <form onsubmit="handleSaveTelegram(event)" class="space-y-4">
@@ -247,6 +440,8 @@
     let adminPass = localStorage.getItem("wedding_admin_pass") || "";
     let allRSVPs = [];
     let currentFilter = 'all';
+    let currentConfig = null;
+    let galleryPhotos = [];
 
     document.addEventListener("DOMContentLoaded", () => {
       if (window.lucide) lucide.createIcons();
@@ -256,6 +451,22 @@
         document.getElementById("login-modal").classList.remove("hidden");
       }
     });
+
+    function switchTab(tab) {
+      const isGuests = (tab === 'guests');
+      document.getElementById("tab-guests").classList.toggle("hidden", !isGuests);
+      document.getElementById("tab-cms").classList.toggle("hidden", isGuests);
+
+      document.getElementById("tab-btn-guests").className = isGuests
+        ? "py-4 text-sm font-semibold border-b-2 border-stone-900 text-stone-900 flex items-center gap-2"
+        : "py-4 text-sm font-semibold border-b-2 border-transparent text-stone-500 hover:text-stone-900 flex items-center gap-2";
+
+      document.getElementById("tab-btn-cms").className = !isGuests
+        ? "py-4 text-sm font-semibold border-b-2 border-stone-900 text-stone-900 flex items-center gap-2"
+        : "py-4 text-sm font-semibold border-b-2 border-transparent text-stone-500 hover:text-stone-900 flex items-center gap-2";
+
+      if (window.lucide) lucide.createIcons();
+    }
 
     async function handleLogin(e) {
       e.preventDefault();
@@ -288,12 +499,14 @@
         document.getElementById("login-modal").classList.add("hidden");
         document.getElementById("admin-app").classList.remove("hidden");
 
-        // Set export CSV link
         document.getElementById("btn-export-csv").href = `/api/export-csv?key=${encodeURIComponent(adminPass)}`;
 
         renderStats(data.stats);
         allRSVPs = data.rsvps || [];
         renderTable();
+
+        currentConfig = data.config;
+        populateCMSForm(currentConfig);
 
         if (window.lucide) lucide.createIcons();
       } catch (err) {
@@ -349,7 +562,6 @@
         const isAttending = r.attendance === 'attending';
         const tr = document.createElement("tr");
         tr.className = "hover:bg-stone-50/80 transition-colors";
-
         const cleanPhone = r.phone.replace(/[^0-9]/g, '');
 
         tr.innerHTML = `
@@ -376,9 +588,203 @@
           <td class="py-3 px-4 text-[11px] text-stone-400 font-mono">
             ${r.created_at || ''}
           </td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="deleteSingleGuest(${r.id})" class="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Удалить ответ">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    async function clearAllResponses() {
+      if (!confirm("Вы уверены, что хотите удалить ВСЕ ответы гостей? Это действие нельзя отменить.")) return;
+      try {
+        const res = await fetch('/api/rsvps/clear', {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${adminPass}` }
+        });
+        if (res.ok) {
+          allRSVPs = [];
+          renderStats({ total_responses: 0, total_people_attending: 0, attending_responses: 0, declined_responses: 0 });
+          renderTable();
+          alert("База ответов успешно очищена!");
+        }
+      } catch (err) {
+        alert("Ошибка очистки: " + err);
+      }
+    }
+
+    async function deleteSingleGuest(id) {
+      if (!confirm("Удалить этот ответ?")) return;
+      try {
+        const res = await fetch(`/api/rsvps?id=${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${adminPass}` }
+        });
+        if (res.ok) {
+          allRSVPs = allRSVPs.filter(x => x.id !== id);
+          renderTable();
+        }
+      } catch (err) {
+        alert("Ошибка удаления: " + err);
+      }
+    }
+
+    // CMS & Photos Logic
+    function populateCMSForm(cfg) {
+      if (!cfg) return;
+      const w = cfg.wedding || {};
+      const p = cfg.photos || {};
+
+      document.getElementById("cms-groom-ru").value = w.groom_ru || w.groom || "Назар";
+      document.getElementById("cms-groom-he").value = w.groom_he || "נזר";
+      document.getElementById("cms-bride-ru").value = w.bride_ru || w.bride || "София";
+      document.getElementById("cms-bride-he").value = w.bride_he || "סופיה";
+
+      if (w.date) {
+        document.getElementById("cms-date").value = w.date.slice(0, 16);
+      }
+
+      document.getElementById("cms-venue-ru").value = w.venue_name_ru || "";
+      document.getElementById("cms-venue-he").value = w.venue_name_he || "";
+      document.getElementById("cms-city-ru").value = w.venue_city_ru || "";
+      document.getElementById("cms-city-he").value = w.venue_city_he || "";
+
+      document.getElementById("cms-waze").value = w.waze_link || "";
+      document.getElementById("cms-maps").value = w.google_maps_link || "";
+
+      document.getElementById("cms-bit-phone").value = w.bit_phone || "";
+      document.getElementById("cms-bit-name").value = w.bit_name || "";
+
+      // Photos
+      const heroUrl = p.hero || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80";
+      document.getElementById("cms-photo-hero").value = heroUrl;
+      document.getElementById("preview-hero").src = heroUrl;
+
+      galleryPhotos = p.gallery || [];
+      renderGalleryCMS();
+    }
+
+    function updateHeroPreview(url) {
+      if (url) document.getElementById("preview-hero").src = url;
+    }
+
+    function renderGalleryCMS() {
+      const grid = document.getElementById("cms-gallery-grid");
+      grid.innerHTML = "";
+
+      galleryPhotos.forEach((url, idx) => {
+        const div = document.createElement("div");
+        div.className = "relative group rounded-xl overflow-hidden aspect-square border border-stone-200 shadow-sm";
+        div.innerHTML = `
+          <img src="${url}" class="w-full h-full object-cover">
+          <button type="button" onclick="removeGalleryPhoto(${idx})" class="absolute top-1 right-1 p-1 bg-stone-900/80 hover:bg-rose-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+        grid.appendChild(div);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function removeGalleryPhoto(idx) {
+      galleryPhotos.splice(idx, 1);
+      renderGalleryCMS();
+    }
+
+    // Upload photo from computer
+    async function uploadPhoto(input, target) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Data = e.target.result;
+        try {
+          const res = await fetch('/api/upload-photo', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${adminPass}`
+            },
+            body: JSON.stringify({ image: base64Data, filename: file.name })
+          });
+
+          const data = await res.json();
+          if (res.ok && data.url) {
+            if (target === 'hero') {
+              document.getElementById("cms-photo-hero").value = data.url;
+              document.getElementById("preview-hero").src = data.url;
+              document.getElementById("upload-status-hero").textContent = "✓ Фото загружено";
+            } else if (target === 'gallery') {
+              galleryPhotos.push(data.url);
+              renderGalleryCMS();
+            }
+          } else {
+            alert("Ошибка загрузки фото: " + (data.error || "Неизвестная ошибка"));
+          }
+        } catch (err) {
+          alert("Не удалось загрузить фото: " + err);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function handleSaveCMS(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btn-save-cms");
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span class="animate-spin mr-2">⏳</span> Сохранение...`;
+
+      const payload = {
+        wedding: {
+          groom_ru: document.getElementById("cms-groom-ru").value.trim(),
+          groom_he: document.getElementById("cms-groom-he").value.trim(),
+          bride_ru: document.getElementById("cms-bride-ru").value.trim(),
+          bride_he: document.getElementById("cms-bride-he").value.trim(),
+          date: document.getElementById("cms-date").value,
+          venue_name_ru: document.getElementById("cms-venue-ru").value.trim(),
+          venue_name_he: document.getElementById("cms-venue-he").value.trim(),
+          venue_city_ru: document.getElementById("cms-city-ru").value.trim(),
+          venue_city_he: document.getElementById("cms-city-he").value.trim(),
+          waze_link: document.getElementById("cms-waze").value.trim(),
+          google_maps_link: document.getElementById("cms-maps").value.trim(),
+          bit_phone: document.getElementById("cms-bit-phone").value.trim(),
+          bit_name: document.getElementById("cms-bit-name").value.trim()
+        },
+        photos: {
+          hero: document.getElementById("cms-photo-hero").value.trim(),
+          gallery: galleryPhotos
+        }
+      };
+
+      try {
+        const res = await fetch('/api/settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminPass}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          alert("🎉 Изменения успешно сохранены! Гости сразу видят обновленный сайт.");
+        } else {
+          alert("Ошибка сохранения настроек.");
+        }
+      } catch (err) {
+        alert("Не удалось сохранить изменения: " + err);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
     }
 
     function toggleTelegramModal(show) {
@@ -416,7 +822,7 @@
           alert("Ошибка сохранения настроек");
         }
       } catch (err) {
-        alert("Не удалось сохранить настройки: " + err);
+        alert("Не удалось сохранить: " + err);
       }
     }
 
@@ -433,7 +839,7 @@
           alert("Не удалось отправить тестовое сообщение. Проверьте Bot Token и Chat ID.");
         }
       } catch (err) {
-        alert("Ошибка вызова тестового сообщения: " + err);
+        alert("Ошибка теста Telegram: " + err);
       }
     }
 

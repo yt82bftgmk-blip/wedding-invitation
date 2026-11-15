@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
 Wedding Invitation & RSVP Server for Nazar & Sofia
-Supports bilingual website, Israeli Bit integration, Telegram notifications, and Owner Admin Dashboard.
+Supports bilingual website, Israeli Bit integration, Telegram notifications, and Owner Admin Dashboard with CMS & Photo Upload.
 """
 
 import os
 import sys
 import json
 import sqlite3
+import base64
+import time
 import urllib.request
 import urllib.parse
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -16,8 +18,11 @@ from datetime import datetime
 PORT = int(os.environ.get("PORT", 8080))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PUBLIC_DIR = os.path.join(BASE_DIR, "public")
+UPLOADS_DIR = os.path.join(PUBLIC_DIR, "uploads")
 DB_PATH = os.path.join(BASE_DIR, "wedding.db")
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+
+os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 
 def load_config():
@@ -29,8 +34,8 @@ def load_config():
             print(f"Error loading config: {e}")
     return {
         "wedding": {
-            "groom": "Назар",
-            "bride": "София",
+            "groom_ru": "Назар",
+            "bride_ru": "София",
             "groom_he": "נזר",
             "bride_he": "סופיה",
             "date": "2027-09-15T18:00:00",
@@ -42,6 +47,10 @@ def load_config():
             "google_maps_link": "https://maps.google.com",
             "bit_phone": "+972 50-000-0000",
             "bit_name": "Nazar & Sofia"
+        },
+        "photos": {
+            "hero": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+            "gallery": []
         },
         "telegram": {
             "enabled": False,
@@ -83,7 +92,6 @@ def send_telegram_notification(rsvp_data):
     cfg = load_config()
     tg = cfg.get("telegram", {})
     if not tg.get("enabled") or not tg.get("bot_token") or not tg.get("chat_id"):
-        print("Telegram notification skipped: Bot is not configured yet.")
         return False
 
     bot_token = tg["bot_token"]
@@ -120,8 +128,6 @@ def send_telegram_notification(rsvp_data):
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
         with urllib.request.urlopen(req, timeout=5) as response:
-            res_body = response.read().decode("utf-8")
-            print("Telegram notification sent successfully:", res_body[:100])
             return True
     except Exception as e:
         print(f"Failed to send Telegram alert: {e}")
@@ -131,6 +137,13 @@ def send_telegram_notification(rsvp_data):
 class WeddingHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=PUBLIC_DIR, **kwargs)
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.end_headers()
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -146,6 +159,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             cfg = load_config()
             public_cfg = {
                 "wedding": cfg.get("wedding", {}),
+                "photos": cfg.get("photos", {}),
                 "telegram_configured": bool(cfg.get("telegram", {}).get("enabled") and cfg.get("telegram", {}).get("bot_token"))
             }
             self.send_json(public_cfg)
@@ -176,10 +190,35 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             self.handle_post_rsvp(payload)
         elif path == "/api/settings":
             self.handle_save_settings(payload)
+        elif path == "/api/upload-photo":
+            self.handle_upload_photo(payload)
         elif path == "/api/test-telegram":
             self.handle_test_telegram(payload)
+        elif path == "/api/rsvps/clear":
+            self.handle_clear_rsvps()
+        elif path == "/api/rsvps/delete":
+            self.handle_delete_rsvp(payload)
         else:
             self.send_error(404, "Endpoint not found")
+
+    def do_DELETE(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+
+        if path == "/api/rsvps/clear":
+            self.handle_clear_rsvps()
+        elif path == "/api/rsvps":
+            query = urllib.parse.parse_qs(parsed.query)
+            rsvp_id = query.get("id", [None])[0]
+            self.handle_delete_rsvp({"id": rsvp_id})
+        else:
+            self.send_error(404, "Endpoint not found")
+
+    def check_admin(self):
+        auth_header = self.headers.get("Authorization", "")
+        cfg = load_config()
+        expected_pass = cfg.get("admin", {}).get("password", "wedding2027admin")
+        return auth_header == f"Bearer {expected_pass}"
 
     def handle_post_rsvp(self, payload):
         first_name = payload.get("first_name", "").strip()
@@ -194,7 +233,6 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             self.send_json({"error": "First name, last name, and phone are required"}, status=400)
             return
 
-        # Insert to SQLite
         try:
             conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
@@ -220,7 +258,6 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             "language": language
         }
 
-        # Send Telegram notification in background or inline
         telegram_sent = send_telegram_notification(rsvp_data)
 
         self.send_json({
@@ -231,11 +268,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         })
 
     def handle_get_rsvps(self):
-        auth_header = self.headers.get("Authorization", "")
-        cfg = load_config()
-        expected_pass = cfg.get("admin", {}).get("password", "wedding2027admin")
-
-        if auth_header != f"Bearer {expected_pass}":
+        if not self.check_admin():
             self.send_json({"error": "Unauthorized"}, status=401)
             return
 
@@ -270,6 +303,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                 "created_at": r[8]
             })
 
+        cfg = load_config()
         self.send_json({
             "stats": {
                 "total_responses": len(rows),
@@ -280,6 +314,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             "rsvps": items,
             "config": {
                 "wedding": cfg.get("wedding", {}),
+                "photos": cfg.get("photos", {}),
                 "telegram": {
                     "enabled": cfg.get("telegram", {}).get("enabled", False),
                     "bot_token": "***" if cfg.get("telegram", {}).get("bot_token") else "",
@@ -287,6 +322,70 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                 }
             }
         })
+
+    def handle_clear_rsvps(self):
+        if not self.check_admin():
+            self.send_json({"error": "Unauthorized"}, status=401)
+            return
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM rsvps;")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='rsvps';")
+        conn.commit()
+        conn.close()
+        self.send_json({"success": True, "message": "All RSVPs cleared"})
+
+    def handle_delete_rsvp(self, payload):
+        if not self.check_admin():
+            self.send_json({"error": "Unauthorized"}, status=401)
+            return
+        rsvp_id = payload.get("id")
+        if not rsvp_id:
+            self.send_json({"error": "Missing id"}, status=400)
+            return
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM rsvps WHERE id = ?;", (rsvp_id,))
+        conn.commit()
+        conn.close()
+        self.send_json({"success": True, "message": "RSVP deleted"})
+
+    def handle_upload_photo(self, payload):
+        if not self.check_admin():
+            self.send_json({"error": "Unauthorized"}, status=401)
+            return
+
+        image_data = payload.get("image", "")
+        file_name = payload.get("filename", "")
+
+        if not image_data:
+            self.send_json({"error": "No image data provided"}, status=400)
+            return
+
+        # Expect base64 data url e.g. "data:image/jpeg;base64,..."
+        try:
+            if "," in image_data:
+                header, encoded = image_data.split(",", 1)
+            else:
+                encoded = image_data
+
+            ext = ".jpg"
+            if "png" in header:
+                ext = ".png"
+            elif "webp" in header:
+                ext = ".webp"
+
+            timestamp = int(time.time() * 1000)
+            out_filename = f"photo_{timestamp}{ext}"
+            out_path = os.path.join(UPLOADS_DIR, out_filename)
+
+            with open(out_path, "wb") as f:
+                f.write(base64.b64decode(encoded))
+
+            photo_url = f"/uploads/{out_filename}"
+            self.send_json({"success": True, "url": photo_url})
+        except Exception as e:
+            self.send_json({"error": f"Failed to save image: {e}"}, status=500)
 
     def handle_export_csv(self):
         auth_query = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("key", [""])[0]
@@ -312,7 +411,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         for r in rows:
             writer.writerow([r[0], r[1], r[2], r[3], "Придет" if r[4] == "attending" else "Не придет", r[5], r[6], r[7], r[8]])
 
-        csv_data = output.getvalue().encode("utf-8-sig")  # utf-8 with BOM for Excel
+        csv_data = output.getvalue().encode("utf-8-sig")
 
         self.send_response(200)
         self.send_header("Content-Type", "text/csv; charset=utf-8")
@@ -322,28 +421,24 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         self.wfile.write(csv_data)
 
     def handle_save_settings(self, payload):
-        auth_header = self.headers.get("Authorization", "")
-        cfg = load_config()
-        expected_pass = cfg.get("admin", {}).get("password", "wedding2027admin")
-
-        if auth_header != f"Bearer {expected_pass}":
+        if not self.check_admin():
             self.send_json({"error": "Unauthorized"}, status=401)
             return
 
+        cfg = load_config()
+
         if "wedding" in payload:
             cfg["wedding"].update(payload["wedding"])
+        if "photos" in payload:
+            cfg["photos"].update(payload["photos"])
         if "telegram" in payload:
             cfg["telegram"].update(payload["telegram"])
 
         save_config(cfg)
-        self.send_json({"success": True, "message": "Settings saved successfully"})
+        self.send_json({"success": True, "message": "Settings saved successfully", "config": cfg})
 
     def handle_test_telegram(self, payload):
-        auth_header = self.headers.get("Authorization", "")
-        cfg = load_config()
-        expected_pass = cfg.get("admin", {}).get("password", "wedding2027admin")
-
-        if auth_header != f"Bearer {expected_pass}":
+        if not self.check_admin():
             self.send_json({"error": "Unauthorized"}, status=401)
             return
 
@@ -364,6 +459,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                 content = f.read()
             self.send_response(200)
             self.send_header("Content-Type", content_type)
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Content-Length", str(len(content)))
             self.end_headers()
             self.wfile.write(content)
