@@ -387,6 +387,161 @@ function copyBitNumber() {
   });
 }
 
+let currentPhoneFormat = 'il_intl'; // 'il_intl', 'il_local', 'ru'
+
+function setPhoneFormat(format) {
+  currentPhoneFormat = format;
+  const input = document.getElementById("phone");
+  const hint = document.getElementById("phone-hint");
+  const isHe = (currentLang === 'he');
+
+  ['il_intl', 'il_local', 'ru'].forEach(fmt => {
+    const btn = document.getElementById(`btn-fmt-${fmt.replace('_', '-')}`);
+    if (btn) {
+      if (fmt === format) {
+        btn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-900 text-white transition-all shadow-sm";
+      } else {
+        btn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all";
+      }
+    }
+  });
+
+  if (hint) {
+    if (format === 'il_intl') {
+      input.placeholder = "+972 50-123-4567";
+      hint.textContent = isHe ? "הזינו 9 ספרות אחרי 972+ (לדוגמה: 50-123-4567)" : "Введите 9 цифр после +972 (например: 50-123-4567)";
+    } else if (format === 'il_local') {
+      input.placeholder = "058-123-4567";
+      hint.textContent = isHe ? "הזינו 10 ספרות (לדוגמה: 058-123-4567)" : "Введите 10 цифр (начиная с 05X, например: 058-123-4567)";
+    } else if (format === 'ru') {
+      input.placeholder = "+7 (912) 345-67-89";
+      hint.textContent = isHe ? "הזינו 10 ספרות אחרי 7+ (רוסיה)" : "Введите 10 цифр после +7 (например: 912 345-67-89)";
+    }
+  }
+
+  formatPhoneNumber();
+}
+
+function handlePhoneKeyDown(e) {
+  const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
+  if (allowedKeys.includes(e.key) || e.ctrlKey || e.metaKey) {
+    return;
+  }
+  if (!/^[0-9]$/.test(e.key)) {
+    e.preventDefault();
+  }
+}
+
+function handlePhoneInput(e) {
+  formatPhoneNumber();
+}
+
+function formatPhoneNumber() {
+  const input = document.getElementById("phone");
+  if (!input) return;
+  let val = input.value;
+  let digits = val.replace(/\D/g, '');
+
+  if (currentPhoneFormat === 'il_intl') {
+    if (digits.startsWith('972')) {
+      digits = digits.slice(3);
+    } else if (digits.startsWith('0')) {
+      digits = digits.slice(1);
+    }
+    digits = digits.slice(0, 9);
+
+    if (digits.length === 0) {
+      input.value = "";
+      return;
+    }
+
+    let formatted = "+972 ";
+    if (digits.length <= 2) {
+      formatted += digits;
+    } else if (digits.length <= 5) {
+      formatted += digits.slice(0, 2) + "-" + digits.slice(2);
+    } else {
+      formatted += digits.slice(0, 2) + "-" + digits.slice(2, 5) + "-" + digits.slice(5);
+    }
+    input.value = formatted;
+  } 
+  else if (currentPhoneFormat === 'il_local') {
+    if (digits.startsWith('972')) {
+      digits = '0' + digits.slice(3);
+    }
+    digits = digits.slice(0, 10);
+
+    if (digits.length === 0) {
+      input.value = "";
+      return;
+    }
+
+    let formatted = "";
+    if (digits.length <= 3) {
+      formatted = digits;
+    } else if (digits.length <= 6) {
+      formatted += digits.slice(0, 3) + "-" + digits.slice(3);
+    } else {
+      formatted += digits.slice(0, 3) + "-" + digits.slice(3, 6) + "-" + digits.slice(6);
+    }
+    input.value = formatted;
+  }
+  else if (currentPhoneFormat === 'ru') {
+    if (digits.startsWith('7') || digits.startsWith('8')) {
+      if (digits.length > 1) digits = digits.slice(1);
+      else digits = "";
+    }
+    digits = digits.slice(0, 10);
+
+    if (digits.length === 0) {
+      input.value = "";
+      return;
+    }
+
+    let formatted = "+7 (";
+    if (digits.length <= 3) {
+      formatted += digits;
+      if (digits.length === 3) formatted += ") ";
+    } else if (digits.length <= 6) {
+      formatted += digits.slice(0, 3) + ") " + digits.slice(3);
+    } else if (digits.length <= 8) {
+      formatted += digits.slice(0, 3) + ") " + digits.slice(3, 6) + "-" + digits.slice(6);
+    } else {
+      formatted += digits.slice(0, 3) + ") " + digits.slice(3, 6) + "-" + digits.slice(6, 8) + "-" + digits.slice(8);
+    }
+    input.value = formatted;
+  }
+}
+
+function validatePhoneNumber() {
+  const input = document.getElementById("phone");
+  const digits = input.value.replace(/\D/g, '');
+  const isHe = (currentLang === 'he');
+
+  if (currentPhoneFormat === 'il_intl') {
+    const effectiveDigits = digits.startsWith('972') ? digits.slice(3) : digits;
+    if (effectiveDigits.length !== 9) {
+      alert(isHe ? "אנא הזינו 9 ספרות מלאות אחרי קידומת 972+ (לדוגמה: 50-123-4567)" : "Пожалуйста, введите все 9 цифр израильского номера после +972 (например: +972 50-123-4567)");
+      input.focus();
+      return false;
+    }
+  } else if (currentPhoneFormat === 'il_local') {
+    if (digits.length !== 10 || !digits.startsWith('05')) {
+      alert(isHe ? "אנא הזינו 10 ספרות המתחילות ב-05 (לדוגמה: 058-123-4567)" : "Пожалуйста, введите 10 цифр израильского номера (начиная с 05, например: 058-123-4567)");
+      input.focus();
+      return false;
+    }
+  } else if (currentPhoneFormat === 'ru') {
+    const effectiveDigits = (digits.startsWith('7') || digits.startsWith('8')) ? digits.slice(1) : digits;
+    if (effectiveDigits.length !== 10) {
+      alert(isHe ? "אנא הזינו 10 ספרות מלאות עבור מספר טלפון רוסי" : "Пожалуйста, введите все 10 цифр российского номера (после +7)");
+      input.focus();
+      return false;
+    }
+  }
+  return true;
+}
+
 function toggleGuestCount(isAttending) {
   const container = document.getElementById("guest-count-container");
   if (!container) return;
@@ -398,6 +553,10 @@ async function submitRSVP(event) {
   const btn = document.getElementById("btn-submit");
   const dict = translations[currentLang];
   const originalText = btn.innerHTML;
+
+  if (!validatePhoneNumber()) {
+    return;
+  }
 
   btn.disabled = true;
   btn.innerHTML = `<span class="animate-spin mr-2">⏳</span> ${dict.btn_submitting || 'Отправка...'}`;

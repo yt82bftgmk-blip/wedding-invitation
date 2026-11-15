@@ -405,18 +405,36 @@
             </div>
           </div>
 
-          <!-- Phone Number -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_phone">Номер телефона *</label>
+          <!-- Phone Number with strict format controls -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_phone">Номер телефона *</label>
+              <div class="flex items-center gap-1.5" id="phone-format-selector">
+                <button type="button" onclick="setPhoneFormat('il_intl')" id="btn-fmt-il-intl" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-900 text-white transition-all shadow-sm">
+                  🇮🇱 +972
+                </button>
+                <button type="button" onclick="setPhoneFormat('il_local')" id="btn-fmt-il-local" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all">
+                  🇮🇱 05X
+                </button>
+                <button type="button" onclick="setPhoneFormat('ru')" id="btn-fmt-ru" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all">
+                  🇷🇺 +7
+                </button>
+              </div>
+            </div>
             <div class="relative">
               <input 
                 type="tel" 
                 id="phone" 
                 required 
+                inputmode="numeric"
+                autocomplete="tel"
                 placeholder="+972 50-123-4567" 
-                class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all font-mono"
+                onkeydown="handlePhoneKeyDown(event)"
+                oninput="handlePhoneInput(event)"
+                class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all font-mono text-base tracking-wide"
               >
             </div>
+            <p id="phone-hint" class="text-[11px] text-stone-400">Введите 9 цифр после +972 (например: 50-123-4567)</p>
           </div>
 
           <!-- Coming / Not Coming choice -->
