@@ -135,6 +135,11 @@
             <span class="hidden lg:inline">Telegram</span>
           </button>
 
+          <button type="button" onclick="toggleBackupModal(true)" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-white hover:bg-[#F4EFE6] text-stone-800 border border-[#DFD6C4] text-xs font-semibold shadow-sm transition-all" title="Резервная копия и восстановление">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span class="hidden lg:inline">Бэкап</span>
+          </button>
+
           <button type="button" id="btn-save-top" onclick="saveAllSettings()" class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full bg-stone-900 hover:bg-champagne-gold text-white text-xs font-semibold shadow-sm transition-all">
             <i data-lucide="save" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">Сохранить</span>
@@ -682,6 +687,45 @@
         <button type="button" onclick="closePhotoStory()" class="text-champagne-gold hover:underline font-semibold flex items-center gap-1">
           <span>Закрыть</span>
           <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup & Restore Modal (Champagne Styled) -->
+  <div id="backup-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#FAF7F2] rounded-3xl p-8 max-w-lg w-full shadow-2xl border border-[#E8DFC9] space-y-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-white border border-[#E8DFC9] text-emerald-600 flex items-center justify-center shadow-sm">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-serif text-2xl font-bold text-stone-900">Резервная копия сайта</h3>
+        </div>
+        <button type="button" onclick="toggleBackupModal(false)" class="text-stone-400 hover:text-stone-700 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-stone-600 text-xs leading-relaxed bg-white p-4 rounded-2xl border border-[#E8DFC9]">
+        Авто-копия всех ваших текстов, фотографий и гостей автоматически сохраняется в браузере при каждом нажатии <b>«Сохранить»</b>. Вы также можете скачать файл-бэкап на устройство или восстановить данные в 1 клик.
+      </p>
+
+      <div class="space-y-3">
+        <button type="button" onclick="downloadBackupFile()" class="w-full py-3.5 bg-stone-900 hover:bg-champagne-gold text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Скачать полную копию (.json)</span>
+        </button>
+
+        <label class="w-full py-3.5 bg-white hover:bg-[#F4EFE6] text-stone-800 border border-[#DFD6C4] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="upload" class="w-4 h-4 text-champagne-gold"></i>
+          <span>Восстановить из файла (.json)</span>
+          <input type="file" accept=".json,application/json" class="hidden" onchange="restoreFromFile(this)">
+        </label>
+
+        <button type="button" id="btn-restore-local" onclick="restoreFromLocalBackup()" class="w-full py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span id="local-backup-label">Восстановить из авто-копии браузера</span>
         </button>
       </div>
     </div>
@@ -1429,6 +1473,7 @@
 
         if (res.ok) {
           clearDirty();
+          saveLocalAutoBackup();
           alert("🎉 Изменения сохранены! Гостевой сайт сразу обновился.");
         } else {
           alert("Ошибка сохранения настроек.");
@@ -1676,6 +1721,106 @@
         }
       } catch (err) {
         alert("Ошибка удаления: " + err);
+      }
+    }
+
+    // Backup & Restore
+    function toggleBackupModal(show) {
+      document.getElementById("backup-modal").classList.toggle("hidden", !show);
+      if (show) {
+        const raw = localStorage.getItem("wedding_auto_backup");
+        const label = document.getElementById("local-backup-label");
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            const dt = parsed.exported_at ? new Date(parsed.exported_at).toLocaleString() : "";
+            label.textContent = `Восстановить из авто-копии (${dt})`;
+          } catch (e) {}
+        } else {
+          label.textContent = "Авто-копия в браузере пока не создана";
+        }
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    async function saveLocalAutoBackup() {
+      try {
+        const res = await fetch('/api/backup', {
+          headers: { 'Authorization': `Bearer ${adminPass}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          localStorage.setItem("wedding_auto_backup", JSON.stringify(data));
+        }
+      } catch (e) {}
+    }
+
+    async function downloadBackupFile() {
+      try {
+        const res = await fetch('/api/backup', {
+          headers: { 'Authorization': `Bearer ${adminPass}` }
+        });
+        if (!res.ok) {
+          alert("Не удалось создать резервную копию.");
+          return;
+        }
+        const data = await res.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `wedding_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert("Ошибка скачивания копии: " + e);
+      }
+    }
+
+    async function restoreFromFile(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const payload = JSON.parse(e.target.result);
+          await sendRestorePayload(payload);
+        } catch (err) {
+          alert("Неверный формат файла бэкапа: " + err);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    async function restoreFromLocalBackup() {
+      const raw = localStorage.getItem("wedding_auto_backup");
+      if (!raw) {
+        alert("В браузере пока нет сохранённой авто-копии.");
+        return;
+      }
+      if (!confirm("Восстановить тексты, фото и гостей из последней авто-копии браузера?")) return;
+      try {
+        const payload = JSON.parse(raw);
+        await sendRestorePayload(payload);
+      } catch (err) {
+        alert("Ошибка восстановления: " + err);
+      }
+    }
+
+    async function sendRestorePayload(payload) {
+      const res = await fetch('/api/restore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminPass}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        alert("🎉 Данные успешно восстановлены!");
+        location.reload();
+      } else {
+        alert("Ошибка восстановления данных на сервере.");
       }
     }
 

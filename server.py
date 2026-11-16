@@ -322,6 +322,9 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         elif path == "/api/sync-github":
             self.handle_sync_github()
             return
+        elif path == "/api/backup":
+            self.handle_backup()
+            return
         elif path == "/app.js":
             self.send_file(os.path.join(PUBLIC_DIR, "app.js"), "application/javascript; charset=utf-8")
             return
@@ -360,6 +363,8 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             self.handle_clear_rsvps()
         elif path == "/api/rsvps/delete":
             self.handle_delete_rsvp(payload)
+        elif path == "/api/restore":
+            self.handle_restore(payload)
         else:
             self.send_error(404, "Endpoint not found")
 
@@ -598,6 +603,107 @@ class WeddingHandler(SimpleHTTPRequestHandler):
 
         save_config(cfg)
         self.send_json({"success": True, "message": "Settings saved successfully", "config": cfg})
+
+    def handle_backup(self):
+        if not self.check_admin():
+            self.send_json({"error": "Unauthorized"}, status=401)
+            return
+
+        cfg = load_config()
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, first_name, last_name, phone, attendance, guests_count, message, language, created_at FROM rsvps ORDER BY id ASC")
+        rows = cursor.fetchall()
+        conn.close()
+
+        rsvps = [
+            {
+                "id": r[0],
+                "first_name": r[1],
+                "last_name": r[2],
+                "phone": r[3],
+                "attendance": r[4],
+                "guests_count": r[5],
+                "message": r[6],
+                "language": r[7],
+                "created_at": r[8]
+            }
+            for r in rows
+        ]
+
+        uploads = {}
+        if os.path.exists(UPLOADS_DIR):
+            for fname in os.listdir(UPLOADS_DIR):
+                fpath = os.path.join(UPLOADS_DIR, fname)
+                if os.path.isfile(fpath):
+                    try:
+                        with open(fpath, "rb") as f:
+                            uploads[fname] = base64.b64encode(f.read()).decode("ascii")
+                    except Exception as e:
+                        print(f"Backup read upload error ({fname}): {e}")
+
+        self.send_json({
+            "exported_at": datetime.now().isoformat(),
+            "wedding": cfg.get("wedding", {}),
+            "photos": cfg.get("photos", {}),
+            "rsvps": rsvps,
+            "uploads": uploads
+        })
+
+    def handle_restore(self, payload):
+        if not self.check_admin():
+            self.send_json({"error": "Unauthorized"}, status=401)
+            return
+
+        cfg = load_config()
+        if "wedding" in payload and isinstance(payload["wedding"], dict):
+            cfg["wedding"].update(payload["wedding"])
+        if "photos" in payload and isinstance(payload["photos"], dict):
+            cfg["photos"].update(payload["photos"])
+        save_config(cfg)
+
+        uploads = payload.get("uploads", {})
+        if isinstance(uploads, dict):
+            os.makedirs(UPLOADS_DIR, exist_ok=True)
+            for fname, b64 in uploads.items():
+                safe_name = os.path.basename(fname)
+                if not safe_name:
+                    continue
+                try:
+                    with open(os.path.join(UPLOADS_DIR, safe_name), "wb") as f:
+                        f.write(base64.b64decode(b64))
+                except Exception as e:
+                    print(f"Restore upload error ({safe_name}): {e}")
+
+        rsvps = payload.get("rsvps", [])
+        if isinstance(rsvps, list) and rsvps:
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            if payload.get("replace_rsvps"):
+                cursor.execute("DELETE FROM rsvps;")
+            for r in rsvps:
+                cursor.execute(
+                    "SELECT id FROM rsvps WHERE first_name = ? AND last_name = ? AND phone = ?",
+                    (r.get("first_name", ""), r.get("last_name", ""), r.get("phone", ""))
+                )
+                if not cursor.fetchone():
+                    cursor.execute("""
+                        INSERT INTO rsvps (first_name, last_name, phone, attendance, guests_count, message, language, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        r.get("first_name", ""),
+                        r.get("last_name", ""),
+                        r.get("phone", ""),
+                        r.get("attendance", "attending"),
+                        int(r.get("guests_count", 1)),
+                        r.get("message", ""),
+                        r.get("language", "ru"),
+                        r.get("created_at") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    ))
+            conn.commit()
+            conn.close()
+
+        self.send_json({"success": True, "message": "Backup restored successfully"})
 
     def handle_test_telegram(self, payload):
         if not self.check_admin():
