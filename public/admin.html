@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Панель управления свадьбой | Назар & София</title>
-  
+  <title>Редактор свадьбы | Назар & София</title>
+
+  <!-- Fonts (identical to guest site) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&family=Heebo:wght@300;400;500;700&family=Frank+Ruhl+Libre:wght@400;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <script>
@@ -18,181 +21,614 @@
         extend: {
           colors: {
             champagne: '#D4AF37',
+            'champagne-light': '#FBF8F3',
             'champagne-gold': '#C5A059',
-            'wedding-dark': '#1C1917',
+            'rose-gold': '#C28285',
+            'warm-sand': '#F4EFE6',
+            'wedding-dark': '#24201D',
+            'bit-blue': '#00A8B5'
           },
           fontFamily: {
-            serif: ['"Cormorant Garamond"', 'serif'],
-            sans: ['"Montserrat"', 'sans-serif'],
+            serif: ['"Cormorant Garamond"', '"Frank Ruhl Libre"', 'serif'],
+            sans: ['"Montserrat"', '"Heebo"', 'sans-serif'],
+            handwritten: ['"Caveat"', 'cursive'],
+            hebrewSerif: ['"Frank Ruhl Libre"', 'serif'],
+            hebrewSans: ['"Heebo"', 'sans-serif']
           }
         }
       }
     }
   </script>
-</head>
-<body class="bg-stone-50 text-stone-900 font-sans min-h-screen">
 
-  <!-- Login Modal -->
-  <div id="login-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-stone-200 text-center space-y-6">
-      <div class="w-16 h-16 bg-stone-100 text-stone-900 rounded-full flex items-center justify-center mx-auto">
-        <i data-lucide="lock" class="w-8 h-8"></i>
+  <link rel="stylesheet" href="/style.css?v=3">
+
+  <style>
+    .editable-field {
+      position: relative;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+      cursor: text;
+      outline: 1.5px dashed rgba(197, 160, 89, 0.35);
+      outline-offset: 4px;
+    }
+    .editable-field:hover {
+      outline: 1.5px dashed rgba(197, 160, 89, 0.85);
+      background-color: rgba(255, 255, 255, 0.45);
+    }
+    .editable-field:focus {
+      outline: 2px solid #C5A059;
+      background-color: rgba(255, 255, 255, 0.85);
+      color: #1c1917;
+    }
+    .editable-field-dark {
+      position: relative;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+      cursor: text;
+      outline: 1.5px dashed rgba(212, 175, 55, 0.4);
+      outline-offset: 4px;
+    }
+    .editable-field-dark:hover {
+      outline: 1.5px dashed rgba(212, 175, 55, 0.9);
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+    .editable-field-dark:focus {
+      outline: 2px solid #D4AF37;
+      background-color: rgba(255, 255, 255, 0.14);
+    }
+  </style>
+</head>
+<body class="bg-[#FAF7F2] text-[#2D2926] font-sans antialiased selection:bg-champagne selection:text-white">
+
+  <!-- Login Modal (styled identically to the wedding site) -->
+  <div id="login-modal" class="fixed inset-0 bg-stone-900/55 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-[#FAF7F2] rounded-3xl p-8 sm:p-10 max-w-md w-full shadow-2xl border border-[#E8DFC9] text-center space-y-6 relative overflow-hidden">
+      <div class="w-16 h-16 bg-white text-champagne-gold rounded-full flex items-center justify-center mx-auto border border-[#E8DFC9] shadow-sm">
+        <i data-lucide="lock" class="w-7 h-7"></i>
       </div>
-      <div>
-        <h2 class="font-serif text-3xl font-bold text-stone-900">Вход для молодожёнов</h2>
-        <p class="text-stone-500 text-sm mt-1">Введите пароль для управления сайтом и списком гостей</p>
+      <div class="space-y-1.5">
+        <div class="text-[11px] uppercase tracking-widest text-champagne-gold font-semibold">Назар & София</div>
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-stone-900">Вход для молодожёнов</h2>
+        <p class="text-stone-500 text-xs sm:text-sm">Введите пароль для редактирования сайта и просмотра гостей</p>
       </div>
       <form onsubmit="handleLogin(event)" class="space-y-4">
-        <input 
-          type="password" 
-          id="admin-password" 
-          required 
-          placeholder="Пароль администратора" 
-          class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50"
+        <input
+          type="password"
+          id="admin-password"
+          required
+          placeholder="Пароль администратора"
+          class="w-full px-4 py-3.5 rounded-xl border border-[#DFD6C4] bg-white focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold text-sm transition-all"
         >
-        <button type="submit" class="w-full py-3 bg-stone-900 hover:bg-stone-800 text-white font-medium rounded-xl transition-all">
-          Войти в панель
+        <button type="submit" class="w-full py-3.5 bg-stone-900 hover:bg-champagne-gold text-white font-semibold rounded-xl shadow-lg transition-all">
+          Войти в редактор
         </button>
       </form>
     </div>
   </div>
 
-  <!-- Main Admin Interface -->
+  <!-- Main Admin Interface (Visual Replica of Guest Site + Inline Editing) -->
   <div id="admin-app" class="hidden">
-    <!-- Navbar -->
-    <header class="bg-white border-b border-stone-200 sticky top-0 z-40">
-      <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-          <h1 class="font-bold text-lg text-stone-900">Свадьба: Назар & София</h1>
-          <span class="text-xs bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full font-mono">Панель Владельца</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <a href="/" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-stone-700 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-all">
-            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-            Открыть сайт гостей
+
+    <!-- Top Bar: Identical Header + Compact Admin Controls -->
+    <header class="fixed top-0 left-0 right-0 z-40 transition-all duration-300 backdrop-blur-md bg-[#FAF7F2]/90 border-b border-[#E8DFC9]/70">
+      <div class="max-w-6xl mx-auto px-3 sm:px-4 h-16 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 shrink-0">
+          <a href="#hero" class="font-serif text-xl sm:text-2xl font-bold tracking-wider text-stone-900 flex items-center gap-2">
+            <span>N & S</span>
           </a>
-          <button onclick="handleLogout()" class="text-xs text-rose-600 hover:text-rose-800 font-medium px-2 py-1">
-            Выйти
+          <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-champagne-gold/15 text-champagne-gold border border-champagne-gold/30 text-[11px] font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Редактор
+          </span>
+        </div>
+
+        <!-- Admin Actions + Language Switcher -->
+        <div class="flex items-center gap-1.5 sm:gap-2.5 flex-wrap justify-end">
+          <button type="button" onclick="toggleGuestsModal(true)" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-white hover:bg-[#F4EFE6] text-stone-800 border border-[#DFD6C4] text-xs font-semibold shadow-sm transition-all">
+            <i data-lucide="users" class="w-3.5 h-3.5 text-champagne-gold"></i>
+            <span class="hidden md:inline">Гости</span>
+            <span id="header-guests-badge" class="px-1.5 py-0.2 rounded-full bg-stone-900 text-white text-[10px]">0</span>
+          </button>
+
+          <button type="button" onclick="toggleTelegramModal(true)" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-white hover:bg-[#F4EFE6] text-stone-800 border border-[#DFD6C4] text-xs font-semibold shadow-sm transition-all" title="Настройки Telegram">
+            <i data-lucide="send" class="w-3.5 h-3.5 text-sky-500"></i>
+            <span class="hidden lg:inline">Telegram</span>
+          </button>
+
+          <button type="button" id="btn-save-top" onclick="saveAllSettings()" class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full bg-stone-900 hover:bg-champagne-gold text-white text-xs font-semibold shadow-sm transition-all">
+            <i data-lucide="save" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Сохранить</span>
+          </button>
+
+          <!-- Lang Toggle (identical to guest site) -->
+          <div class="flex items-center gap-1 bg-[#EFE9DE] p-1 rounded-full border border-[#DFD6C4]">
+            <button id="btn-lang-ru" onclick="setLanguage('ru')" class="px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold rounded-full transition-all bg-white text-stone-900 shadow-sm">
+              🇷🇺 <span class="hidden sm:inline">Русский</span>
+            </button>
+            <button id="btn-lang-he" onclick="setLanguage('he')" class="px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold rounded-full transition-all text-stone-600 hover:text-stone-900">
+              🇮🇱 <span class="hidden sm:inline">עברית</span>
+            </button>
+          </div>
+
+          <a href="/" target="_blank" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-full bg-white/80 hover:bg-white border border-[#DFD6C4] text-stone-700 hover:text-stone-900 text-xs font-medium transition-all inline-flex items-center gap-1" title="Открыть гостевой сайт">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          </a>
+
+          <button type="button" onclick="handleLogout()" class="p-1.5 rounded-full text-rose-600 hover:bg-rose-50 transition-all" title="Выйти">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
           </button>
         </div>
       </div>
     </header>
 
-    <!-- Navigation Tabs -->
-    <div class="bg-white border-b border-stone-200">
-      <div class="max-w-6xl mx-auto px-4 flex gap-8">
-        <button onclick="switchTab('guests')" id="tab-btn-guests" class="py-4 text-sm font-semibold border-b-2 border-stone-900 text-stone-900 flex items-center gap-2">
-          <i data-lucide="users" class="w-4 h-4"></i>
-          <span>Список гостей и ответы</span>
-        </button>
-        <button onclick="switchTab('cms')" id="tab-btn-cms" class="py-4 text-sm font-semibold border-b-2 border-transparent text-stone-500 hover:text-stone-900 flex items-center gap-2">
-          <i data-lucide="layout" class="w-4 h-4"></i>
-          <span>Редактор сайта и фото</span>
-        </button>
-      </div>
+    <!-- Floating Unsaved Changes Save Pill -->
+    <div id="floating-save-bar" class="fixed bottom-6 right-6 z-40 hidden">
+      <button type="button" onclick="saveAllSettings()" class="flex items-center gap-2.5 px-5 py-3 rounded-full bg-stone-900 hover:bg-champagne-gold text-white text-xs sm:text-sm font-semibold shadow-2xl border border-champagne-gold/40 transition-all transform hover:-translate-y-0.5">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        <span>Сохранить изменения</span>
+        <i data-lucide="save" class="w-4 h-4"></i>
+      </button>
     </div>
 
-    <main class="max-w-6xl mx-auto px-4 py-8">
-      
-      <!-- TAB 1: GUESTS & STATS -->
-      <div id="tab-guests" class="space-y-8">
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-            <div>
-              <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Всего ответов</div>
-              <div id="stat-total-responses" class="text-3xl font-bold text-stone-900 mt-1">0</div>
+    <!-- Floating Romantic Music Player (identical to guest site) -->
+    <div id="music-player-container" class="fixed bottom-6 left-6 z-40 hidden sm:block">
+      <button id="btn-toggle-music" onclick="toggleMusic()" class="flex items-center gap-3 px-4 py-2.5 rounded-full bg-white/95 backdrop-blur-md border border-[#D4AF37]/50 shadow-2xl text-stone-800 hover:scale-105 transition-all group">
+        <div id="vinyl-icon" class="w-8 h-8 rounded-full bg-stone-900 border-2 border-champagne-gold flex items-center justify-center text-champagne-gold transition-transform shrink-0">
+          <i data-lucide="music" class="w-4 h-4 text-champagne-gold"></i>
+        </div>
+        <div class="text-left text-xs pr-1">
+          <div id="music-status-text" class="font-semibold text-stone-900">Включить музыку ▶️</div>
+          <div class="text-[10px] text-stone-500">Романтическая мелодия</div>
+        </div>
+        <div id="music-eq" class="hidden items-end gap-1 h-3.5 pl-1">
+          <span class="w-1 bg-champagne-gold rounded-full eq-bar-1"></span>
+          <span class="w-1 bg-champagne-gold rounded-full eq-bar-2"></span>
+          <span class="w-1 bg-champagne-gold rounded-full eq-bar-3"></span>
+        </div>
+      </button>
+      <audio id="wedding-audio" loop preload="none" src="/music/wedding.mp3"></audio>
+    </div>
+
+    <!-- Hero Section (Identical + Inline Editable Names, Photo, Date) -->
+    <section id="hero" class="relative min-h-screen flex items-center justify-center text-center px-4 pt-24 pb-20 overflow-hidden bg-gradient-to-b from-[#FAF7F2] via-[#F4EFE6] to-[#ECE5D8]">
+      <div class="absolute top-1/4 -left-20 w-96 h-96 bg-champagne-gold/15 rounded-full blur-3xl -z-10"></div>
+      <div class="absolute bottom-1/4 -right-20 w-[450px] h-[450px] bg-rose-gold/15 rounded-full blur-3xl -z-10"></div>
+
+      <div class="max-w-3xl mx-auto space-y-8">
+        <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-champagne-gold/40 shadow-sm text-xs font-semibold tracking-widest text-champagne-gold uppercase">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span data-i18n="hero_badge">Приглашение на свадьбу</span>
+        </div>
+
+        <div class="space-y-4">
+          <h1 class="font-serif text-5xl sm:text-7xl lg:text-8xl font-normal text-stone-900 leading-tight">
+            <span id="names-title" class="inline-flex flex-wrap items-center justify-center gap-x-3">
+              <span id="edit-groom" contenteditable="true" spellcheck="false" class="editable-field px-1.5" title="Нажмите, чтобы изменить имя жениха">Назар</span>
+              <span id="names-amp">&amp;</span>
+              <span id="edit-bride" contenteditable="true" spellcheck="false" class="editable-field px-1.5" title="Нажмите, чтобы изменить имя невесты">София</span>
+            </span>
+          </h1>
+          <p class="text-stone-600 text-lg sm:text-xl font-light tracking-wide max-w-xl mx-auto" data-i18n="hero_subtitle">
+            Мы приглашаем вас разделить радость самого счастливого дня нашей жизни!
+          </p>
+        </div>
+
+        <!-- Hero Couple Photo with luxury frame + Edit Controls -->
+        <div class="space-y-3">
+          <div class="relative w-72 h-96 sm:w-80 sm:h-[440px] mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-white group">
+            <img
+              id="hero-img"
+              src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80"
+              alt="Назар и София"
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            >
+            <!-- Photo Upload / URL Controls -->
+            <div class="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+              <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 hover:bg-white text-stone-900 text-xs font-semibold shadow-lg border border-[#E8DFC9] transition-all">
+                <i data-lucide="camera" class="w-3.5 h-3.5 text-champagne-gold"></i>
+                <span>Сменить фото</span>
+                <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'hero')">
+              </label>
+              <button type="button" onclick="toggleHeroUrlInput()" class="p-1.5 rounded-full bg-white/95 hover:bg-white text-stone-700 shadow-lg border border-[#E8DFC9] transition-all" title="Вставить ссылку на фото">
+                <i data-lucide="link" class="w-3.5 h-3.5"></i>
+              </button>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center">
-              <i data-lucide="mail" class="w-6 h-6"></i>
+
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-900/75 via-transparent to-transparent flex items-end justify-center p-6 text-white pointer-events-none">
+              <div class="text-center pointer-events-auto">
+                <span class="text-xs uppercase tracking-widest text-stone-200" data-i18n="wedding_day_label">День нашей свадьбы</span>
+                <button type="button" onclick="toggleDatePicker()" class="mt-1 flex items-center justify-center gap-1.5 font-serif text-2xl font-bold hover:text-champagne-gold transition-colors mx-auto group/date" title="Нажмите, чтобы изменить дату">
+                  <span id="wedding-display-date">15 Сентября 2027</span>
+                  <i data-lucide="pencil" class="w-3.5 h-3.5 opacity-75 group-hover/date:opacity-100"></i>
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-            <div>
-              <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Придут (человек)</div>
-              <div id="stat-total-people" class="text-3xl font-bold text-emerald-600 mt-1">0</div>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <i data-lucide="users" class="w-6 h-6"></i>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-            <div>
-              <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Подтвердили (анкет)</div>
-              <div id="stat-attending-responses" class="text-3xl font-bold text-stone-900 mt-1">0</div>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center">
-              <i data-lucide="check-circle" class="w-6 h-6"></i>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-            <div>
-              <div class="text-xs text-stone-500 font-medium uppercase tracking-wider">Отклонили</div>
-              <div id="stat-declined-responses" class="text-3xl font-bold text-rose-500 mt-1">0</div>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center">
-              <i data-lucide="x-circle" class="w-6 h-6"></i>
+          <!-- Optional Hero URL Input -->
+          <div id="hero-url-box" class="hidden max-w-sm mx-auto bg-white/90 backdrop-blur-md p-3 rounded-2xl border border-[#E8DFC9] shadow-md">
+            <div class="flex items-center gap-2">
+              <input type="text" id="cms-photo-hero" placeholder="https://..." oninput="updateHeroPreview(this.value)" class="flex-1 px-3 py-1.5 rounded-xl border border-stone-200 text-xs font-mono bg-[#FAF7F2]">
+              <button type="button" onclick="toggleHeroUrlInput()" class="text-xs text-stone-500 hover:text-stone-900 px-2 py-1">OK</button>
             </div>
           </div>
         </div>
 
-        <!-- Action Banner -->
-        <div class="bg-stone-900 text-white rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl">
+        <!-- Countdown Timer + Inline Date Picker -->
+        <div class="bg-white/85 backdrop-blur-md p-6 rounded-3xl border border-[#E8DFC9] shadow-xl max-w-lg mx-auto space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="text-xs uppercase tracking-wider text-stone-500 font-semibold" data-i18n="timer_title">
+              До торжества осталось:
+            </div>
+            <button type="button" onclick="toggleDatePicker()" class="inline-flex items-center gap-1 text-[11px] font-semibold text-champagne-gold hover:underline">
+              <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+              <span>Изменить дату</span>
+            </button>
+          </div>
+
+          <div id="date-picker-box" class="hidden pt-1 pb-2">
+            <input type="datetime-local" id="cms-date" onchange="handleDateChange(this.value)" class="w-full px-3.5 py-2 rounded-xl border border-[#DFD6C4] bg-[#FAF7F2] text-sm font-medium text-stone-800">
+          </div>
+
+          <div class="grid grid-cols-4 gap-2 text-center">
+            <div class="bg-[#FAF7F2] p-2.5 sm:p-3.5 rounded-2xl border border-[#EBE4D8]">
+              <div id="days" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900">00</div>
+              <div class="text-[10px] sm:text-xs text-stone-500 uppercase mt-1" data-i18n="timer_days">Дней</div>
+            </div>
+            <div class="bg-[#FAF7F2] p-2.5 sm:p-3.5 rounded-2xl border border-[#EBE4D8]">
+              <div id="hours" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900">00</div>
+              <div class="text-[10px] sm:text-xs text-stone-500 uppercase mt-1" data-i18n="timer_hours">Часов</div>
+            </div>
+            <div class="bg-[#FAF7F2] p-2.5 sm:p-3.5 rounded-2xl border border-[#EBE4D8]">
+              <div id="minutes" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900">00</div>
+              <div class="text-[10px] sm:text-xs text-stone-500 uppercase mt-1" data-i18n="timer_minutes">Минут</div>
+            </div>
+            <div class="bg-[#FAF7F2] p-2.5 sm:p-3.5 rounded-2xl border border-[#EBE4D8]">
+              <div id="seconds" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900">00</div>
+              <div class="text-[10px] sm:text-xs text-stone-500 uppercase mt-1" data-i18n="timer_seconds">Секунд</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick RSVP / Guests Button -->
+        <div>
+          <button type="button" onclick="toggleGuestsModal(true)" class="inline-flex items-center gap-2 px-8 py-4 bg-stone-900 text-white rounded-full text-base font-medium shadow-2xl hover:bg-champagne-gold hover:text-white transition-all transform hover:-translate-y-0.5">
+            <i data-lucide="users" class="w-5 h-5 text-champagne-gold"></i>
+            <span>Открыть список гостей</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Story Section: Editorial Chapters (Identical to guest site) -->
+    <section id="story" class="py-24 px-4 bg-[#F5EFEB]/90 border-y border-[#E8DFC9]">
+      <div class="max-w-4xl mx-auto space-y-16">
+        <div class="text-center space-y-3">
+          <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="story_tag">Как всё начиналось</span>
+          <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="story_title">Наша история</h2>
+          <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+          <p class="text-stone-500 text-sm max-w-md mx-auto">Каждый шаг приближал нас к этому счастливому дню</p>
+        </div>
+
+        <div class="space-y-12">
+          <!-- Chapter 1 -->
+          <div class="photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row items-center gap-8">
+            <div class="w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md shrink-0">
+              <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80" alt="Первая встреча" class="w-full h-full object-cover">
+            </div>
+            <div class="w-full md:w-1/2 space-y-3 text-left">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
+                <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+                <span data-i18n="story_event1_date">2023 год • Глава I</span>
+              </div>
+              <h3 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900" data-i18n="story_event1_title">Первая встреча</h3>
+              <p class="text-stone-600 text-sm sm:text-base leading-relaxed" data-i18n="story_event1_text">
+                Случайный разговор, который перевернул наши жизни. С самого первого взгляда стало ясно: впереди нас ждёт нечто невероятное.
+              </p>
+            </div>
+          </div>
+
+          <!-- Chapter 2 -->
+          <div class="photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row-reverse items-center gap-8">
+            <div class="w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md shrink-0">
+              <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80" alt="Первое путешествие" class="w-full h-full object-cover">
+            </div>
+            <div class="w-full md:w-1/2 space-y-3 text-left">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
+                <i data-lucide="plane" class="w-3.5 h-3.5"></i>
+                <span data-i18n="story_event2_date">2024 год • Глава II</span>
+              </div>
+              <h3 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900" data-i18n="story_event2_title">Первое путешествие</h3>
+              <p class="text-stone-600 text-sm sm:text-base leading-relaxed" data-i18n="story_event2_text">
+                Незабываемые закаты, тысячи фотографий, смех и понимание того, что мы идеальная команда в любом уголке мира.
+              </p>
+            </div>
+          </div>
+
+          <!-- Chapter 3 -->
+          <div class="photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row items-center gap-8">
+            <div class="w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md shrink-0">
+              <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80" alt="Она сказала Да" class="w-full h-full object-cover">
+            </div>
+            <div class="w-full md:w-1/2 space-y-3 text-left">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
+                <i data-lucide="gem" class="w-3.5 h-3.5"></i>
+                <span data-i18n="story_event3_date">2025 год • Глава III</span>
+              </div>
+              <h3 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900" data-i18n="story_event3_title">Она сказала «Да!»</h3>
+              <p class="text-stone-600 text-sm sm:text-base leading-relaxed" data-i18n="story_event3_text">
+                Самый романтический вечер, трепетное биение сердец и самое главное слово, открывшее новую главу нашей семьи.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Photo Gallery Section: Romantic Album Style + Add/Remove Controls -->
+    <section class="py-24 px-4 bg-[#FAF7F2]">
+      <div class="max-w-5xl mx-auto space-y-12">
+        <div class="text-center space-y-3">
+          <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="gallery_tag">Наши моменты</span>
+          <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="gallery_title">Фотоальбом любви</h2>
+          <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+          <p class="text-stone-500 text-sm max-w-md mx-auto">Нажмите на фото, чтобы прочитать историю, или добавьте новые кадры</p>
+        </div>
+
+        <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <!-- Populated dynamically with Polaroid cards + Add Photo card -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Schedule of the Day (Identical to guest site) -->
+    <section class="py-24 px-4 bg-[#F5EFEB]/90 border-y border-[#E8DFC9]">
+      <div class="max-w-3xl mx-auto space-y-12">
+        <div class="text-center space-y-3">
+          <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="schedule_tag">Торжественный день</span>
+          <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="schedule_title">Программа свадьбы</h2>
+          <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm">
+              <i data-lucide="wine" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-champagne-gold tracking-wider">18:30</div>
+              <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_1_title">Сбор гостей & Фуршет</h3>
+              <p class="text-stone-500 text-xs mt-1" data-i18n="sched_1_desc">Приветственные напитки, закуски и тёплые встречи</p>
+            </div>
+          </div>
+
+          <div class="p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm">
+              <i data-lucide="heart-handshake" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-champagne-gold tracking-wider">19:30</div>
+              <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_2_title">Хупа / Церемония</h3>
+              <p class="text-stone-500 text-xs mt-1" data-i18n="sched_2_desc">Торжественная церемония бракосочетания</p>
+            </div>
+          </div>
+
+          <div class="p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm">
+              <i data-lucide="utensils" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-champagne-gold tracking-wider">20:15</div>
+              <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_3_title">Праздничный ужин</h3>
+              <p class="text-stone-500 text-xs mt-1" data-i18n="sched_3_desc">Банкет, изысканные блюда и тосты за молодых</p>
+            </div>
+          </div>
+
+          <div class="p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm">
+              <i data-lucide="music" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-champagne-gold tracking-wider">21:30</div>
+              <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_4_title">Танцы и вечеринка</h3>
+              <p class="text-stone-500 text-xs mt-1" data-i18n="sched_4_desc">Зажигательная музыка, свадебный торт и веселье</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Location & Navigation Section (Inline Editable Venue, City, Waze & Maps Links) -->
+    <section class="py-24 px-4 bg-[#FAF7F2]">
+      <div class="max-w-3xl mx-auto space-y-8 text-center">
+        <div class="space-y-3">
+          <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="location_tag">Где нас найти</span>
+          <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="location_title">Место проведения</h2>
+          <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+        </div>
+
+        <div class="bg-white/95 backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-[#E8DFC9] shadow-xl space-y-6">
+          <div class="w-16 h-16 bg-champagne-gold/15 text-champagne-gold rounded-full flex items-center justify-center mx-auto shadow-inner">
+            <i data-lucide="map-pin" class="w-8 h-8"></i>
+          </div>
+
           <div class="space-y-2">
-            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-xs font-mono">
-              <i data-lucide="send" class="w-3.5 h-3.5 text-sky-400"></i>
-              <span>Telegram Уведомления</span>
+            <h3 id="venue-title" contenteditable="true" spellcheck="false" class="editable-field inline-block px-3 py-0.5 font-serif text-2xl sm:text-3xl font-bold text-stone-900" title="Нажмите, чтобы изменить название зала">Зал торжеств «Royal Garden»</h3>
+            <div>
+              <p id="venue-city" contenteditable="true" spellcheck="false" class="editable-field inline-block px-3 py-0.5 text-stone-600" title="Нажмите, чтобы изменить город">Тель-Авив / Центр Израиля</p>
             </div>
-            <h2 class="text-xl sm:text-2xl font-bold">Получать ответы гостей прямо в Telegram</h2>
-            <p class="text-stone-300 text-xs sm:text-sm max-w-xl">
-              Бот мгновенно отправляет уведомление на ваш телефон в момент, когда гость заполняет анкету!
-            </p>
           </div>
-          <div class="flex flex-wrap items-center gap-3">
-            <button onclick="toggleTelegramModal(true)" class="px-5 py-3 bg-white text-stone-900 hover:bg-stone-100 rounded-xl text-sm font-semibold transition-all">
-              Настроить бота
-            </button>
-            <a id="btn-export-csv" href="#" class="px-5 py-3 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2 border border-stone-700">
-              <i data-lucide="download" class="w-4 h-4"></i>
-              Скачать Excel
+
+          <!-- Navigation Buttons -->
+          <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a id="btn-waze" href="https://waze.com/ul" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-3.5 bg-[#33CCFF] hover:bg-[#20b4e6] text-white font-semibold rounded-full shadow-lg transition-all transform hover:-translate-y-0.5">
+              <i data-lucide="navigation" class="w-5 h-5"></i>
+              <span data-i18n="btn_waze">Открыть в Waze</span>
             </a>
-            <button onclick="clearAllResponses()" class="px-4 py-3 bg-rose-900/60 hover:bg-rose-900 text-rose-200 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-              Очистить ответы
+            <a id="btn-maps" href="https://maps.google.com" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-3.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold rounded-full shadow-lg transition-all transform hover:-translate-y-0.5">
+              <i data-lucide="map" class="w-5 h-5"></i>
+              <span data-i18n="btn_maps">Открыть в Google Maps</span>
+            </a>
+          </div>
+
+          <!-- Inline Link Editor -->
+          <div class="pt-4 border-t border-[#EBE4D8] grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+            <div class="space-y-1">
+              <label class="text-[11px] font-semibold uppercase tracking-wider text-stone-500">Ссылка Waze</label>
+              <input type="url" id="cms-waze" oninput="syncNavLink('waze', this.value)" placeholder="https://waze.com/ul?..." class="w-full px-3.5 py-2 rounded-xl border border-[#DFD6C4] bg-[#FAF7F2] text-xs font-mono focus:bg-white focus:border-champagne-gold">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-semibold uppercase tracking-wider text-stone-500">Ссылка Google Maps</label>
+              <input type="url" id="cms-maps" oninput="syncNavLink('maps', this.value)" placeholder="https://maps.google.com/..." class="w-full px-3.5 py-2 rounded-xl border border-[#DFD6C4] bg-[#FAF7F2] text-xs font-mono focus:bg-white focus:border-champagne-gold">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Israeli Bit Gift Card Section (Inline Editable Bit Name & Phone) -->
+    <section class="py-24 px-4 bg-[#F5EFEB]/90 border-y border-[#E8DFC9]">
+      <div class="max-w-2xl mx-auto space-y-8 text-center">
+        <div class="space-y-3">
+          <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="gift_tag">Подарки</span>
+          <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="gift_title">Свадебный подарок</h2>
+          <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+        </div>
+
+        <p class="text-stone-600 max-w-lg mx-auto leading-relaxed text-sm sm:text-base" data-i18n="gift_description">
+          Ваше присутствие и тёплые улыбки — самый ценный подарок для нас! Но если вы хотите сделать памятный вклад в нашу молодую семью, вы можете легко воспользоваться израильским приложением <b>Bit</b>.
+        </p>
+
+        <!-- Bit Card Container -->
+        <div class="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 text-white p-8 rounded-3xl shadow-2xl relative overflow-hidden text-left border border-stone-700">
+          <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-bit-blue/20 rounded-full blur-2xl"></div>
+
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-2">
+              <div class="w-9 h-9 rounded-full bg-bit-blue flex items-center justify-center text-white font-black text-sm tracking-wider">
+                bit
+              </div>
+              <span class="font-bold tracking-wide text-lg">bit payment</span>
+            </div>
+            <span class="text-xs bg-white/10 px-3 py-1 rounded-full text-stone-300 font-mono">Israel</span>
+          </div>
+
+          <div class="space-y-2 mb-6">
+            <div class="text-xs text-stone-400 uppercase tracking-widest" data-i18n="bit_recipient">Получатель</div>
+            <div>
+              <div id="bit-name-display" contenteditable="true" spellcheck="false" class="editable-field-dark inline-block px-2 py-0.5 font-serif text-2xl font-bold text-champagne-gold" title="Нажмите, чтобы изменить получателя">Назар & София</div>
+            </div>
+            <div>
+              <div id="bit-phone-display" contenteditable="true" spellcheck="false" class="editable-field-dark inline-block px-2 py-0.5 text-xl font-mono text-white tracking-wider mt-1" title="Нажмите, чтобы изменить номер Bit">+972 50-000-0000</div>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button type="button" onclick="copyBitNumber()" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-white text-stone-900 hover:bg-stone-100 rounded-xl font-semibold transition-all shadow-md">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+              <span id="btn-copy-bit-text" data-i18n="bit_copy_btn">Скопировать номер</span>
             </button>
+            <a id="btn-open-bit" href="bit://" class="inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-bit-blue hover:bg-[#00929d] text-white rounded-xl font-semibold transition-all shadow-md">
+              <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+              <span data-i18n="bit_open_app">Открыть Bit</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RSVP & Guest Management Section (Identical Aesthetic + Live Guest Stats & Table) -->
+    <section id="rsvp" class="py-24 px-4 relative bg-[#FAF7F2]">
+      <div class="max-w-5xl mx-auto space-y-10">
+        <div class="text-center space-y-3">
+          <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="rsvp_tag">Будем счастливы вас видеть</span>
+          <h2 class="font-serif text-4xl sm:text-5xl text-stone-900">Ответы гостей (RSVP)</h2>
+          <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+          <p class="text-stone-600 max-w-md mx-auto text-sm">
+            Живая статистика и список всех гостей, подтвердивших участие
+          </p>
+        </div>
+
+        <!-- Statistics Cards (Champagne Palette) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-[#E8DFC9] shadow-md flex items-center justify-between">
+            <div>
+              <div class="text-[11px] text-stone-500 font-semibold uppercase tracking-wider">Всего ответов</div>
+              <div id="stat-total-responses" class="font-serif text-3xl sm:text-4xl font-bold text-stone-900 mt-1">0</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] text-champagne-gold flex items-center justify-center shrink-0">
+              <i data-lucide="mail" class="w-5 h-5"></i>
+            </div>
+          </div>
+
+          <div class="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-[#E8DFC9] shadow-md flex items-center justify-between">
+            <div>
+              <div class="text-[11px] text-stone-500 font-semibold uppercase tracking-wider">Придут (чел.)</div>
+              <div id="stat-total-people" class="font-serif text-3xl sm:text-4xl font-bold text-emerald-700 mt-1">0</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+              <i data-lucide="users" class="w-5 h-5"></i>
+            </div>
+          </div>
+
+          <div class="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-[#E8DFC9] shadow-md flex items-center justify-between">
+            <div>
+              <div class="text-[11px] text-stone-500 font-semibold uppercase tracking-wider">Подтвердили</div>
+              <div id="stat-attending-responses" class="font-serif text-3xl sm:text-4xl font-bold text-stone-900 mt-1">0</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] text-champagne-gold flex items-center justify-center shrink-0">
+              <i data-lucide="check-circle" class="w-5 h-5"></i>
+            </div>
+          </div>
+
+          <div class="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-[#E8DFC9] shadow-md flex items-center justify-between">
+            <div>
+              <div class="text-[11px] text-stone-500 font-semibold uppercase tracking-wider">Отклонили</div>
+              <div id="stat-declined-responses" class="font-serif text-3xl sm:text-4xl font-bold text-rose-500 mt-1">0</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-rose-50 border border-rose-100 text-rose-500 flex items-center justify-center shrink-0">
+              <i data-lucide="x-circle" class="w-5 h-5"></i>
+            </div>
           </div>
         </div>
 
-        <!-- Guest Table & Filter -->
-        <div class="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden space-y-4 p-6">
-          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-              <button onclick="filterGuests('all')" id="btn-filter-all" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-900 text-white transition-all">
+        <!-- Guests Table Card -->
+        <div class="bg-white/95 backdrop-blur-md rounded-3xl border border-[#E8DFC9] shadow-2xl overflow-hidden p-6 sm:p-8 space-y-6">
+          <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" onclick="filterGuests('all')" id="btn-filter-all" class="px-4 py-2 text-xs font-semibold rounded-full bg-stone-900 text-white transition-all">
                 Все ответы
               </button>
-              <button onclick="filterGuests('attending')" id="btn-filter-attending" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all">
+              <button type="button" onclick="filterGuests('attending')" id="btn-filter-attending" class="px-4 py-2 text-xs font-semibold rounded-full bg-[#FAF7F2] text-stone-700 border border-[#E8DFC9] hover:bg-[#F4EFE6] transition-all">
                 Придут
               </button>
-              <button onclick="filterGuests('declined')" id="btn-filter-declined" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all">
+              <button type="button" onclick="filterGuests('declined')" id="btn-filter-declined" class="px-4 py-2 text-xs font-semibold rounded-full bg-[#FAF7F2] text-stone-700 border border-[#E8DFC9] hover:bg-[#F4EFE6] transition-all">
                 Не смогут
               </button>
             </div>
-            <input 
-              type="text" 
-              id="search-input" 
-              oninput="handleSearch()" 
-              placeholder="Поиск по имени или телефону..." 
-              class="w-full sm:w-72 px-4 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:ring-2 focus:ring-stone-900"
-            >
+
+            <div class="flex flex-wrap items-center gap-2.5">
+              <input
+                type="text"
+                id="search-input"
+                oninput="handleSearch()"
+                placeholder="Поиск по имени или телефону..."
+                class="flex-1 sm:w-64 px-4 py-2 rounded-full border border-[#DFD6C4] bg-[#FAF7F2] text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-champagne-gold/40"
+              >
+              <a id="btn-export-csv" href="#" class="px-4 py-2 bg-[#FAF7F2] hover:bg-[#F4EFE6] text-stone-800 border border-[#DFD6C4] rounded-full text-xs font-semibold transition-all inline-flex items-center gap-1.5">
+                <i data-lucide="download" class="w-3.5 h-3.5 text-champagne-gold"></i>
+                <span>Excel</span>
+              </a>
+              <button type="button" onclick="clearAllResponses()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-full text-xs font-semibold transition-all inline-flex items-center gap-1.5">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>Очистить</span>
+              </button>
+            </div>
           </div>
 
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-              <thead class="bg-stone-50 text-stone-500 text-xs font-semibold uppercase tracking-wider border-y border-stone-200">
+              <thead class="bg-[#FAF7F2] text-stone-500 text-xs font-semibold uppercase tracking-wider border-y border-[#E8DFC9]">
                 <tr>
                   <th class="py-3 px-4">Гость</th>
                   <th class="py-3 px-4">Телефон</th>
@@ -203,7 +639,7 @@
                   <th class="py-3 px-4 text-right">Действие</th>
                 </tr>
               </thead>
-              <tbody id="guests-table-body" class="divide-y divide-stone-100"></tbody>
+              <tbody id="guests-table-body" class="divide-y divide-[#F0E9DC]"></tbody>
             </table>
             <div id="empty-state" class="hidden text-center py-12 text-stone-400 text-sm">
               Список пуст. Новые ответы гостей будут отображаться здесь автоматически!
@@ -211,203 +647,62 @@
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- TAB 2: SITE CMS & PHOTOS -->
-      <div id="tab-cms" class="hidden space-y-8">
-        <form onsubmit="handleSaveCMS(event)" class="space-y-8">
-
-          <!-- 1. Photo Management Section -->
-          <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm space-y-6">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-champagne-gold/10 text-champagne-gold flex items-center justify-center">
-                <i data-lucide="image" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <h3 class="font-bold text-lg text-stone-900">Управление фотографиями</h3>
-                <p class="text-stone-500 text-xs">Загружайте ваши фотографии жениха и невесты с компьютера</p>
-              </div>
-            </div>
-
-            <!-- Hero Photo -->
-            <div class="pt-2 border-t border-stone-100">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
-                Главное фото пары (Первый экран)
-              </label>
-              <div class="flex flex-col sm:flex-row items-center gap-6">
-                <div class="relative w-40 h-52 rounded-2xl overflow-hidden border-2 border-stone-200 shadow-md shrink-0 bg-stone-100">
-                  <img id="preview-hero" src="" alt="Hero" class="w-full h-full object-cover">
-                </div>
-                <div class="space-y-3 flex-1">
-                  <div class="flex items-center gap-3">
-                    <label class="cursor-pointer px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-2 shadow-sm transition-all">
-                      <i data-lucide="upload" class="w-4 h-4"></i>
-                      <span>Загрузить фото с компьютера</span>
-                      <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'hero')">
-                    </label>
-                    <span id="upload-status-hero" class="text-xs text-stone-400"></span>
-                  </div>
-                  <div class="space-y-1">
-                    <span class="text-[11px] text-stone-400">Или укажите прямую ссылку на фото:</span>
-                    <input type="text" id="cms-photo-hero" placeholder="https://..." oninput="updateHeroPreview(this.value)" class="w-full px-4 py-2 rounded-xl border border-stone-200 text-xs font-mono">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Gallery Photos -->
-            <div class="pt-6 border-t border-stone-100 space-y-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <label class="block text-xs font-semibold uppercase tracking-wider text-stone-700">
-                    Фотогалерея воспоминаний
-                  </label>
-                  <p class="text-[11px] text-stone-400">Фотографии для блока галереи на сайте</p>
-                </div>
-                <label class="cursor-pointer px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 transition-all">
-                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                  <span>Добавить фото в галерею</span>
-                  <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'gallery')">
-                </label>
-              </div>
-
-              <!-- Gallery Grid -->
-              <div id="cms-gallery-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3"></div>
-            </div>
-          </div>
-
-          <!-- 2. Wedding Details & Names -->
-          <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm space-y-6">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-champagne-gold/10 text-champagne-gold flex items-center justify-center">
-                <i data-lucide="heart" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <h3 class="font-bold text-lg text-stone-900">Имена и дата торжества</h3>
-                <p class="text-stone-500 text-xs">Данные для обоих языков (Русский и Иврит)</p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Имя жениха (Русский)</label>
-                <input type="text" id="cms-groom-ru" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
-              </div>
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Имя жениха (Иврит)</label>
-                <input type="text" id="cms-groom-he" dir="rtl" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
-              </div>
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Имя невесты (Русский)</label>
-                <input type="text" id="cms-bride-ru" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
-              </div>
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Имя невесты (Иврит)</label>
-                <input type="text" id="cms-bride-he" dir="rtl" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
-              </div>
-            </div>
-
-            <div class="space-y-1">
-              <label class="text-xs font-semibold text-stone-700">Дата и время свадьбы (для таймера отсчёта)</label>
-              <input type="datetime-local" id="cms-date" class="w-full sm:w-80 px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
-            </div>
-          </div>
-
-          <!-- 3. Venue & Navigation -->
-          <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm space-y-6">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-champagne-gold/10 text-champagne-gold flex items-center justify-center">
-                <i data-lucide="map-pin" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <h3 class="font-bold text-lg text-stone-900">Место проведения и навигация</h3>
-                <p class="text-stone-500 text-xs">Зал торжеств и кнопки Waze / Google Maps</p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Название зала (Русский)</label>
-                <input type="text" id="cms-venue-ru" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
-              </div>
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Название зала (Иврит)</label>
-                <input type="text" id="cms-venue-he" dir="rtl" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
-              </div>
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Город / Регион (Русский)</label>
-                <input type="text" id="cms-city-ru" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
-              </div>
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Город / Регион (Иврит)</label>
-                <input type="text" id="cms-city-he" dir="rtl" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Ссылка на Waze</label>
-                <input type="url" id="cms-waze" placeholder="https://waze.com/ul?..." class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-mono">
-              </div>
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Ссылка на Google Maps</label>
-                <input type="url" id="cms-maps" placeholder="https://maps.google.com/..." class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-mono">
-              </div>
-            </div>
-          </div>
-
-          <!-- 4. Bit Payment Info -->
-          <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm space-y-6">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-black text-xs">
-                bit
-              </div>
-              <div>
-                <h3 class="font-bold text-lg text-stone-900">Подарок в Bit (Израиль)</h3>
-                <p class="text-stone-500 text-xs">Номер телефона для получения подарков через приложение Bit</p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Номер телефона для Bit</label>
-                <input type="text" id="cms-bit-phone" placeholder="+972 50-000-0000" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-mono">
-              </div>
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-stone-700">Имя получателя в карточке</label>
-                <input type="text" id="cms-bit-name" placeholder="Nazar & Sofia" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm">
-              </div>
-            </div>
-          </div>
-
-          <!-- Submit Button -->
-          <div class="sticky bottom-6 z-30 flex justify-end">
-            <button type="submit" id="btn-save-cms" class="px-8 py-4 bg-stone-900 hover:bg-champagne-gold text-white font-semibold rounded-2xl shadow-2xl transition-all flex items-center gap-2 text-base">
-              <i data-lucide="save" class="w-5 h-5"></i>
-              <span>Сохранить изменения на сайте</span>
-            </button>
-          </div>
-        </form>
-      </div>
-
-    </main>
+    <!-- Footer (identical to guest site) -->
+    <footer class="py-12 border-t border-[#E8DFC9] text-center text-stone-500 text-xs space-y-3 bg-[#F5EFEB]/60">
+      <div id="footer-names" class="font-serif text-xl font-bold text-stone-900">Назар & София</div>
+      <div data-i18n="footer_love">С любовью и благодарностью к каждому гостю ❤️</div>
+    </footer>
   </div>
 
-  <!-- Telegram Setup Modal -->
-  <div id="telegram-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl border border-stone-200 space-y-6">
+  <!-- Photo Story Lightbox Modal (identical to guest site) -->
+  <div id="photo-story-modal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xl flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none">
+    <div class="bg-white/95 backdrop-blur-md rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#E8DFC9] space-y-4 transform scale-95 transition-all duration-300 relative text-left" id="photo-story-card">
+      <button type="button" onclick="closePhotoStory()" class="absolute -top-3 -right-3 sm:top-4 sm:right-4 w-10 h-10 bg-white text-stone-700 hover:text-stone-950 hover:bg-rose-50 hover:border-rose-200 rounded-full shadow-2xl flex items-center justify-center border border-stone-200 transition-all z-20 cursor-pointer" title="Закрыть">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+        <span id="modal-badge-text">Воспоминание Назара и Софии</span>
+      </div>
+
+      <div class="w-full h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md">
+        <img id="modal-photo-img" src="" alt="Story" class="w-full h-full object-cover">
+      </div>
+
+      <div class="space-y-2">
+        <h3 id="modal-photo-title" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900"></h3>
+        <p id="modal-photo-desc" class="text-stone-600 text-sm sm:text-base leading-relaxed"></p>
+      </div>
+
+      <div class="pt-3 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-400">
+        <span>❤️ Назар & София</span>
+        <button type="button" onclick="closePhotoStory()" class="text-champagne-gold hover:underline font-semibold flex items-center gap-1">
+          <span>Закрыть</span>
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Telegram Setup Modal (Champagne Styled) -->
+  <div id="telegram-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#FAF7F2] rounded-3xl p-8 max-w-lg w-full shadow-2xl border border-[#E8DFC9] space-y-6">
       <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-500 flex items-center justify-center">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-white border border-[#E8DFC9] text-sky-500 flex items-center justify-center shadow-sm">
             <i data-lucide="send" class="w-5 h-5"></i>
           </div>
-          <h3 class="font-bold text-lg text-stone-900">Подключение Telegram-бота</h3>
+          <h3 class="font-serif text-2xl font-bold text-stone-900">Подключение Telegram-бота</h3>
         </div>
-        <button onclick="toggleTelegramModal(false)" class="text-stone-400 hover:text-stone-700">
+        <button type="button" onclick="toggleTelegramModal(false)" class="text-stone-400 hover:text-stone-700 p-1">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <p class="text-stone-600 text-xs leading-relaxed">
+      <p class="text-stone-600 text-xs leading-relaxed bg-white p-4 rounded-2xl border border-[#E8DFC9]">
         Чтобы ответы сразу падали вам на телефон:
         <br>1. Откройте в Telegram <b>@BotFather</b> и отправьте <code>/newbot</code>.
         <br>2. Скопируйте полученный <b>HTTP API Token</b>.
@@ -417,23 +712,23 @@
       <form onsubmit="handleSaveTelegram(event)" class="space-y-4">
         <div class="space-y-1">
           <label class="text-xs font-semibold text-stone-700">Telegram Bot Token</label>
-          <input type="text" id="tg-token" placeholder="123456789:AAFg..." class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-mono">
+          <input type="text" id="tg-token" placeholder="123456789:AAFg..." class="w-full px-4 py-2.5 rounded-xl border border-[#DFD6C4] bg-white text-xs font-mono">
         </div>
         <div class="space-y-1">
           <label class="text-xs font-semibold text-stone-700">Ваш Telegram Chat ID</label>
-          <input type="text" id="tg-chat-id" placeholder="987654321" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-mono">
+          <input type="text" id="tg-chat-id" placeholder="987654321" class="w-full px-4 py-2.5 rounded-xl border border-[#DFD6C4] bg-white text-xs font-mono">
         </div>
 
         <div class="pt-2 flex flex-col sm:flex-row items-center gap-3">
-          <button type="submit" class="w-full sm:flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold transition-all">
+          <button type="submit" class="w-full sm:flex-1 py-3 bg-stone-900 hover:bg-champagne-gold text-white rounded-xl text-xs font-semibold transition-all">
             Сохранить настройки
           </button>
-          <button type="button" onclick="testTelegram()" class="w-full sm:w-auto px-4 py-3 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-xl text-xs font-semibold transition-all">
+          <button type="button" onclick="testTelegram()" class="w-full sm:w-auto px-4 py-3 bg-white hover:bg-sky-50 text-sky-700 border border-[#DFD6C4] rounded-xl text-xs font-semibold transition-all">
             Отправить тест
           </button>
         </div>
 
-        <div class="pt-3 border-t border-stone-100">
+        <div class="pt-3 border-t border-[#E8DFC9]">
           <button type="button" onclick="setupBotWebhook()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm">
             <i data-lucide="sparkles" class="w-4 h-4"></i>
             <span>Активировать кнопки и команды в Telegram</span>
@@ -445,14 +740,176 @@
   </div>
 
   <script>
+    const translations = {
+      ru: {
+        hero_badge: "Приглашение на свадьбу",
+        hero_subtitle: "Мы приглашаем вас разделить радость самого счастливого дня нашей жизни!",
+        wedding_day_label: "День нашей свадьбы",
+        timer_title: "До торжества осталось:",
+        timer_days: "Дней",
+        timer_hours: "Часов",
+        timer_minutes: "Минут",
+        timer_seconds: "Секунд",
+        story_tag: "Как всё начиналось",
+        story_title: "Наша история",
+        story_event1_date: "2023 год",
+        story_event1_title: "Первая встреча",
+        story_event1_text: "Случайный разговор, который перевернул наши жизни. С первого взгляда стало ясно: впереди нас ждёт нечто невероятное.",
+        story_event2_date: "2024 год",
+        story_event2_title: "Первое путешествие",
+        story_event2_text: "Незабываемые закаты, тысячи фотографий, смех и понимание того, что мы идеальная команда в любом уголке мира.",
+        story_event3_date: "2025 год",
+        story_event3_title: "Она сказала «Да!»",
+        story_event3_text: "Самый романтический вечер, трепетное биение сердец и самое главное слово, открывшее новую главу нашей семьи.",
+        gallery_tag: "Наши моменты",
+        gallery_title: "Фотоальбом любви",
+        schedule_tag: "Торжественный день",
+        schedule_title: "Программа свадьбы",
+        sched_1_title: "Сбор гостей & Фуршет",
+        sched_1_desc: "Приветственные напитки, закуски и тёплые встречи",
+        sched_2_title: "Хупа / Церемония",
+        sched_2_desc: "Торжественная церемония бракосочетания",
+        sched_3_title: "Праздничный ужин",
+        sched_3_desc: "Банкет, изысканные блюда и тосты за молодых",
+        sched_4_title: "Танцы и вечеринка",
+        sched_4_desc: "Зажигательная музыка, свадебный торт и веселье",
+        location_tag: "Где нас найти",
+        location_title: "Место проведения",
+        btn_waze: "Открыть в Waze",
+        btn_maps: "Открыть в Google Maps",
+        gift_tag: "Подарки",
+        gift_title: "Свадебный подарок",
+        gift_description: "Ваше присутствие и тёплые улыбки — самый ценный подарок для нас! Но если вы хотите сделать памятный вклад в нашу молодую семью, вы можете легко воспользоваться израильским приложением Bit.",
+        bit_recipient: "Получатель",
+        bit_copy_btn: "Скопировать номер",
+        bit_copied: "Номер скопирован! ✓",
+        bit_open_app: "Открыть Bit",
+        rsvp_tag: "Будем счастливы вас видеть",
+        footer_love: "С любовью и благодарностью к каждому гостю ❤️"
+      },
+      he: {
+        hero_badge: "הזמנה לחתונה",
+        hero_subtitle: "אנו שמחים ונרגשים להזמינכם לחגוג עמנו את יום נישואינו!",
+        wedding_day_label: "יום החתונה שלנו",
+        timer_title: "הספירה לאחור החלה:",
+        timer_days: "ימים",
+        timer_hours: "שעות",
+        timer_minutes: "דקות",
+        timer_seconds: "שניות",
+        story_tag: "איך הכל התחיל",
+        story_title: "הסיפור שלנו",
+        story_event1_date: "שנת 2023",
+        story_event1_title: "המפגש הראשון",
+        story_event1_text: "שיחה מקרית אחת ששינתה את חיינו לחלוטין. מהמבט הראשון היה ברור שזהו תחילתו של סיפור אהבה מיוחד.",
+        story_event2_date: "שנת 2024",
+        story_event2_title: "הטיול הראשון ביחד",
+        story_event2_text: "שקיעות בלתי נשכחות, אינספור תמונות וצחוק, וההבנה שאנחנו הצוות המושלם בכל מקום בעולם.",
+        story_event3_date: "שנת 2025",
+        story_event3_title: "היא אמרה כן!",
+        story_event3_text: "ערב רומנטי ומרגש במיוחד, פעימות לב מואצות והמילה המיוחלת שפתחה את הפרק המרגש ביותר בחיינו.",
+        gallery_tag: "רגעים שלנו",
+        gallery_title: "גלריית תמונות",
+        schedule_tag: "היום המאושר",
+        schedule_title: "לוח זמנים לחתונה",
+        sched_1_title: "קבלת פנים",
+        sched_1_desc: "מינגלינג, משקאות ונשנושים מפנקים",
+        sched_2_title: "חופה וקידושין",
+        sched_2_desc: "הטקס המרגש מתחת לחופה",
+        sched_3_title: "סעודת חתונה",
+        sched_3_desc: "ארוחת ערב חגיגית, מנות שף והרמת כוסית",
+        sched_4_title: "מסיבה וריקודים",
+        sched_4_desc: "מוזיקה מעולה, עוגת חתונה וריקודים עד השעות הקטנות",
+        location_tag: "איפה נפגשים",
+        location_title: "מיקום האירוע",
+        btn_waze: "ניווט ב-Waze",
+        btn_maps: "פתיחה ב-Google Maps",
+        gift_tag: "מתנות",
+        gift_title: "מתנה לחתונה",
+        gift_description: "הנוכחות והחיוך שלכם הם המתנה היקרה ביותר עבורנו! אך אם ברצונכם להעניק לנו מתנה כספית, ניתן לעשות זאת בקלות באמצעות אפליקציית Bit.",
+        bit_recipient: "שם המוטב",
+        bit_copy_btn: "העתק מספר טלפון",
+        bit_copied: "המספר הועתק! ✓",
+        bit_open_app: "פתח ב-Bit",
+        rsvp_tag: "נשמח מאוד לראותכם",
+        footer_love: "באהבה והערכה רבה לכל אחד ואחת מכם ❤️"
+      }
+    };
+
+    const photoStories = [
+      {
+        image: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+        title_ru: "В лучах заката",
+        title_he: "בשקיעה יפהפייה",
+        story_ru: "Незабываемый тёплый вечер, когда солнце медленно опускалось за горизонт. Мы говорили обо всём на свете и пообещали себе встречать вместе ещё тысячи таких закатов.",
+        story_he: "ערב חמים ובלתי נשכח מול שקיעה עוצרת נשימה. שוחחנו על העתיד והבטחנו לעצמנו לפגוש עוד אינספור שקיעות יחד."
+      },
+      {
+        image: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80",
+        title_ru: "Счастье вдвоём",
+        title_he: "אושר ביחד",
+        story_ru: "Кадры, которые не требуют лишних слов. Когда внутри тепло и спокойно, а впереди — целая совместная жизнь, полная любви, заботы и взаимной поддержки.",
+        story_he: "רגעים שלא צריכים מילים. כשיש שלווה עמוקה בלב וידיעה ברורה שלפנינו חיים שלמים של אהבה וחלומות משותפים."
+      },
+      {
+        image: "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=800&q=80",
+        title_ru: "Самый тёплый день",
+        title_he: "היום הכי מאושר",
+        story_ru: "День, когда весь мир вокруг словно замер. Мы просто держались за руки и знали, что впереди нас ждёт целая жизнь, полная путешествий и общих побед.",
+        story_he: "יום שבו כל העולם שמסביב נעצר. פשוט החזקנו ידיים וידענו שמחכים לנו חיים שלמים של אהבה ומסעות משותפים."
+      },
+      {
+        image: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80",
+        title_ru: "Навсегда вместе",
+        title_he: "לתמיד ביחד",
+        story_ru: "Самый искренний взгляд и обещание любить, беречь и поддерживать друг друга в любой ситуации. Это начало нашей красивой и крепкой семейной истории.",
+        story_he: "מבט של אהבה כנה והבטחה לתמוך, לחבק ולצמוח יחד בכל שלב בדרך. ההתחלה של המשפחה החדשה שלנו."
+      },
+      {
+        image: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80",
+        title_ru: "Улыбка и нежность",
+        title_he: "חיוך ואהבה",
+        story_ru: "Каждая улыбка рядом с тобой наполняет день светом. В таких простых и нежных мгновениях рождается настоящая, глубокая привязанность.",
+        story_he: "כל חיוך לצידך ממלא את היום באור. ברגעים הפשוטים והעדינים האלה נולדת אהבה אמיתית ועמוקה."
+      },
+      {
+        image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+        title_ru: "Наше маленькое чудо",
+        title_he: "הנס הקטן שלנו",
+        story_ru: "Этот день стал для нас особенным воспоминанием. Мы гуляли, смеялись над каждой мелочью и именно тогда поняли, что наше маленькое чудо — это просто быть рядом друг с другом.",
+        story_he: "היום הזה הפך לזיכרון מתוק ומיוחד עבורנו. טיילנו יחד, צחקנו מכל הלב והבנו שהנס הקטן שלנו הוא פשוט להיות אחד לצד השנייה."
+      },
+      {
+        image: "https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80",
+        title_ru: "Момент искренней радости",
+        title_he: "רגע של שמחה",
+        story_ru: "Когда сердца бьются в унисон, а вокруг — только радость, смех и предвкушение нашего большого праздника в кругу самых близких людей.",
+        story_he: "כשהלבבות פועמים יחד, ומסביב רק שמחה, צחוק והתרגשות לקראת החגיגה הגדולה שלנו עם האנשים היקרים לנו מכל."
+      },
+      {
+        image: "https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=800&q=80",
+        title_ru: "Только ты и я",
+        title_he: "רק אני ואת",
+        story_ru: "Среди тысяч дорог и миллионов людей мы нашли друг друга. И теперь каждая новая страница нашей книги пишется нами вдвоём.",
+        story_he: "בין אלפי דרכים ומיליוני אנשים מצאנו זה את זו. ומעכשיו, כל פרק חדש בספר החיים שלנו נכתב על ידי שנינו יחד."
+      }
+    ];
+
     let adminPass = localStorage.getItem("wedding_admin_pass") || "";
+    let currentLang = 'ru';
     let allRSVPs = [];
     let currentFilter = 'all';
-    let currentConfig = null;
-    let galleryPhotos = [];
+    let editableConfig = {
+      wedding: {},
+      photos: { hero: "", gallery: [] }
+    };
+    let weddingTargetDate = new Date("2027-09-15T18:00:00").getTime();
+    let hasUnsavedChanges = false;
+    let isMusicPlaying = false;
 
     document.addEventListener("DOMContentLoaded", () => {
       if (window.lucide) lucide.createIcons();
+      setupInlineEditors();
+      startCountdown();
       if (adminPass) {
         verifyAndLoad();
       } else {
@@ -460,20 +917,64 @@
       }
     });
 
-    function switchTab(tab) {
-      const isGuests = (tab === 'guests');
-      document.getElementById("tab-guests").classList.toggle("hidden", !isGuests);
-      document.getElementById("tab-cms").classList.toggle("hidden", isGuests);
+    function markDirty() {
+      hasUnsavedChanges = true;
+      document.getElementById("floating-save-bar").classList.remove("hidden");
+      const topBtn = document.getElementById("btn-save-top");
+      topBtn.classList.remove("bg-stone-900");
+      topBtn.classList.add("bg-champagne-gold");
+    }
 
-      document.getElementById("tab-btn-guests").className = isGuests
-        ? "py-4 text-sm font-semibold border-b-2 border-stone-900 text-stone-900 flex items-center gap-2"
-        : "py-4 text-sm font-semibold border-b-2 border-transparent text-stone-500 hover:text-stone-900 flex items-center gap-2";
+    function clearDirty() {
+      hasUnsavedChanges = false;
+      document.getElementById("floating-save-bar").classList.add("hidden");
+      const topBtn = document.getElementById("btn-save-top");
+      topBtn.classList.add("bg-stone-900");
+      topBtn.classList.remove("bg-champagne-gold");
+    }
 
-      document.getElementById("tab-btn-cms").className = !isGuests
-        ? "py-4 text-sm font-semibold border-b-2 border-stone-900 text-stone-900 flex items-center gap-2"
-        : "py-4 text-sm font-semibold border-b-2 border-transparent text-stone-500 hover:text-stone-900 flex items-center gap-2";
+    function setupInlineEditors() {
+      const ids = ["edit-groom", "edit-bride", "venue-title", "venue-city", "bit-name-display", "bit-phone-display"];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
 
-      if (window.lucide) lucide.createIcons();
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            el.blur();
+          }
+        });
+
+        el.addEventListener("input", () => {
+          const val = el.textContent.trim();
+          const isHe = (currentLang === 'he');
+          if (id === "edit-groom") {
+            editableConfig.wedding[isHe ? "groom_he" : "groom_ru"] = val;
+            updateFooterNames();
+          } else if (id === "edit-bride") {
+            editableConfig.wedding[isHe ? "bride_he" : "bride_ru"] = val;
+            updateFooterNames();
+          } else if (id === "venue-title") {
+            editableConfig.wedding[isHe ? "venue_name_he" : "venue_name_ru"] = val;
+          } else if (id === "venue-city") {
+            editableConfig.wedding[isHe ? "venue_city_he" : "venue_city_ru"] = val;
+          } else if (id === "bit-name-display") {
+            editableConfig.wedding.bit_name = val;
+          } else if (id === "bit-phone-display") {
+            editableConfig.wedding.bit_phone = val;
+          }
+          markDirty();
+        });
+      });
+    }
+
+    function updateFooterNames() {
+      const isHe = (currentLang === 'he');
+      const g = isHe ? (editableConfig.wedding.groom_he || "נזר") : (editableConfig.wedding.groom_ru || "Назар");
+      const b = isHe ? (editableConfig.wedding.bride_he || "סופיה") : (editableConfig.wedding.bride_ru || "София");
+      const footerEl = document.getElementById("footer-names");
+      if (footerEl) footerEl.textContent = isHe ? `${b} ו${g}` : `${g} & ${b}`;
     }
 
     async function handleLogin(e) {
@@ -506,24 +1007,428 @@
         const data = await res.json();
         document.getElementById("login-modal").classList.add("hidden");
         document.getElementById("admin-app").classList.remove("hidden");
-
         document.getElementById("btn-export-csv").href = `/api/export-csv?key=${encodeURIComponent(adminPass)}`;
 
         renderStats(data.stats);
         allRSVPs = data.rsvps || [];
         renderTable();
 
-        currentConfig = data.config;
-        populateCMSForm(currentConfig);
+        const cfg = data.config || {};
+        editableConfig.wedding = Object.assign({}, cfg.wedding || {});
+        editableConfig.photos = {
+          hero: (cfg.photos && cfg.photos.hero) || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+          gallery: Array.isArray(cfg.photos && cfg.photos.gallery) ? [...cfg.photos.gallery] : []
+        };
 
+        if (cfg.telegram) {
+          document.getElementById("tg-chat-id").value = cfg.telegram.chat_id || "";
+        }
+
+        applyConfigToPage();
+        renderGallery();
         if (window.lucide) lucide.createIcons();
       } catch (err) {
         console.error("Failed to load admin data:", err);
       }
     }
 
+    function applyConfigToPage() {
+      const w = editableConfig.wedding;
+      const p = editableConfig.photos;
+      const isHe = (currentLang === 'he');
+
+      const groomEl = document.getElementById("edit-groom");
+      const brideEl = document.getElementById("edit-bride");
+      const ampEl = document.getElementById("names-amp");
+      const namesTitle = document.getElementById("names-title");
+
+      const groom = isHe ? (w.groom_he || "נזר") : (w.groom_ru || w.groom || "Назар");
+      const bride = isHe ? (w.bride_he || "סופיה") : (w.bride_ru || w.bride || "София");
+
+      if (groomEl) groomEl.textContent = groom;
+      if (brideEl) brideEl.textContent = bride;
+
+      // Order in Hebrew vs Russian
+      if (namesTitle && groomEl && brideEl && ampEl) {
+        if (isHe) {
+          ampEl.textContent = "ו";
+          namesTitle.appendChild(brideEl);
+          namesTitle.appendChild(ampEl);
+          namesTitle.appendChild(groomEl);
+        } else {
+          ampEl.textContent = "&";
+          namesTitle.appendChild(groomEl);
+          namesTitle.appendChild(ampEl);
+          namesTitle.appendChild(brideEl);
+        }
+      }
+
+      updateFooterNames();
+
+      if (w.date) {
+        document.getElementById("cms-date").value = w.date.slice(0, 16);
+        weddingTargetDate = new Date(w.date).getTime();
+        formatDisplayDate(w.date);
+      }
+
+      const venueTitle = document.getElementById("venue-title");
+      if (venueTitle) {
+        venueTitle.textContent = isHe ? (w.venue_name_he || "אולם אירועים «Royal Garden»") : (w.venue_name_ru || "Зал торжеств «Royal Garden»");
+      }
+
+      const venueCity = document.getElementById("venue-city");
+      if (venueCity) {
+        venueCity.textContent = isHe ? (w.venue_city_he || "תל אביב / מרכז") : (w.venue_city_ru || "Тель-Авив / Центр Израиля");
+      }
+
+      document.getElementById("cms-waze").value = w.waze_link || "";
+      document.getElementById("cms-maps").value = w.google_maps_link || "";
+      if (w.waze_link) document.getElementById("btn-waze").href = w.waze_link;
+      if (w.google_maps_link) document.getElementById("btn-maps").href = w.google_maps_link;
+
+      const bitName = document.getElementById("bit-name-display");
+      if (bitName) bitName.textContent = w.bit_name || `${groom} & ${bride}`;
+
+      const bitPhone = document.getElementById("bit-phone-display");
+      if (bitPhone) bitPhone.textContent = w.bit_phone || "+972 50-000-0000";
+
+      if (p.hero) {
+        document.getElementById("hero-img").src = p.hero;
+        document.getElementById("cms-photo-hero").value = p.hero;
+      }
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const html = document.documentElement;
+      const dict = translations[lang];
+
+      if (lang === 'he') {
+        html.setAttribute('dir', 'rtl');
+        html.setAttribute('lang', 'he');
+        document.getElementById('btn-lang-he').className = "px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold rounded-full transition-all bg-white text-stone-900 shadow-sm";
+        document.getElementById('btn-lang-ru').className = "px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold rounded-full transition-all text-stone-600 hover:text-stone-900";
+      } else {
+        html.setAttribute('dir', 'ltr');
+        html.setAttribute('lang', 'ru');
+        document.getElementById('btn-lang-ru').className = "px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold rounded-full transition-all bg-white text-stone-900 shadow-sm";
+        document.getElementById('btn-lang-he').className = "px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold rounded-full transition-all text-stone-600 hover:text-stone-900";
+      }
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+
+      applyConfigToPage();
+      renderGallery();
+      updateMusicUI(isMusicPlaying);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function formatDisplayDate(dateStr) {
+      try {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return;
+        const monthsRu = ["Января","Февраля","Марта","Апреля","Мая","Июня","Июля","Августа","Сентября","Октября","Ноября","Декабря"];
+        const monthsHe = ["בינואר","בפברואר","במרץ","באפריל","במאי","ביוני","ביולי","באוגוסט","בספטמבר","באוקטובר","בנובמבר","בדצמבר"];
+        const day = d.getDate();
+        const year = d.getFullYear();
+        const isHe = currentLang === 'he';
+        const dateDisplay = document.getElementById("wedding-display-date");
+        if (dateDisplay) {
+          dateDisplay.textContent = isHe
+            ? `${day} ${monthsHe[d.getMonth()]} ${year}`
+            : `${day} ${monthsRu[d.getMonth()]} ${year}`;
+        }
+      } catch (e) {}
+    }
+
+    function toggleDatePicker() {
+      document.getElementById("date-picker-box").classList.toggle("hidden");
+    }
+
+    function handleDateChange(val) {
+      if (!val) return;
+      editableConfig.wedding.date = val;
+      weddingTargetDate = new Date(val).getTime();
+      formatDisplayDate(val);
+      markDirty();
+    }
+
+    function toggleHeroUrlInput() {
+      document.getElementById("hero-url-box").classList.toggle("hidden");
+    }
+
+    function updateHeroPreview(url) {
+      if (!url) return;
+      editableConfig.photos.hero = url.trim();
+      document.getElementById("hero-img").src = url.trim();
+      markDirty();
+    }
+
+    function syncNavLink(type, val) {
+      if (type === 'waze') {
+        editableConfig.wedding.waze_link = val.trim();
+        document.getElementById("btn-waze").href = val.trim() || "#";
+      } else {
+        editableConfig.wedding.google_maps_link = val.trim();
+        document.getElementById("btn-maps").href = val.trim() || "#";
+      }
+      markDirty();
+    }
+
+    // Gallery Rendering (Identical Polaroid cards + Delete & Add buttons)
+    function renderGallery() {
+      const container = document.getElementById("gallery-grid");
+      if (!container) return;
+      container.innerHTML = "";
+      const isHe = (currentLang === 'he');
+      const photos = editableConfig.photos.gallery || [];
+
+      photos.forEach((src, idx) => {
+        if (photoStories[idx]) {
+          photoStories[idx].image = src;
+        } else {
+          photoStories.push({
+            image: src,
+            title_ru: "Наше маленькое чудо",
+            title_he: "הנס הקטן שלנו",
+            story_ru: "Особенное мгновение нашей любви, наполненное теплом, нежностью и искренней радостью.",
+            story_he: "רגע מיוחד של אהבה, מלא בחום, רוך ושמחה כנה."
+          });
+        }
+
+        const st = photoStories[idx];
+        const cap = isHe ? `«${st.title_he}»` : `«${st.title_ru}»`;
+
+        const card = document.createElement("div");
+        card.className = "photo-story-card group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden";
+        card.innerHTML = `
+          <button type="button" onclick="removeGalleryPhoto(${idx})" class="absolute top-5 right-5 z-20 w-7 h-7 bg-stone-900/80 hover:bg-rose-600 text-white rounded-full flex items-center justify-center shadow-md transition-colors" title="Удалить фото">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+          <div class="relative overflow-hidden rounded-xl cursor-pointer" onclick="openPhotoStory(${idx})">
+            <img src="${src}" alt="${st.title_ru}" class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105">
+            <div class="absolute bottom-2 right-2 bg-stone-900/75 backdrop-blur-sm text-white text-[10px] font-medium px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+              <span>📖</span>
+              <span>${isHe ? 'הסיפור שלנו' : 'Читать историю'}</span>
+            </div>
+          </div>
+          <div class="font-handwritten text-center text-stone-700 text-lg">${cap}</div>
+        `;
+        container.appendChild(card);
+      });
+
+      // Add Photo Polaroid Card
+      const addCard = document.createElement("label");
+      addCard.className = "cursor-pointer bg-white/70 hover:bg-white p-3 rounded-2xl border-2 border-dashed border-champagne-gold/60 hover:border-champagne-gold shadow-sm flex flex-col items-center justify-center min-h-[268px] gap-3 text-center transition-all group";
+      addCard.innerHTML = `
+        <div class="w-12 h-12 rounded-full bg-[#FAF7F2] border border-[#E8DFC9] flex items-center justify-center text-champagne-gold group-hover:scale-110 transition-transform">
+          <i data-lucide="plus" class="w-6 h-6"></i>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs font-semibold text-stone-800">${isHe ? 'הוסף תמונה' : 'Добавить фото'}</div>
+          <div class="text-[10px] text-stone-400">${isHe ? 'לגלריה' : 'в фотоальбом'}</div>
+        </div>
+        <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'gallery')">
+      `;
+      container.appendChild(addCard);
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function removeGalleryPhoto(idx) {
+      editableConfig.photos.gallery.splice(idx, 1);
+      renderGallery();
+      markDirty();
+    }
+
+    async function uploadPhoto(input, target) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Data = e.target.result;
+        try {
+          const res = await fetch('/api/upload-photo', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${adminPass}`
+            },
+            body: JSON.stringify({ image: base64Data, filename: file.name })
+          });
+
+          const data = await res.json();
+          if (res.ok && data.url) {
+            if (target === 'hero') {
+              editableConfig.photos.hero = data.url;
+              document.getElementById("hero-img").src = data.url;
+              document.getElementById("cms-photo-hero").value = data.url;
+            } else if (target === 'gallery') {
+              editableConfig.photos.gallery.push(data.url);
+              renderGallery();
+            }
+            markDirty();
+          } else {
+            alert("Ошибка загрузки фото: " + (data.error || "Неизвестная ошибка"));
+          }
+        } catch (err) {
+          alert("Не удалось загрузить фото: " + err);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveAllSettings() {
+      const topBtn = document.getElementById("btn-save-top");
+      const origHtml = topBtn.innerHTML;
+      topBtn.disabled = true;
+      topBtn.innerHTML = `<span class="animate-spin">⏳</span> <span class="hidden sm:inline">Сохранение...</span>`;
+
+      try {
+        const res = await fetch('/api/settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminPass}`
+          },
+          body: JSON.stringify({
+            wedding: editableConfig.wedding,
+            photos: editableConfig.photos
+          })
+        });
+
+        if (res.ok) {
+          clearDirty();
+          alert("🎉 Изменения сохранены! Гостевой сайт сразу обновился.");
+        } else {
+          alert("Ошибка сохранения настроек.");
+        }
+      } catch (err) {
+        alert("Не удалось сохранить изменения: " + err);
+      } finally {
+        topBtn.disabled = false;
+        topBtn.innerHTML = origHtml;
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    // Lightbox for Photo Stories
+    function openPhotoStory(index) {
+      const story = photoStories[index] || photoStories[0];
+      const isHe = (currentLang === 'he');
+      const modal = document.getElementById("photo-story-modal");
+      const card = document.getElementById("photo-story-card");
+      document.getElementById("modal-photo-img").src = story.image;
+      document.getElementById("modal-photo-title").textContent = isHe ? story.title_he : story.title_ru;
+      document.getElementById("modal-photo-desc").textContent = isHe ? story.story_he : story.story_ru;
+      document.getElementById("modal-badge-text").textContent = isHe ? "זיכרון של נזר וסופיה" : "Воспоминание Назара и Софии";
+
+      modal.classList.remove("opacity-0", "pointer-events-none");
+      modal.classList.add("opacity-100", "pointer-events-auto");
+      card.classList.remove("scale-95");
+      card.classList.add("scale-100");
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closePhotoStory() {
+      const modal = document.getElementById("photo-story-modal");
+      const card = document.getElementById("photo-story-card");
+      modal.classList.remove("opacity-100", "pointer-events-auto");
+      modal.classList.add("opacity-0", "pointer-events-none");
+      card.classList.remove("scale-100");
+      card.classList.add("scale-95");
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closePhotoStory();
+    });
+
+    // Countdown Timer
+    function startCountdown() {
+      function update() {
+        const now = new Date().getTime();
+        const distance = weddingTargetDate - now;
+        if (distance < 0) {
+          ["days", "hours", "minutes", "seconds"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = "00";
+          });
+          return;
+        }
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        document.getElementById("days").innerText = String(days).padStart(2, '0');
+        document.getElementById("hours").innerText = String(hours).padStart(2, '0');
+        document.getElementById("minutes").innerText = String(minutes).padStart(2, '0');
+        document.getElementById("seconds").innerText = String(seconds).padStart(2, '0');
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    // Music Player
+    function toggleMusic() {
+      const audio = document.getElementById("wedding-audio");
+      if (!audio) return;
+      if (isMusicPlaying || !audio.paused) {
+        audio.pause();
+        isMusicPlaying = false;
+        updateMusicUI(false);
+      } else {
+        audio.volume = 0.75;
+        audio.play().then(() => {
+          isMusicPlaying = true;
+          updateMusicUI(true);
+        }).catch(() => {});
+      }
+    }
+
+    function updateMusicUI(playing) {
+      const vinyl = document.getElementById("vinyl-icon");
+      const eq = document.getElementById("music-eq");
+      const text = document.getElementById("music-status-text");
+      const isHe = (currentLang === 'he');
+      if (playing) {
+        if (vinyl) vinyl.classList.add("animate-spin-slow");
+        if (eq) { eq.classList.remove("hidden"); eq.classList.add("flex"); }
+        if (text) text.textContent = isHe ? "עצור מוזיקה ⏸" : "Остановить музыку ⏸";
+      } else {
+        if (vinyl) vinyl.classList.remove("animate-spin-slow");
+        if (eq) { eq.classList.add("hidden"); eq.classList.remove("flex"); }
+        if (text) text.textContent = isHe ? "נגן מוזיקה ▶️" : "Включить музыку ▶️";
+      }
+    }
+
+    function copyBitNumber() {
+      const phone = document.getElementById("bit-phone-display").textContent.trim();
+      const btnText = document.getElementById("btn-copy-bit-text");
+      navigator.clipboard.writeText(phone).then(() => {
+        const dict = translations[currentLang];
+        btnText.textContent = dict.bit_copied || "Номер скопирован! ✓";
+        setTimeout(() => {
+          btnText.textContent = dict.bit_copy_btn || "Скопировать номер";
+        }, 2500);
+      }).catch(() => {});
+    }
+
+    // Guests & Stats
+    function toggleGuestsModal(scrollToSection) {
+      if (scrollToSection) {
+        const rsvpEl = document.getElementById("rsvp");
+        if (rsvpEl) rsvpEl.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+
     function renderStats(stats) {
-      document.getElementById("stat-total-responses").textContent = stats.total_responses || 0;
+      const total = stats.total_responses || 0;
+      document.getElementById("stat-total-responses").textContent = total;
+      document.getElementById("header-guests-badge").textContent = total;
       document.getElementById("stat-total-people").textContent = stats.total_people_attending || 0;
       document.getElementById("stat-attending-responses").textContent = stats.attending_responses || 0;
       document.getElementById("stat-declined-responses").textContent = stats.declined_responses || 0;
@@ -534,9 +1439,9 @@
       ['all', 'attending', 'declined'].forEach(f => {
         const btn = document.getElementById(`btn-filter-${f}`);
         if (f === type) {
-          btn.className = "px-4 py-2 text-xs font-semibold rounded-xl bg-stone-900 text-white transition-all";
+          btn.className = "px-4 py-2 text-xs font-semibold rounded-full bg-stone-900 text-white transition-all";
         } else {
-          btn.className = "px-4 py-2 text-xs font-semibold rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all";
+          btn.className = "px-4 py-2 text-xs font-semibold rounded-full bg-[#FAF7F2] text-stone-700 border border-[#E8DFC9] hover:bg-[#F4EFE6] transition-all";
         }
       });
       renderTable();
@@ -554,23 +1459,19 @@
 
       const filtered = allRSVPs.filter(item => {
         const matchFilter = currentFilter === 'all' || item.attendance === currentFilter;
-        const matchSearch = !search || 
-          `${item.first_name} ${item.last_name}`.toLowerCase().includes(search) || 
+        const matchSearch = !search ||
+          `${item.first_name} ${item.last_name}`.toLowerCase().includes(search) ||
           (item.phone && item.phone.includes(search));
         return matchFilter && matchSearch;
       });
 
-      if (filtered.length === 0) {
-        empty.classList.remove("hidden");
-      } else {
-        empty.classList.add("hidden");
-      }
+      empty.classList.toggle("hidden", filtered.length > 0);
 
       filtered.forEach(r => {
         const isAttending = r.attendance === 'attending';
         const tr = document.createElement("tr");
-        tr.className = "hover:bg-stone-50/80 transition-colors";
-        const cleanPhone = r.phone.replace(/[^0-9]/g, '');
+        tr.className = "hover:bg-[#FAF7F2]/80 transition-colors";
+        const cleanPhone = (r.phone || "").replace(/[^0-9]/g, '');
 
         tr.innerHTML = `
           <td class="py-3 px-4 font-semibold text-stone-900">
@@ -578,11 +1479,11 @@
             <div class="text-[10px] text-stone-400 font-normal uppercase">${r.language === 'he' ? '🇮🇱 עברית' : '🇷🇺 Русский'}</div>
           </td>
           <td class="py-3 px-4 font-mono text-xs">
-            <a href="tel:${r.phone}" class="hover:underline text-stone-800">${escapeHtml(r.phone)}</a>
+            <a href="tel:${escapeHtml(r.phone)}" class="hover:underline text-stone-800">${escapeHtml(r.phone)}</a>
             <a href="https://wa.me/${cleanPhone}" target="_blank" class="text-emerald-600 text-[10px] block hover:underline">WhatsApp</a>
           </td>
           <td class="py-3 px-4">
-            ${isAttending 
+            ${isAttending
               ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">🎉 Придет</span>`
               : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700">💔 Не сможет</span>`
             }
@@ -597,7 +1498,7 @@
             ${r.created_at || ''}
           </td>
           <td class="py-3 px-4 text-right">
-            <button onclick="deleteSingleGuest(${r.id})" class="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Удалить ответ">
+            <button type="button" onclick="deleteSingleGuest(${r.id})" class="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Удалить ответ">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </td>
@@ -635,6 +1536,15 @@
         });
         if (res.ok) {
           allRSVPs = allRSVPs.filter(x => x.id !== id);
+          const attending = allRSVPs.filter(x => x.attendance === 'attending');
+          const declined = allRSVPs.filter(x => x.attendance !== 'attending');
+          const totalPeople = attending.reduce((acc, x) => acc + (x.guests_count || 1), 0);
+          renderStats({
+            total_responses: allRSVPs.length,
+            attending_responses: attending.length,
+            declined_responses: declined.length,
+            total_people_attending: totalPeople
+          });
           renderTable();
         }
       } catch (err) {
@@ -642,178 +1552,16 @@
       }
     }
 
-    // CMS & Photos Logic
-    function populateCMSForm(cfg) {
-      if (!cfg) return;
-      const w = cfg.wedding || {};
-      const p = cfg.photos || {};
-
-      document.getElementById("cms-groom-ru").value = w.groom_ru || w.groom || "Назар";
-      document.getElementById("cms-groom-he").value = w.groom_he || "נזר";
-      document.getElementById("cms-bride-ru").value = w.bride_ru || w.bride || "София";
-      document.getElementById("cms-bride-he").value = w.bride_he || "סופיה";
-
-      if (w.date) {
-        document.getElementById("cms-date").value = w.date.slice(0, 16);
-      }
-
-      document.getElementById("cms-venue-ru").value = w.venue_name_ru || "";
-      document.getElementById("cms-venue-he").value = w.venue_name_he || "";
-      document.getElementById("cms-city-ru").value = w.venue_city_ru || "";
-      document.getElementById("cms-city-he").value = w.venue_city_he || "";
-
-      document.getElementById("cms-waze").value = w.waze_link || "";
-      document.getElementById("cms-maps").value = w.google_maps_link || "";
-
-      document.getElementById("cms-bit-phone").value = w.bit_phone || "";
-      document.getElementById("cms-bit-name").value = w.bit_name || "";
-
-      // Photos
-      const heroUrl = p.hero || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80";
-      document.getElementById("cms-photo-hero").value = heroUrl;
-      document.getElementById("preview-hero").src = heroUrl;
-
-      galleryPhotos = p.gallery || [];
-      renderGalleryCMS();
-    }
-
-    function updateHeroPreview(url) {
-      if (url) document.getElementById("preview-hero").src = url;
-    }
-
-    function renderGalleryCMS() {
-      const grid = document.getElementById("cms-gallery-grid");
-      grid.innerHTML = "";
-
-      galleryPhotos.forEach((url, idx) => {
-        const div = document.createElement("div");
-        div.className = "relative group rounded-xl overflow-hidden aspect-square border border-stone-200 shadow-sm";
-        div.innerHTML = `
-          <img src="${url}" class="w-full h-full object-cover">
-          <button type="button" onclick="removeGalleryPhoto(${idx})" class="absolute top-1 right-1 p-1 bg-stone-900/80 hover:bg-rose-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-            <i data-lucide="x" class="w-3.5 h-3.5"></i>
-          </button>
-        `;
-        grid.appendChild(div);
-      });
-
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function removeGalleryPhoto(idx) {
-      galleryPhotos.splice(idx, 1);
-      renderGalleryCMS();
-    }
-
-    // Upload photo from computer
-    async function uploadPhoto(input, target) {
-      const file = input.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const base64Data = e.target.result;
-        try {
-          const res = await fetch('/api/upload-photo', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${adminPass}`
-            },
-            body: JSON.stringify({ image: base64Data, filename: file.name })
-          });
-
-          const data = await res.json();
-          if (res.ok && data.url) {
-            if (target === 'hero') {
-              document.getElementById("cms-photo-hero").value = data.url;
-              document.getElementById("preview-hero").src = data.url;
-              document.getElementById("upload-status-hero").textContent = "✓ Фото загружено";
-            } else if (target === 'gallery') {
-              galleryPhotos.push(data.url);
-              renderGalleryCMS();
-            }
-          } else {
-            alert("Ошибка загрузки фото: " + (data.error || "Неизвестная ошибка"));
-          }
-        } catch (err) {
-          alert("Не удалось загрузить фото: " + err);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-
-    async function handleSaveCMS(e) {
-      e.preventDefault();
-      const btn = document.getElementById("btn-save-cms");
-      const originalText = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = `<span class="animate-spin mr-2">⏳</span> Сохранение...`;
-
-      const payload = {
-        wedding: {
-          groom_ru: document.getElementById("cms-groom-ru").value.trim(),
-          groom_he: document.getElementById("cms-groom-he").value.trim(),
-          bride_ru: document.getElementById("cms-bride-ru").value.trim(),
-          bride_he: document.getElementById("cms-bride-he").value.trim(),
-          date: document.getElementById("cms-date").value,
-          venue_name_ru: document.getElementById("cms-venue-ru").value.trim(),
-          venue_name_he: document.getElementById("cms-venue-he").value.trim(),
-          venue_city_ru: document.getElementById("cms-city-ru").value.trim(),
-          venue_city_he: document.getElementById("cms-city-he").value.trim(),
-          waze_link: document.getElementById("cms-waze").value.trim(),
-          google_maps_link: document.getElementById("cms-maps").value.trim(),
-          bit_phone: document.getElementById("cms-bit-phone").value.trim(),
-          bit_name: document.getElementById("cms-bit-name").value.trim()
-        },
-        photos: {
-          hero: document.getElementById("cms-photo-hero").value.trim(),
-          gallery: galleryPhotos
-        }
-      };
-
-      try {
-        const res = await fetch('/api/settings', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${adminPass}`
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (res.ok) {
-          alert("🎉 Изменения успешно сохранены! Гости сразу видят обновленный сайт.");
-        } else {
-          alert("Ошибка сохранения настроек.");
-        }
-      } catch (err) {
-        alert("Не удалось сохранить изменения: " + err);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-      }
-    }
-
+    // Telegram Modal
     function toggleTelegramModal(show) {
-      const modal = document.getElementById("telegram-modal");
-      if (show) modal.classList.remove("hidden");
-      else modal.classList.add("hidden");
+      document.getElementById("telegram-modal").classList.toggle("hidden", !show);
+      if (show && window.lucide) lucide.createIcons();
     }
 
     async function handleSaveTelegram(e) {
       e.preventDefault();
       const token = document.getElementById("tg-token").value.trim();
       const chatId = document.getElementById("tg-chat-id").value.trim();
-
-      const payload = {
-        telegram: {
-          enabled: true,
-          bot_token: token,
-          chat_id: chatId
-        }
-      };
-
       try {
         const res = await fetch('/api/settings', {
           method: 'POST',
@@ -821,7 +1569,9 @@
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${adminPass}`
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({
+            telegram: { enabled: true, bot_token: token, chat_id: chatId }
+          })
         });
         if (res.ok) {
           alert("Настройки Telegram успешно сохранены!");
@@ -842,7 +1592,7 @@
         });
         const data = await res.json();
         if (data.success) {
-          alert("🎉 Тестовое сообщение отправлено! Проверьте ваш Telegram на телефоне.");
+          alert("🎉 Тестовое сообщение отправлено! Проверьте ваш Telegram.");
         } else {
           alert("Не удалось отправить тестовое сообщение. Проверьте Bot Token и Chat ID.");
         }
@@ -856,7 +1606,7 @@
         const res = await fetch('/api/setup-webhook');
         const data = await res.json();
         if (res.ok && data.success) {
-          alert("🎉 Интерактивные команды и кнопки активированы! Проверьте ваш Telegram — бот прислал приветственное меню.");
+          alert("🎉 Интерактивные команды и кнопки активированы!");
           toggleTelegramModal(false);
         } else {
           alert("Ошибка активации: " + (data.error || "Проверьте токен бота"));
