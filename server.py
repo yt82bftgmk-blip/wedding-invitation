@@ -10,6 +10,7 @@ import json
 import sqlite3
 import base64
 import time
+import threading
 import urllib.request
 import urllib.parse
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -146,6 +147,139 @@ def send_telegram_notification(rsvp_data):
     return success_any
 
 
+def get_stats_message():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT attendance, guests_count FROM rsvps")
+        rows = cursor.fetchall()
+        conn.close()
+
+        total_responses = len(rows)
+        attending_responses = 0
+        declined_responses = 0
+        total_people = 0
+
+        for att, cnt in rows:
+            if att == 'attending':
+                attending_responses += 1
+                total_people += (cnt or 1)
+            else:
+                declined_responses += 1
+
+        lines = [
+            "📊 <b>Статистика гостей на данный момент:</b>",
+            "━━━━━━━━━━━━━━━━━━",
+            f"🎉 <b>Подтвердили (анкет):</b> {attending_responses}",
+            f"👥 <b>ВСЕГО ГОСТЕЙ ПРИДЕТ:</b> <b>{total_people} чел.</b>",
+            f"💔 <b>Не смогут прийти:</b> {declined_responses} чел.",
+            f"📨 <b>Всего ответов получено:</b> {total_responses}",
+            "━━━━━━━━━━━━━━━━━━",
+            f"⏰ <i>Обновлено: {datetime.now().strftime('%d.%m.%Y %H:%M')}</i>"
+        ]
+        return "\n".join(lines)
+    except Exception as e:
+        return f"Ошибка при получении статистики: {e}"
+
+
+def get_guest_list_message(attending=True):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        status = 'attending' if attending else 'declined'
+        cursor.execute("SELECT first_name, last_name, phone, guests_count, message FROM rsvps WHERE attendance = ? ORDER BY id ASC", (status,))
+        rows = cursor.fetchall()
+        conn.close()
+
+        if not rows:
+            if attending:
+                return "📋 <b>Список гостей пока пуст.</b>\nКогда гости заполнят анкету на сайте, они появятся здесь!"
+            else:
+                return "💔 <b>Пока никто не отказался!</b>\nВсе приглашённые планируют присутствовать! 🎉"
+
+        if attending:
+            total_people = sum(r[3] or 1 for r in rows)
+            lines = [
+                f"📋 <b>Список подтверждённых гостей</b>",
+                f"<i>(Анкет: {len(rows)}, Всего людей: {total_people})</i>",
+                "━━━━━━━━━━━━━━━━━━"
+            ]
+            for idx, r in enumerate(rows, 1):
+                f_name, l_name, phone, count, msg = r
+                count_str = f" (+{count-1})" if count and count > 1 else ""
+                lines.append(f"<b>{idx}. {f_name} {l_name}</b> — <b>{count or 1} чел.</b>{count_str}")
+                lines.append(f"   📞 <code>{phone}</code>")
+                if msg:
+                    lines.append(f"   💌 <i>«{msg}»</i>")
+                lines.append("")
+        else:
+            lines = [
+                f"💔 <b>Гости, которые не смогут прийти ({len(rows)} чел.):</b>",
+                "━━━━━━━━━━━━━━━━━━"
+            ]
+            for idx, r in enumerate(rows, 1):
+                f_name, l_name, phone, _, msg = r
+                lines.append(f"<b>{idx}. {f_name} {l_name}</b>")
+                lines.append(f"   📞 <code>{phone}</code>")
+                if msg:
+                    lines.append(f"   💌 <i>«{msg}»</i>")
+                lines.append("")
+
+        return "\n".join(lines)
+    except Exception as e:
+        return f"Ошибка при получении списка: {e}"
+
+
+def get_wishes_message():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT first_name, last_name, message, created_at FROM rsvps WHERE message IS NOT NULL AND TRIM(message) != '' ORDER BY id DESC LIMIT 15")
+        rows = cursor.fetchall()
+        conn.close()
+
+        if not rows:
+            return "💌 <b>Пока нет поздравлений.</b>\nКак только гости напишут тёплые слова, они появятся здесь!"
+
+        lines = [
+            f"💌 <b>Тёплые слова и поздравления от гостей:</b>",
+            "━━━━━━━━━━━━━━━━━━"
+        ]
+        for r in rows:
+            f_name, l_name, msg, date = r
+            lines.append(f"👤 <b>{f_name} {l_name}:</b>")
+            lines.append(f"<i>«{msg}»</i>\n")
+
+        return "\n".join(lines)
+    except Exception as e:
+        return f"Ошибка при получении поздравлений: {e}"
+
+
+def send_telegram_reply(bot_token, chat_id, text):
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "HTML",
+        "reply_markup": {
+            "keyboard": [
+                [{"text": "📊 Сколько придет"}, {"text": "📋 Список гостей"}],
+                [{"text": "💔 Кто не сможет"}, {"text": "💌 Поздравления"}]
+            ],
+            "resize_keyboard": True,
+            "is_persistent": True
+        }
+    }
+    try:
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            return True
+    except Exception as e:
+        print(f"Failed to send reply to {chat_id}: {e}")
+        return False
+
+
 class WeddingHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=PUBLIC_DIR, **kwargs)
@@ -182,6 +316,9 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         elif path == "/api/export-csv":
             self.handle_export_csv()
             return
+        elif path == "/api/setup-webhook":
+            self.handle_setup_webhook()
+            return
 
         super().do_GET()
 
@@ -200,6 +337,10 @@ class WeddingHandler(SimpleHTTPRequestHandler):
 
         if path == "/api/rsvp":
             self.handle_post_rsvp(payload)
+        elif path == "/api/telegram-webhook":
+            self.handle_telegram_webhook(payload)
+        elif path == "/api/setup-webhook":
+            self.handle_setup_webhook()
         elif path == "/api/settings":
             self.handle_save_settings(payload)
         elif path == "/api/upload-photo":
@@ -465,6 +606,97 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         success = send_telegram_notification(test_data)
         self.send_json({"success": success})
 
+    def handle_telegram_webhook(self, payload):
+        msg = payload.get("message") or payload.get("edited_message")
+        if not msg:
+            self.send_json({"ok": True})
+            return
+
+        chat = msg.get("chat", {})
+        chat_id = str(chat.get("id", ""))
+        text = (msg.get("text") or "").strip().lower()
+
+        cfg = load_config()
+        tg = cfg.get("telegram", {})
+        bot_token = tg.get("bot_token")
+        raw_allowed = tg.get("chat_id", "")
+
+        if isinstance(raw_allowed, list):
+            allowed_ids = [str(x).strip() for x in raw_allowed]
+        else:
+            allowed_ids = [x.strip() for x in str(raw_allowed).replace(",", " ").split() if x.strip()]
+
+        if not bot_token:
+            self.send_json({"ok": True})
+            return
+
+        # Security check: only Nazar and Sofia
+        if chat_id not in allowed_ids:
+            send_telegram_reply(bot_token, chat_id, "🔒 Этот бот приватный и предназначен только для жениха и невесты (Назара и Софии).")
+            self.send_json({"ok": True})
+            return
+
+        # Commands handling
+        if text in ["/start", "/help", "старт", "меню", "привет", "главная"]:
+            greeting = (
+                "💍 <b>Приветствуем, молодожёны!</b>\n\n"
+                "Я ваш свадебный бот-ассистент.\n"
+                "Вы можете просто нажимать кнопки внизу экрана или писать мне обычные вопросы:\n\n"
+                "• <b>«Сколько придет»</b> — покажет точный подсчет людей\n"
+                "• <b>«Список гостей»</b> — пришлет полный список подтвердивших с телефонами\n"
+                "• <b>«Кто не сможет»</b> — покажет тех, кто отклонил\n"
+                "• <b>«Поздравления»</b> — покажет все тёплые пожелания от гостей"
+            )
+            send_telegram_reply(bot_token, chat_id, greeting)
+        elif any(k in text for k in ["сколько", "статистик", "стата", "сколько людей", "/stats", "📊 сколько придет"]):
+            reply_text = get_stats_message()
+            send_telegram_reply(bot_token, chat_id, reply_text)
+        elif any(k in text for k in ["список", "кто придет", "/list", "гости", "📋 список гостей"]):
+            reply_text = get_guest_list_message(attending=True)
+            send_telegram_reply(bot_token, chat_id, reply_text)
+        elif any(k in text for k in ["отказал", "не сможет", "не придет", "/declined", "💔 кто не сможет"]):
+            reply_text = get_guest_list_message(attending=False)
+            send_telegram_reply(bot_token, chat_id, reply_text)
+        elif any(k in text for k in ["поздравлен", "пожелан", "слова", "💌 поздравления", "/wishes"]):
+            reply_text = get_wishes_message()
+            send_telegram_reply(bot_token, chat_id, reply_text)
+        else:
+            default_reply = (
+                "Я вас понял, но лучше нажмите одну из кнопок внизу меню 👇\n"
+                "или напишите <b>«Сколько придет»</b> или <b>«Список гостей»</b>!"
+            )
+            send_telegram_reply(bot_token, chat_id, default_reply)
+
+        self.send_json({"ok": True})
+
+    def handle_setup_webhook(self):
+        cfg = load_config()
+        tg = cfg.get("telegram", {})
+        bot_token = tg.get("bot_token")
+        if not bot_token:
+            self.send_json({"error": "No bot token configured"}, status=400)
+            return
+
+        webhook_url = "https://nazar-sofia-wedding.onrender.com/api/telegram-webhook"
+        set_url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url={urllib.parse.quote(webhook_url)}"
+        try:
+            req = urllib.request.Request(set_url)
+            with urllib.request.urlopen(req, timeout=5) as response:
+                res_body = json.loads(response.read().decode())
+                
+                # Send greeting with buttons to Nazar and Sofia
+                raw_allowed = tg.get("chat_id", "")
+                if isinstance(raw_allowed, list):
+                    chat_ids = [str(x).strip() for x in raw_allowed]
+                else:
+                    chat_ids = [x.strip() for x in str(raw_allowed).replace(",", " ").split() if x.strip()]
+                for cid in chat_ids:
+                    send_telegram_reply(bot_token, cid, "⚡ <b>Команды и кнопки активированы!</b>\nТеперь внизу экрана у вас есть кнопки для подсчёта гостей.")
+
+                self.send_json({"success": True, "telegram_response": res_body})
+        except Exception as e:
+            self.send_json({"error": str(e)}, status=500)
+
     def send_file(self, filepath, content_type):
         try:
             with open(filepath, "rb") as f:
@@ -489,8 +721,26 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
 
+def auto_setup_webhook():
+    time.sleep(3)
+    cfg = load_config()
+    tg = cfg.get("telegram", {})
+    bot_token = tg.get("bot_token")
+    if not bot_token:
+        return
+    webhook_url = "https://nazar-sofia-wedding.onrender.com/api/telegram-webhook"
+    set_url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url={urllib.parse.quote(webhook_url)}"
+    try:
+        req = urllib.request.Request(set_url)
+        with urllib.request.urlopen(req, timeout=5) as res:
+            print("Webhook registered on startup:", res.read().decode())
+    except Exception as e:
+        print("Auto webhook setup error:", e)
+
+
 def run_server():
     init_db()
+    threading.Thread(target=auto_setup_webhook, daemon=True).start()
     server_address = ("", PORT)
     httpd = HTTPServer(server_address, WeddingHandler)
     print(f"==================================================")

@@ -424,13 +424,21 @@
           <input type="text" id="tg-chat-id" placeholder="987654321" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs font-mono">
         </div>
 
-        <div class="pt-2 flex items-center gap-3">
-          <button type="submit" class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold transition-all">
+        <div class="pt-2 flex flex-col sm:flex-row items-center gap-3">
+          <button type="submit" class="w-full sm:flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold transition-all">
             Сохранить настройки
           </button>
-          <button type="button" onclick="testTelegram()" class="px-4 py-3 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-xl text-xs font-semibold transition-all">
+          <button type="button" onclick="testTelegram()" class="w-full sm:w-auto px-4 py-3 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-xl text-xs font-semibold transition-all">
             Отправить тест
           </button>
+        </div>
+
+        <div class="pt-3 border-t border-stone-100">
+          <button type="button" onclick="setupBotWebhook()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Активировать кнопки и команды в Telegram</span>
+          </button>
+          <p class="text-[11px] text-stone-400 text-center mt-1.5">Включает кнопки «Сколько придет» и «Список гостей» прямо в чате</p>
         </div>
       </form>
     </div>
@@ -840,6 +848,21 @@
         }
       } catch (err) {
         alert("Ошибка теста Telegram: " + err);
+      }
+    }
+
+    async function setupBotWebhook() {
+      try {
+        const res = await fetch('/api/setup-webhook');
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert("🎉 Интерактивные команды и кнопки активированы! Проверьте ваш Telegram — бот прислал приветственное меню.");
+          toggleTelegramModal(false);
+        } else {
+          alert("Ошибка активации: " + (data.error || "Проверьте токен бота"));
+        }
+      } catch (err) {
+        alert("Не удалось активировать команды: " + err);
       }
     }
 
