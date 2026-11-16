@@ -307,7 +307,7 @@
           <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="story_tag">Как всё начиналось</span>
           <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="story_title">Наша история</h2>
           <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
-          <p class="text-stone-500 text-sm max-w-md mx-auto">Каждый шаг приближал нас к этому счастливому дню</p>
+          <p class="text-stone-500 text-sm max-w-md mx-auto" data-i18n="story_subtitle">Каждый шаг приближал нас к этому счастливому дню</p>
         </div>
 
         <div class="space-y-12">
@@ -372,7 +372,7 @@
           <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="gallery_tag">Наши моменты</span>
           <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="gallery_title">Фотоальбом любви</h2>
           <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
-          <p class="text-stone-500 text-sm max-w-md mx-auto">Нажмите на фото, чтобы прочитать историю, или добавьте новые кадры</p>
+          <p class="text-stone-500 text-sm max-w-md mx-auto" data-i18n="gallery_subtitle">Нажмите на фото, чтобы прочитать историю, или добавьте новые кадры</p>
         </div>
 
         <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-4 gap-5">
@@ -396,7 +396,7 @@
               <i data-lucide="wine" class="w-6 h-6"></i>
             </div>
             <div>
-              <div class="text-xs font-bold text-champagne-gold tracking-wider">18:30</div>
+              <div class="text-xs font-bold text-champagne-gold tracking-wider" data-i18n="sched_1_time">18:30</div>
               <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_1_title">Сбор гостей & Фуршет</h3>
               <p class="text-stone-500 text-xs mt-1" data-i18n="sched_1_desc">Приветственные напитки, закуски и тёплые встречи</p>
             </div>
@@ -407,7 +407,7 @@
               <i data-lucide="heart-handshake" class="w-6 h-6"></i>
             </div>
             <div>
-              <div class="text-xs font-bold text-champagne-gold tracking-wider">19:30</div>
+              <div class="text-xs font-bold text-champagne-gold tracking-wider" data-i18n="sched_2_time">19:30</div>
               <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_2_title">Хупа / Церемония</h3>
               <p class="text-stone-500 text-xs mt-1" data-i18n="sched_2_desc">Торжественная церемония бракосочетания</p>
             </div>
@@ -418,7 +418,7 @@
               <i data-lucide="utensils" class="w-6 h-6"></i>
             </div>
             <div>
-              <div class="text-xs font-bold text-champagne-gold tracking-wider">20:15</div>
+              <div class="text-xs font-bold text-champagne-gold tracking-wider" data-i18n="sched_3_time">20:15</div>
               <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_3_title">Праздничный ужин</h3>
               <p class="text-stone-500 text-xs mt-1" data-i18n="sched_3_desc">Банкет, изысканные блюда и тосты за молодых</p>
             </div>
@@ -429,7 +429,7 @@
               <i data-lucide="music" class="w-6 h-6"></i>
             </div>
             <div>
-              <div class="text-xs font-bold text-champagne-gold tracking-wider">21:30</div>
+              <div class="text-xs font-bold text-champagne-gold tracking-wider" data-i18n="sched_4_time">21:30</div>
               <h3 class="font-serif text-lg font-bold text-stone-900" data-i18n="sched_4_title">Танцы и вечеринка</h3>
               <p class="text-stone-500 text-xs mt-1" data-i18n="sched_4_desc">Зажигательная музыка, свадебный торт и веселье</p>
             </div>
@@ -542,9 +542,9 @@
       <div class="max-w-5xl mx-auto space-y-10">
         <div class="text-center space-y-3">
           <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="rsvp_tag">Будем счастливы вас видеть</span>
-          <h2 class="font-serif text-4xl sm:text-5xl text-stone-900">Ответы гостей (RSVP)</h2>
+          <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="rsvp_title">Ответы гостей (RSVP)</h2>
           <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
-          <p class="text-stone-600 max-w-md mx-auto text-sm">
+          <p class="text-stone-600 max-w-md mx-auto text-sm" data-i18n="rsvp_desc">
             Живая статистика и список всех гостей, подтвердивших участие
           </p>
         </div>
@@ -673,8 +673,8 @@
       </div>
 
       <div class="space-y-2">
-        <h3 id="modal-photo-title" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900"></h3>
-        <p id="modal-photo-desc" class="text-stone-600 text-sm sm:text-base leading-relaxed"></p>
+        <h3 id="modal-photo-title" contenteditable="true" spellcheck="false" class="editable-field px-2 py-0.5 font-serif text-2xl sm:text-3xl font-bold text-stone-900" title="Нажмите, чтобы изменить заголовок истории"></h3>
+        <p id="modal-photo-desc" contenteditable="true" spellcheck="false" class="editable-field px-2 py-1 text-stone-600 text-sm sm:text-base leading-relaxed" title="Нажмите, чтобы изменить текст истории"></p>
       </div>
 
       <div class="pt-3 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-400">
@@ -752,6 +752,7 @@
         timer_seconds: "Секунд",
         story_tag: "Как всё начиналось",
         story_title: "Наша история",
+        story_subtitle: "Каждый шаг приближал нас к этому счастливому дню",
         story_event1_date: "2023 год",
         story_event1_title: "Первая встреча",
         story_event1_text: "Случайный разговор, который перевернул наши жизни. С первого взгляда стало ясно: впереди нас ждёт нечто невероятное.",
@@ -763,14 +764,19 @@
         story_event3_text: "Самый романтический вечер, трепетное биение сердец и самое главное слово, открывшее новую главу нашей семьи.",
         gallery_tag: "Наши моменты",
         gallery_title: "Фотоальбом любви",
+        gallery_subtitle: "Нажмите на фото, чтобы прочитать историю, или добавьте новые кадры",
         schedule_tag: "Торжественный день",
         schedule_title: "Программа свадьбы",
+        sched_1_time: "18:30",
         sched_1_title: "Сбор гостей & Фуршет",
         sched_1_desc: "Приветственные напитки, закуски и тёплые встречи",
+        sched_2_time: "19:30",
         sched_2_title: "Хупа / Церемония",
         sched_2_desc: "Торжественная церемония бракосочетания",
+        sched_3_time: "20:15",
         sched_3_title: "Праздничный ужин",
         sched_3_desc: "Банкет, изысканные блюда и тосты за молодых",
+        sched_4_time: "21:30",
         sched_4_title: "Танцы и вечеринка",
         sched_4_desc: "Зажигательная музыка, свадебный торт и веселье",
         location_tag: "Где нас найти",
@@ -785,6 +791,8 @@
         bit_copied: "Номер скопирован! ✓",
         bit_open_app: "Открыть Bit",
         rsvp_tag: "Будем счастливы вас видеть",
+        rsvp_title: "Ответы гостей (RSVP)",
+        rsvp_desc: "Живая статистика и список всех гостей, подтвердивших участие",
         footer_love: "С любовью и благодарностью к каждому гостю ❤️"
       },
       he: {
@@ -798,6 +806,7 @@
         timer_seconds: "שניות",
         story_tag: "איך הכל התחיל",
         story_title: "הסיפור שלנו",
+        story_subtitle: "כל צעד קירב אותנו ליום המאושר הזה",
         story_event1_date: "שנת 2023",
         story_event1_title: "המפגש הראשון",
         story_event1_text: "שיחה מקרית אחת ששינתה את חיינו לחלוטין. מהמבט הראשון היה ברור שזהו תחילתו של סיפור אהבה מיוחד.",
@@ -809,14 +818,19 @@
         story_event3_text: "ערב רומנטי ומרגש במיוחד, פעימות לב מואצות והמילה המיוחלת שפתחה את הפרק המרגש ביותר בחיינו.",
         gallery_tag: "רגעים שלנו",
         gallery_title: "גלריית תמונות",
+        gallery_subtitle: "לחצו על תמונה כדי לקרוא את הסיפור, או הוסיפו תמונות חדשות",
         schedule_tag: "היום המאושר",
         schedule_title: "לוח זמנים לחתונה",
+        sched_1_time: "18:30",
         sched_1_title: "קבלת פנים",
         sched_1_desc: "מינגלינג, משקאות ונשנושים מפנקים",
+        sched_2_time: "19:30",
         sched_2_title: "חופה וקידושין",
         sched_2_desc: "הטקס המרגש מתחת לחופה",
+        sched_3_time: "20:15",
         sched_3_title: "סעודת חתונה",
         sched_3_desc: "ארוחת ערב חגיגית, מנות שף והרמת כוסית",
+        sched_4_time: "21:30",
         sched_4_title: "מסיבה וריקודים",
         sched_4_desc: "מוזיקה מעולה, עוגת חתונה וריקודים עד השעות הקטנות",
         location_tag: "איפה נפגשים",
@@ -831,6 +845,8 @@
         bit_copied: "המספר הועתק! ✓",
         bit_open_app: "פתח ב-Bit",
         rsvp_tag: "נשמח מאוד לראותכם",
+        rsvp_title: "אישורי הגעה (RSVP)",
+        rsvp_desc: "סטטיסטיקה חיה ורשימת כל האורחים שאישרו הגעה",
         footer_love: "באהבה והערכה רבה לכל אחד ואחת מכם ❤️"
       }
     };
@@ -899,9 +915,10 @@
     let allRSVPs = [];
     let currentFilter = 'all';
     let editableConfig = {
-      wedding: {},
-      photos: { hero: "", gallery: [] }
+      wedding: { texts: { ru: {}, he: {} } },
+      photos: { hero: "", gallery: [], stories: [] }
     };
+    let activeStoryIndex = 0;
     let weddingTargetDate = new Date("2027-09-15T18:00:00").getTime();
     let hasUnsavedChanges = false;
     let isMusicPlaying = false;
@@ -967,6 +984,89 @@
           markDirty();
         });
       });
+
+      setupAllEditableTexts();
+      setupStoryModalEditors();
+    }
+
+    function setupAllEditableTexts() {
+      const darkParents = ['.bg-stone-900', '.bg-gradient-to-br', '.bg-bit-blue'];
+      document.querySelectorAll('#admin-app [data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (!key) return;
+
+        el.setAttribute('contenteditable', 'true');
+        el.setAttribute('spellcheck', 'false');
+        el.setAttribute('title', 'Нажмите, чтобы редактировать текст');
+
+        const isDark = darkParents.some(sel => el.closest(sel)) || el.closest('#btn-waze') || el.closest('#btn-maps');
+        el.classList.add(isDark ? 'editable-field-dark' : 'editable-field', 'px-1');
+
+        if (el.closest('a') || el.closest('button')) {
+          el.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          });
+        }
+
+        const isMultiline = ['hero_subtitle', 'story_subtitle', 'gallery_subtitle', 'gift_description', 'rsvp_desc'].includes(key) || key.endsWith('_text') || key.endsWith('_desc');
+        if (!isMultiline) {
+          el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              el.blur();
+            }
+          });
+        }
+
+        el.addEventListener('input', () => {
+          const val = el.textContent.trim();
+          translations[currentLang][key] = val;
+          if (!editableConfig.wedding.texts) editableConfig.wedding.texts = { ru: {}, he: {} };
+          if (!editableConfig.wedding.texts[currentLang]) editableConfig.wedding.texts[currentLang] = {};
+          editableConfig.wedding.texts[currentLang][key] = val;
+          markDirty();
+        });
+      });
+    }
+
+    function setupStoryModalEditors() {
+      const titleEl = document.getElementById('modal-photo-title');
+      const descEl = document.getElementById('modal-photo-desc');
+      if (titleEl) {
+        titleEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }
+        });
+        titleEl.addEventListener('input', () => {
+          const st = photoStories[activeStoryIndex];
+          if (!st) return;
+          const field = currentLang === 'he' ? 'title_he' : 'title_ru';
+          st[field] = titleEl.textContent.trim();
+          syncStoriesToConfig();
+          renderGallery();
+          markDirty();
+        });
+      }
+      if (descEl) {
+        descEl.addEventListener('input', () => {
+          const st = photoStories[activeStoryIndex];
+          if (!st) return;
+          const field = currentLang === 'he' ? 'story_he' : 'story_ru';
+          st[field] = descEl.textContent.trim();
+          syncStoriesToConfig();
+          markDirty();
+        });
+      }
+    }
+
+    function syncStoriesToConfig() {
+      editableConfig.photos.stories = photoStories.map(s => ({
+        image: s.image,
+        title_ru: s.title_ru,
+        title_he: s.title_he,
+        story_ru: s.story_ru,
+        story_he: s.story_he
+      }));
     }
 
     function updateFooterNames() {
@@ -1014,18 +1114,32 @@
         renderTable();
 
         const cfg = data.config || {};
-        editableConfig.wedding = Object.assign({}, cfg.wedding || {});
+        editableConfig.wedding = Object.assign({ texts: { ru: {}, he: {} } }, cfg.wedding || {});
+        if (!editableConfig.wedding.texts) editableConfig.wedding.texts = { ru: {}, he: {} };
+        ['ru', 'he'].forEach(l => {
+          if (editableConfig.wedding.texts[l]) {
+            Object.assign(translations[l], editableConfig.wedding.texts[l]);
+          }
+        });
+
         editableConfig.photos = {
           hero: (cfg.photos && cfg.photos.hero) || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-          gallery: Array.isArray(cfg.photos && cfg.photos.gallery) ? [...cfg.photos.gallery] : []
+          gallery: Array.isArray(cfg.photos && cfg.photos.gallery) ? [...cfg.photos.gallery] : [],
+          stories: Array.isArray(cfg.photos && cfg.photos.stories) ? cfg.photos.stories : []
         };
+        editableConfig.photos.stories.forEach((customStory, idx) => {
+          if (customStory && photoStories[idx]) {
+            Object.assign(photoStories[idx], customStory);
+          } else if (customStory) {
+            photoStories[idx] = customStory;
+          }
+        });
 
         if (cfg.telegram) {
           document.getElementById("tg-chat-id").value = cfg.telegram.chat_id || "";
         }
 
-        applyConfigToPage();
-        renderGallery();
+        setLanguage(currentLang);
         if (window.lucide) lucide.createIcons();
       } catch (err) {
         console.error("Failed to load admin data:", err);
@@ -1215,8 +1329,20 @@
               <span>${isHe ? 'הסיפור שלנו' : 'Читать историю'}</span>
             </div>
           </div>
-          <div class="font-handwritten text-center text-stone-700 text-lg">${cap}</div>
+          <div contenteditable="true" spellcheck="false" data-story-cap="${idx}" class="editable-field font-handwritten text-center text-stone-700 text-lg px-1" title="Нажмите, чтобы изменить подпись">${cap}</div>
         `;
+        const capEl = card.querySelector(`[data-story-cap="${idx}"]`);
+        if (capEl) {
+          capEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); capEl.blur(); }
+          });
+          capEl.addEventListener('input', () => {
+            const clean = capEl.textContent.replace(/^[«"]|[»"]$/g, '').trim();
+            st[isHe ? 'title_he' : 'title_ru'] = clean;
+            syncStoriesToConfig();
+            markDirty();
+          });
+        }
         container.appendChild(card);
       });
 
@@ -1318,6 +1444,7 @@
 
     // Lightbox for Photo Stories
     function openPhotoStory(index) {
+      activeStoryIndex = index;
       const story = photoStories[index] || photoStories[0];
       const isHe = (currentLang === 'he');
       const modal = document.getElementById("photo-story-modal");

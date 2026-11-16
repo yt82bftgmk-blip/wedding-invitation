@@ -15,6 +15,7 @@ const translations = {
 
     story_tag: "Как всё начиналось",
     story_title: "Наша история",
+    story_subtitle: "Каждый шаг приближал нас к этому счастливому дню",
     story_event1_date: "2023 год",
     story_event1_title: "Первая встреча",
     story_event1_text: "Случайный разговор, который перевернул наши жизни. С первого взгляда стало ясно: впереди нас ждёт нечто невероятное.",
@@ -27,15 +28,20 @@ const translations = {
 
     gallery_tag: "Наши моменты",
     gallery_title: "Фотогалерея",
+    gallery_subtitle: "Тёплые кадры наших счастливых дней",
 
     schedule_tag: "Торжественный день",
     schedule_title: "Программа свадьбы",
+    sched_1_time: "18:30",
     sched_1_title: "Сбор гостей & Фуршет",
     sched_1_desc: "Приветственные напитки, закуски и тёплые встречи",
+    sched_2_time: "19:30",
     sched_2_title: "Хупа / Церемония",
     sched_2_desc: "Торжественная церемония бракосочетания",
+    sched_3_time: "20:15",
     sched_3_title: "Праздничный ужин",
     sched_3_desc: "Банкет, изысканные блюда и тосты за молодых",
+    sched_4_time: "21:30",
     sched_4_title: "Танцы и вечеринка",
     sched_4_desc: "Зажигательная музыка, свадебный торт и веселье",
 
@@ -95,6 +101,7 @@ const translations = {
 
     story_tag: "איך הכל התחיל",
     story_title: "הסיפור שלנו",
+    story_subtitle: "כל צעד קירב אותנו ליום המאושר הזה",
     story_event1_date: "שנת 2023",
     story_event1_title: "המפגש הראשון",
     story_event1_text: "שיחה מקרית אחת ששינתה את חיינו לחלוטין. מהמבט הראשון היה ברור שזהו תחילתו של סיפור אהבה מיוחד.",
@@ -107,15 +114,20 @@ const translations = {
 
     gallery_tag: "רגעים שלנו",
     gallery_title: "גלריית תמונות",
+    gallery_subtitle: "רגעים חמים מהימים המאושרים שלנו",
 
     schedule_tag: "היום המאושר",
     schedule_title: "לוח זמנים לחתונה",
+    sched_1_time: "18:30",
     sched_1_title: "קבלת פנים",
     sched_1_desc: "מינגלינג, משקאות ונשנושים מפנקים",
+    sched_2_time: "19:30",
     sched_2_title: "חופה וקידושין",
     sched_2_desc: "הטקס המרגש מתחת לחופה",
+    sched_3_time: "20:15",
     sched_3_title: "סעודת חתונה",
     sched_3_desc: "ארוחת ערב חגיגית, מנות שף והרמת כוסית",
+    sched_4_time: "21:30",
     sched_4_title: "מסיבה וריקודים",
     sched_4_desc: "מוזיקה מעולה, עוגת חתונה וריקודים עד השעות הקטנות",
 
@@ -360,10 +372,27 @@ async function fetchConfig() {
       const data = await res.json();
       weddingConfig = data.wedding;
       weddingPhotos = data.photos;
+      if (weddingConfig && weddingConfig.texts) {
+        ['ru', 'he'].forEach(lang => {
+          if (weddingConfig.texts[lang]) {
+            Object.assign(translations[lang], weddingConfig.texts[lang]);
+          }
+        });
+      }
+      if (weddingPhotos && Array.isArray(weddingPhotos.stories)) {
+        weddingPhotos.stories.forEach((customStory, idx) => {
+          if (customStory && photoStories[idx]) {
+            Object.assign(photoStories[idx], customStory);
+          } else if (customStory) {
+            photoStories[idx] = customStory;
+          }
+        });
+      }
       if (weddingConfig && weddingConfig.date) {
         weddingTargetDate = new Date(weddingConfig.date).getTime();
         formatDisplayDate(weddingConfig.date);
       }
+      setLanguage(currentLang);
       applyConfig();
       applyPhotos();
     }
