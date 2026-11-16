@@ -172,7 +172,64 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   fetchConfig();
   startCountdown();
+  initMusicAutoPlay();
 });
+
+let isMusicPlaying = false;
+
+function toggleMusic() {
+  const audio = document.getElementById("wedding-audio");
+  const vinyl = document.getElementById("vinyl-icon");
+  const eq = document.getElementById("music-eq");
+  const text = document.getElementById("music-status-text");
+  const isHe = (currentLang === 'he');
+
+  if (!audio) return;
+
+  if (isMusicPlaying) {
+    audio.pause();
+    isMusicPlaying = false;
+    if (vinyl) vinyl.classList.remove("animate-spin-slow");
+    if (eq) { eq.classList.add("hidden"); eq.classList.remove("flex"); }
+    if (text) text.textContent = isHe ? "נגן מוזיקה 🎵" : "Включить музыку 🎵";
+  } else {
+    audio.play().then(() => {
+      isMusicPlaying = true;
+      if (vinyl) vinyl.classList.add("animate-spin-slow");
+      if (eq) { eq.classList.remove("hidden"); eq.classList.add("flex"); }
+      if (text) text.textContent = isHe ? "מנגן עכשיו 🎶" : "Играет мелодия 🎶";
+    }).catch(err => {
+      console.log("Audio play error:", err);
+    });
+  }
+}
+
+function initMusicAutoPlay() {
+  const audio = document.getElementById("wedding-audio");
+  if (!audio) return;
+
+  const startOnInteraction = () => {
+    if (!isMusicPlaying) {
+      audio.play().then(() => {
+        isMusicPlaying = true;
+        const vinyl = document.getElementById("vinyl-icon");
+        const eq = document.getElementById("music-eq");
+        const text = document.getElementById("music-status-text");
+        const isHe = (currentLang === 'he');
+        if (vinyl) vinyl.classList.add("animate-spin-slow");
+        if (eq) { eq.classList.remove("hidden"); eq.classList.add("flex"); }
+        if (text) text.textContent = isHe ? "מנגן עכשיו 🎶" : "Играет мелодия 🎶";
+      }).catch(() => {});
+    }
+    window.removeEventListener('click', startOnInteraction);
+    window.removeEventListener('touchstart', startOnInteraction);
+    window.removeEventListener('scroll', startOnInteraction);
+  };
+
+  window.addEventListener('click', startOnInteraction, { once: true });
+  window.addEventListener('touchstart', startOnInteraction, { once: true });
+  window.addEventListener('scroll', startOnInteraction, { once: true });
+}
 
 async function fetchConfig() {
   try {
@@ -233,22 +290,37 @@ function applyPhotos() {
 }
 
 function galleryPhotosToColumns(photos, container) {
-  // Distribute photos into 4 columns for masonry look
-  const colCount = window.innerWidth >= 768 ? 4 : 2;
-  const cols = [];
-  for (let i = 0; i < colCount; i++) {
-    const col = document.createElement("div");
-    col.className = "space-y-4";
-    container.appendChild(col);
-    cols.push(col);
-  }
+  const captions = [
+    "«В лучах заката»",
+    "«Счастье вдвоём»",
+    "«Самый тёплый день»",
+    "«Навсегда вместе»",
+    "«Улыбка и нежность»",
+    "«Наше маленькое чудо»",
+    "«Момент искренней радости»",
+    "«Только ты и я»"
+  ];
+  const captionsHe = [
+    "«בשקיעה יפהפייה»",
+    "«אושר ביחד»",
+    "«היום הכי מאושר»",
+    "«לתמיד ביחד»",
+    "«חיוך ואהבה»",
+    "«הקסם שלנו»",
+    "«רגע של שמחה»",
+    "«רק אני ואת»"
+  ];
+  const isHe = (currentLang === 'he');
 
   photos.forEach((src, idx) => {
-    const img = document.createElement("img");
-    img.src = src;
-    img.alt = "Wedding Moment";
-    img.className = (idx % 2 === 0 ? "w-full h-64" : "w-full h-44") + " object-cover rounded-2xl shadow-sm hover:opacity-95 transition-all";
-    cols[idx % colCount].appendChild(img);
+    const card = document.createElement("div");
+    card.className = "photo-story-card bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2";
+    const cap = isHe ? (captionsHe[idx % captionsHe.length]) : (captions[idx % captions.length]);
+    card.innerHTML = `
+      <img src="${src}" alt="Wedding Moment" class="w-full h-56 object-cover rounded-xl">
+      <div class="font-handwritten text-center text-stone-600 text-base">${cap}</div>
+    `;
+    container.appendChild(card);
   });
 }
 
