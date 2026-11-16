@@ -176,16 +176,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let isMusicPlaying = false;
+let userPausedMusic = false;
 
 function toggleMusic() {
   const audio = document.getElementById("wedding-audio");
   if (!audio) return;
 
-  if (isMusicPlaying) {
+  if (isMusicPlaying || !audio.paused) {
     audio.pause();
     isMusicPlaying = false;
+    userPausedMusic = true;
     updateMusicUI(false);
   } else {
+    userPausedMusic = false;
     audio.play().then(() => {
       isMusicPlaying = true;
       updateMusicUI(true);
@@ -204,71 +207,108 @@ function updateMusicUI(playing) {
   if (playing) {
     if (vinyl) vinyl.classList.add("animate-spin-slow");
     if (eq) { eq.classList.remove("hidden"); eq.classList.add("flex"); }
-    if (text) text.textContent = isHe ? "מנגן עכשיו 🎶" : "Играет мелодия 🎶";
+    if (text) text.textContent = isHe ? "עצור מוזיקה ⏸" : "Остановить музыку ⏸";
   } else {
     if (vinyl) vinyl.classList.remove("animate-spin-slow");
     if (eq) { eq.classList.add("hidden"); eq.classList.remove("flex"); }
-    if (text) text.textContent = isHe ? "נגן מוזיקה 🎵" : "Включить музыку 🎵";
+    if (text) text.textContent = isHe ? "נגן מוזיקה ▶️" : "Включить музыку ▶️";
   }
 }
 
 function initMusicAutoPlay() {
   const audio = document.getElementById("wedding-audio");
   if (!audio) return;
+  audio.volume = 0.75;
 
-  // Immediate attempt to play
+  const unlockEvents = ['click', 'touchstart', 'touchend', 'pointerdown', 'pointerup', 'keydown'];
+
+  const startOnInteraction = (e) => {
+    if (userPausedMusic || isMusicPlaying) return;
+    // Ignore clicks on the music toggle button itself (toggleMusic handles it)
+    if (e && e.target && e.target.closest && e.target.closest('#btn-toggle-music')) return;
+
+    audio.play().then(() => {
+      isMusicPlaying = true;
+      updateMusicUI(true);
+      unlockEvents.forEach(ev => {
+        document.removeEventListener(ev, startOnInteraction, true);
+        window.removeEventListener(ev, startOnInteraction, true);
+      });
+    }).catch(() => {
+      // Keep listeners active until a valid user gesture unlocks audio
+    });
+  };
+
+  // Try immediate autoplay right away
   audio.play().then(() => {
     isMusicPlaying = true;
     updateMusicUI(true);
   }).catch(() => {
-    // If browser autoplay policy requires user gesture, start on first touch/scroll/click
-    const startOnInteraction = () => {
-      if (!isMusicPlaying) {
-        audio.play().then(() => {
-          isMusicPlaying = true;
-          updateMusicUI(true);
-        }).catch(() => {});
-      }
-      ['click', 'touchstart', 'scroll', 'pointerdown', 'keydown'].forEach(ev => {
-        window.removeEventListener(ev, startOnInteraction);
-      });
-    };
-
-    ['click', 'touchstart', 'scroll', 'pointerdown', 'keydown'].forEach(ev => {
-      window.addEventListener(ev, startOnInteraction, { once: true, passive: true });
+    updateMusicUI(false);
+    unlockEvents.forEach(ev => {
+      document.addEventListener(ev, startOnInteraction, { capture: true, passive: true });
+      window.addEventListener(ev, startOnInteraction, { capture: true, passive: true });
     });
   });
 }
 
-// Photo Stories Dataset & Lightbox Logic
+// Photo Stories Dataset & Lightbox Logic (8 full stories)
 const photoStories = [
   {
-    image: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80",
-    title_ru: "Наше маленькое чудо",
-    title_he: "הנס הקטן שלנו",
-    story_ru: "Этот день стал для нас особенным воспоминанием. Мы гуляли по набережной, смеялись над каждой мелочью и именно тогда поняли, что наше счастье — в том, чтобы просто быть рядом друг с другом.",
-    story_he: "היום הזה הפך לזיכרון מתוק ומיוחד עבורנו. טיילנו יחד, צחקנו מכל הלב והבנו שהאושר האמיתי הוא פשוט להיות אחד לצד השנייה."
-  },
-  {
-    image: "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
     title_ru: "В лучах заката",
     title_he: "בשקיעה יפהפייה",
     story_ru: "Незабываемый тёплый вечер, когда солнце медленно опускалось за горизонт. Мы говорили обо всём на свете и пообещали себе встречать вместе ещё тысячи таких закатов.",
     story_he: "ערב חמים ובלתי נשכח מול שקיעה עוצרת נשימה. שוחחנו על העתיד והבטחנו לעצמנו לפגוש עוד אינספור שקיעות יחד."
   },
   {
-    image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80",
     title_ru: "Счастье вдвоём",
     title_he: "אושר ביחד",
     story_ru: "Кадры, которые не требуют лишних слов. Когда внутри тепло и спокойно, а впереди — целая совместная жизнь, полная любви, заботы и взаимной поддержки.",
     story_he: "רגעים שלא צריכים מילים. כשיש שלווה עמוקה בלב וידיעה ברורה שלפנינו חיים שלמים של אהבה וחלומות משותפים."
   },
   {
-    image: "https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=800&q=80",
+    title_ru: "Самый тёплый день",
+    title_he: "היום הכי מאושר",
+    story_ru: "День, когда весь мир вокруг словно замер. Мы просто держались за руки и знали, что впереди нас ждёт целая жизнь, полная путешествий и общих побед.",
+    story_he: "יום שבו כל העולם שמסביב נעצר. פשוט החזקנו ידיים וידענו שמחכים לנו חיים שלמים של אהבה ומסעות משותפים."
+  },
+  {
+    image: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80",
     title_ru: "Навсегда вместе",
     title_he: "לתמיד ביחד",
     story_ru: "Самый искренний взгляд и обещание любить, беречь и поддерживать друг друга в любой ситуации. Это начало нашей красивой и крепкой семейной истории.",
     story_he: "מבט של אהבה כנה והבטחה לתמוך, לחבק ולצמוח יחד בכל שלב בדרך. ההתחלה של המשפחה החדשה שלנו."
+  },
+  {
+    image: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80",
+    title_ru: "Улыбка и нежность",
+    title_he: "חיוך ואהבה",
+    story_ru: "Каждая улыбка рядом с тобой наполняет день светом. В таких простых и нежных мгновениях рождается настоящая, глубокая привязанность.",
+    story_he: "כל חיוך לצידך ממלא את היום באור. ברגעים הפשוטים והעדינים האלה נולדת אהבה אמיתית ועמוקה."
+  },
+  {
+    image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+    title_ru: "Наше маленькое чудо",
+    title_he: "הנס הקטן שלנו",
+    story_ru: "Этот день стал для нас особенным воспоминанием. Мы гуляли, смеялись над каждой мелочью и именно тогда поняли, что наше маленькое чудо — это просто быть рядом друг с другом.",
+    story_he: "היום הזה הפך לזיכרון מתוק ומיוחד עבורנו. טיילנו יחד, צחקנו מכל הלב והבנו שהנס הקטן שלנו הוא פשוט להיות אחד לצד השנייה."
+  },
+  {
+    image: "https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80",
+    title_ru: "Момент искренней радости",
+    title_he: "רגע של שמחה",
+    story_ru: "Когда сердца бьются в унисон, а вокруг — только радость, смех и предвкушение нашего большого праздника в кругу самых близких людей.",
+    story_he: "כשהלבבות פועמים יחד, ומסביב רק שמחה, צחוק והתרגשות לקראת החגיגה הגדולה שלנו עם האנשים היקרים לנו מכל."
+  },
+  {
+    image: "https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=800&q=80",
+    title_ru: "Только ты и я",
+    title_he: "רק אני ואת",
+    story_ru: "Среди тысяч дорог и миллионов людей мы нашли друг друга. И теперь каждая новая страница нашей книги пишется нами вдвоём.",
+    story_he: "בין אלפי דרכים ומיליוני אנשים מצאנו זה את זו. ומעכשיו, כל פרק חדש בספר החיים שלנו נכתב על ידי שנינו יחד."
   }
 ];
 
@@ -372,26 +412,6 @@ function applyPhotos() {
 }
 
 function galleryPhotosToColumns(photos, container) {
-  const captions = [
-    "«Наше маленькое чудо»",
-    "«В лучах заката»",
-    "«Счастье вдвоём»",
-    "«Навсегда вместе»",
-    "«Улыбка и нежность»",
-    "«Самый тёплый день»",
-    "«Момент искренней радости»",
-    "«Только ты и я»"
-  ];
-  const captionsHe = [
-    "«הנס הקטן שלנו»",
-    "«בשקיעה יפהפייה»",
-    "«אושר ביחד»",
-    "«לתמיד ביחד»",
-    "«חיוך ואהבה»",
-    "«היום הכי מאושר»",
-    "«רגע של שמחה»",
-    "«רק אני ואת»"
-  ];
   const isHe = (currentLang === 'he');
 
   photos.forEach((src, idx) => {
@@ -400,27 +420,29 @@ function galleryPhotosToColumns(photos, container) {
     } else {
       photoStories.push({
         image: src,
-        title_ru: captions[idx % captions.length].replace(/«|»/g, ''),
-        title_he: captionsHe[idx % captionsHe.length].replace(/«|»/g, ''),
+        title_ru: "Наше маленькое чудо",
+        title_he: "הנס הקטן שלנו",
         story_ru: "Особенное мгновение нашей любви, наполненное теплом, нежностью и искренней радостью.",
         story_he: "רגע מיוחד של אהבה, מלא בחום, רוך ושמחה כנה."
       });
     }
 
-    const card = document.createElement("div");
-    card.className = "photo-story-card cursor-pointer group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden";
-    card.onclick = () => openPhotoStory(idx);
+    const st = photoStories[idx];
+    const cap = isHe ? `«${st.title_he}»` : `«${st.title_ru}»`;
 
-    const cap = isHe ? (captionsHe[idx % captionsHe.length]) : (captions[idx % captions.length]);
+    const card = document.createElement("div");
+    card.className = "photo-story-card cursor-pointer group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden active:scale-95 transition-transform";
+    card.setAttribute("onclick", `openPhotoStory(${idx})`);
+
     card.innerHTML = `
       <div class="relative overflow-hidden rounded-xl">
-        <img src="${src}" alt="Wedding Moment" class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105">
-        <div class="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
-          <i data-lucide="book-open" class="w-4 h-4"></i>
-          <span>${isHe ? 'לקריאת הסיפור' : 'Читать историю'}</span>
+        <img src="${src}" alt="${st.title_ru}" class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105">
+        <div class="absolute bottom-2 right-2 bg-stone-900/75 backdrop-blur-sm text-white text-[10px] font-medium px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+          <span>📖</span>
+          <span>${isHe ? 'הסיפור שלנו' : 'Читать историю'}</span>
         </div>
       </div>
-      <div class="font-handwritten text-center text-stone-600 text-base">${cap}</div>
+      <div class="font-handwritten text-center text-stone-700 text-lg">${cap}</div>
     `;
     container.appendChild(card);
   });
@@ -513,6 +535,8 @@ function setLanguage(lang) {
   }
 
   applyConfig();
+  applyPhotos();
+  updateMusicUI(isMusicPlaying);
 
   if (window.lucide) {
     lucide.createIcons();

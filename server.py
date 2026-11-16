@@ -319,6 +319,15 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         elif path == "/api/setup-webhook":
             self.handle_setup_webhook()
             return
+        elif path == "/api/sync-github":
+            self.handle_sync_github()
+            return
+        elif path == "/app.js":
+            self.send_file(os.path.join(PUBLIC_DIR, "app.js"), "application/javascript; charset=utf-8")
+            return
+        elif path == "/style.css":
+            self.send_file(os.path.join(PUBLIC_DIR, "style.css"), "text/css; charset=utf-8")
+            return
 
         super().do_GET()
 
@@ -697,6 +706,23 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         except Exception as e:
             self.send_json({"error": str(e)}, status=500)
 
+    def handle_sync_github(self):
+        files_to_sync = ["public/index.html", "public/app.js", "public/style.css", "public/admin.html"]
+        synced = []
+        for rel_path in files_to_sync:
+            raw_url = f"https://raw.githubusercontent.com/yt82bftgmk-blip/wedding-invitation/main/{rel_path}?t={int(time.time())}"
+            try:
+                req = urllib.request.Request(raw_url, headers={"Cache-Control": "no-cache"})
+                with urllib.request.urlopen(req, timeout=10) as res:
+                    data = res.read()
+                    dest = os.path.join(BASE_DIR, rel_path)
+                    with open(dest, "wb") as f:
+                        f.write(data)
+                    synced.append(rel_path)
+            except Exception as e:
+                print(f"Sync error for {rel_path}: {e}")
+        self.send_json({"success": True, "synced": synced})
+
     def send_file(self, filepath, content_type):
         try:
             with open(filepath, "rb") as f:
@@ -704,6 +730,9 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", content_type)
             self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
             self.send_header("Content-Length", str(len(content)))
             self.end_headers()
             self.wfile.write(content)
