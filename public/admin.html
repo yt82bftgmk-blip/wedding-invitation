@@ -542,16 +542,93 @@
       </div>
     </section>
 
-    <!-- RSVP & Guest Management Section (Identical Aesthetic + Live Guest Stats & Table) -->
+    <!-- RSVP Section (Identical Editable Form Card + Live Guest Stats & Table Below) -->
     <section id="rsvp" class="py-24 px-4 relative bg-[#FAF7F2]">
-      <div class="max-w-5xl mx-auto space-y-10">
+      <div class="max-w-2xl mx-auto space-y-8">
         <div class="text-center space-y-3">
           <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="rsvp_tag">Будем счастливы вас видеть</span>
-          <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="rsvp_title">Ответы гостей (RSVP)</h2>
+          <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="rsvp_title">Подтверждение присутствия</h2>
           <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
           <p class="text-stone-600 max-w-md mx-auto text-sm" data-i18n="rsvp_desc">
-            Живая статистика и список всех гостей, подтвердивших участие
+            Пожалуйста, ответьте на приглашение, чтобы мы могли позаботиться о вашем комфорте!
           </p>
+        </div>
+
+        <!-- Identical Editable RSVP Form Card -->
+        <div class="bg-white/95 backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-[#E8DFC9] shadow-2xl relative space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 block" data-i18n="field_first_name">Имя *</label>
+              <input type="text" disabled placeholder="Давид" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-[#FAF7F2]/60 text-stone-400">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 block" data-i18n="field_last_name">Фамилия *</label>
+              <input type="text" disabled placeholder="Леви" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-[#FAF7F2]/60 text-stone-400">
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_phone">Номер телефона *</label>
+              <div class="flex items-center gap-1.5">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-900 text-white">🇮🇱 +972</span>
+                <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 text-stone-700">🇮🇱 05X</span>
+                <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 text-stone-700">🇷🇺 +7</span>
+              </div>
+            </div>
+            <input type="text" disabled placeholder="+972 50-123-4567" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-[#FAF7F2]/60 font-mono text-base text-stone-400">
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 block" data-i18n="field_attendance">Сможете ли вы прийти? *</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="flex items-center gap-3 p-4 rounded-xl border-2 border-stone-900 bg-[#FAF7F2]">
+                <span class="w-4 h-4 rounded-full border-4 border-stone-900 inline-block shrink-0"></span>
+                <div class="font-medium text-sm text-stone-900 flex items-center gap-2">
+                  <span>🎉</span>
+                  <span data-i18n="choice_yes">Я обязательно приду!</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-4 rounded-xl border-2 border-stone-200">
+                <span class="w-4 h-4 rounded-full border border-stone-300 inline-block shrink-0"></span>
+                <div class="font-medium text-sm text-stone-900 flex items-center gap-2">
+                  <span>💔</span>
+                  <span data-i18n="choice_no">К сожалению, не смогу</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 block" data-i18n="field_guests_count">Количество человек</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div class="px-3.5 py-2.5 rounded-xl border border-[#DFD6C4] bg-[#FAF7F2]/80 text-xs text-stone-800" data-i18n="guest_opt_1">1 человек (только я)</div>
+              <div class="px-3.5 py-2.5 rounded-xl border border-[#DFD6C4] bg-[#FAF7F2]/80 text-xs text-stone-800" data-i18n="guest_opt_2">2 человека (+1 гость)</div>
+              <div class="px-3.5 py-2.5 rounded-xl border border-[#DFD6C4] bg-[#FAF7F2]/80 text-xs text-stone-800" data-i18n="guest_opt_3">3 человека</div>
+              <div class="px-3.5 py-2.5 rounded-xl border border-[#DFD6C4] bg-[#FAF7F2]/80 text-xs text-stone-800" data-i18n="guest_opt_4">4+ человека (с семьёй)</div>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
+              <span data-i18n="field_message">Тёплые слова молодожёнам (мини-поздравление)</span>
+              <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
+            </label>
+            <textarea rows="2" disabled placeholder="Дорогие Назар и София! От всей души поздравляем вас..." class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-[#FAF7F2]/60 text-stone-400 resize-none"></textarea>
+          </div>
+
+          <button type="button" class="w-full py-4 px-6 bg-stone-900 hover:bg-champagne-gold text-white font-semibold rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 text-base">
+            <i data-lucide="send" class="w-5 h-5"></i>
+            <span data-i18n="btn_submit_rsvp">Отправить подтверждение</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Guest Stats & Table -->
+      <div id="guests-section" class="max-w-5xl mx-auto space-y-8 mt-20 pt-16 border-t border-[#E8DFC9]">
+        <div class="text-center space-y-2">
+          <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest">Статистика</span>
+          <h3 class="font-serif text-3xl sm:text-4xl text-stone-900">Список гостей и ответы</h3>
         </div>
 
         <!-- Statistics Cards (Champagne Palette) -->
@@ -835,8 +912,22 @@
         bit_copied: "Номер скопирован! ✓",
         bit_open_app: "Открыть Bit",
         rsvp_tag: "Будем счастливы вас видеть",
-        rsvp_title: "Ответы гостей (RSVP)",
-        rsvp_desc: "Живая статистика и список всех гостей, подтвердивших участие",
+        rsvp_title: "Подтверждение присутствия",
+        rsvp_desc: "Пожалуйста, ответьте на приглашение, чтобы мы могли позаботиться о вашем комфорте!",
+        field_first_name: "Имя *",
+        field_last_name: "Фамилия *",
+        field_phone: "Номер телефона *",
+        field_attendance: "Сможете ли вы прийти? *",
+        choice_yes: "Я обязательно приду!",
+        choice_no: "К сожалению, не смогу",
+        field_guests_count: "Количество человек",
+        guest_opt_1: "1 человек (только я)",
+        guest_opt_2: "2 человека (+1 гость)",
+        guest_opt_3: "3 человека",
+        guest_opt_4: "4+ человека (с семьёй)",
+        field_message: "Тёплые слова молодожёнам (мини-поздравление)",
+        optional_tag: "(по желанию)",
+        btn_submit_rsvp: "Отправить подтверждение",
         footer_love: "С любовью и благодарностью к каждому гостю ❤️"
       },
       he: {
@@ -889,8 +980,22 @@
         bit_copied: "המספר הועתק! ✓",
         bit_open_app: "פתח ב-Bit",
         rsvp_tag: "נשמח מאוד לראותכם",
-        rsvp_title: "אישורי הגעה (RSVP)",
-        rsvp_desc: "סטטיסטיקה חיה ורשימת כל האורחים שאישרו הגעה",
+        rsvp_title: "אישור הגעה",
+        rsvp_desc: "אנא אשרו את הגעתכם כדי שנוכל להיערך בצורה הטובה ביותר עבורכם!",
+        field_first_name: "שם פרטי *",
+        field_last_name: "שם משפחה *",
+        field_phone: "מספר טלפון *",
+        field_attendance: "האם תגיעו לחגוג עמנו? *",
+        choice_yes: "מגיע/ה בשמחה!",
+        choice_no: "לצערי לא אוכל להגיע",
+        field_guests_count: "מספר אורחים",
+        guest_opt_1: "אורח 1 (רק אני)",
+        guest_opt_2: "2 אורחים (אני ובן/בת זוג)",
+        guest_opt_3: "3 אורחים",
+        guest_opt_4: "4+ אורחים (עם המשפחה)",
+        field_message: "ברכה ואיחולים לזוג הצעיר",
+        optional_tag: "(אופציונלי)",
+        btn_submit_rsvp: "שליחת אישור הגעה",
         footer_love: "באהבה והערכה רבה לכל אחד ואחת מכם ❤️"
       }
     };
@@ -1592,8 +1697,8 @@
     // Guests & Stats
     function toggleGuestsModal(scrollToSection) {
       if (scrollToSection) {
-        const rsvpEl = document.getElementById("rsvp");
-        if (rsvpEl) rsvpEl.scrollIntoView({ behavior: "smooth" });
+        const guestsEl = document.getElementById("guests-section");
+        if (guestsEl) guestsEl.scrollIntoView({ behavior: "smooth" });
       }
     }
 
