@@ -234,23 +234,47 @@
 
       <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-4 gap-5">
         <!-- Photo 1 -->
-        <div class="photo-story-card bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2">
-          <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-56 object-cover rounded-xl">
-          <div class="font-handwritten text-center text-stone-600 text-base">«В лучах заката»</div>
+        <div class="photo-story-card cursor-pointer group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden" onclick="openPhotoStory(0)">
+          <div class="relative overflow-hidden rounded-xl">
+            <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=600&q=80" alt="Наше маленькое чудо" class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105">
+            <div class="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
+              <i data-lucide="book-open" class="w-4 h-4"></i>
+              <span>Читать историю</span>
+            </div>
+          </div>
+          <div class="font-handwritten text-center text-stone-600 text-base">«Наше маленькое чудо»</div>
         </div>
         <!-- Photo 2 -->
-        <div class="photo-story-card bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2">
-          <img src="https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-56 object-cover rounded-xl">
-          <div class="font-handwritten text-center text-stone-600 text-base">«Счастье вдвоём»</div>
+        <div class="photo-story-card cursor-pointer group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden" onclick="openPhotoStory(1)">
+          <div class="relative overflow-hidden rounded-xl">
+            <img src="https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=600&q=80" alt="В лучах заката" class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105">
+            <div class="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
+              <i data-lucide="book-open" class="w-4 h-4"></i>
+              <span>Читать историю</span>
+            </div>
+          </div>
+          <div class="font-handwritten text-center text-stone-600 text-base">«В лучах заката»</div>
         </div>
         <!-- Photo 3 -->
-        <div class="photo-story-card bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2">
-          <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-56 object-cover rounded-xl">
-          <div class="font-handwritten text-center text-stone-600 text-base">«Самый тёплый день»</div>
+        <div class="photo-story-card cursor-pointer group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden" onclick="openPhotoStory(2)">
+          <div class="relative overflow-hidden rounded-xl">
+            <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=600&q=80" alt="Счастье вдвоём" class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105">
+            <div class="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
+              <i data-lucide="book-open" class="w-4 h-4"></i>
+              <span>Читать историю</span>
+            </div>
+          </div>
+          <div class="font-handwritten text-center text-stone-600 text-base">«Счастье вдвоём»</div>
         </div>
         <!-- Photo 4 -->
-        <div class="photo-story-card bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2">
-          <img src="https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=600&q=80" alt="Moment" class="w-full h-56 object-cover rounded-xl">
+        <div class="photo-story-card cursor-pointer group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden" onclick="openPhotoStory(3)">
+          <div class="relative overflow-hidden rounded-xl">
+            <img src="https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=600&q=80" alt="Навсегда вместе" class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105">
+            <div class="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
+              <i data-lucide="book-open" class="w-4 h-4"></i>
+              <span>Читать историю</span>
+            </div>
+          </div>
           <div class="font-handwritten text-center text-stone-600 text-base">«Навсегда вместе»</div>
         </div>
       </div>
@@ -551,6 +575,42 @@
     <div class="font-serif text-xl font-bold text-stone-900">Назар & София</div>
     <div data-i18n="footer_love">С любовью и благодарностью к каждому гостю ❤️</div>
   </footer>
+
+  <!-- Photo Story Lightbox Modal with Blurred Background & Close Cross -->
+  <div id="photo-story-modal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xl flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none">
+    <div class="bg-white/95 backdrop-blur-md rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#E8DFC9] space-y-4 transform scale-95 transition-all duration-300 relative text-left" id="photo-story-card">
+      <!-- Close Cross Button (Крестик) -->
+      <button type="button" onclick="closePhotoStory()" class="absolute -top-3 -right-3 sm:top-4 sm:right-4 w-10 h-10 bg-white text-stone-700 hover:text-stone-950 hover:bg-rose-50 hover:border-rose-200 rounded-full shadow-2xl flex items-center justify-center border border-stone-200 transition-all z-20 cursor-pointer" title="Закрыть">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+        <span id="modal-badge-text">Воспоминание Назара и Софии</span>
+      </div>
+
+      <!-- Photo with subtle zoom -->
+      <div class="w-full h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md">
+        <img id="modal-photo-img" src="" alt="Story" class="w-full h-full object-cover">
+      </div>
+
+      <!-- Title & Mini-Story Text -->
+      <div class="space-y-2">
+        <h3 id="modal-photo-title" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900"></h3>
+        <p id="modal-photo-desc" class="text-stone-600 text-sm sm:text-base leading-relaxed"></p>
+      </div>
+
+      <!-- Footer Note -->
+      <div class="pt-3 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-400">
+        <span>❤️ Назар & София</span>
+        <button type="button" onclick="closePhotoStory()" class="text-champagne-gold hover:underline font-semibold flex items-center gap-1">
+          <span>Закрыть</span>
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script src="/app.js"></script>
 </body>

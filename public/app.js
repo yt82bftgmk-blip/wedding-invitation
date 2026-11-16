@@ -179,28 +179,36 @@ let isMusicPlaying = false;
 
 function toggleMusic() {
   const audio = document.getElementById("wedding-audio");
-  const vinyl = document.getElementById("vinyl-icon");
-  const eq = document.getElementById("music-eq");
-  const text = document.getElementById("music-status-text");
-  const isHe = (currentLang === 'he');
-
   if (!audio) return;
 
   if (isMusicPlaying) {
     audio.pause();
     isMusicPlaying = false;
-    if (vinyl) vinyl.classList.remove("animate-spin-slow");
-    if (eq) { eq.classList.add("hidden"); eq.classList.remove("flex"); }
-    if (text) text.textContent = isHe ? "נגן מוזיקה 🎵" : "Включить музыку 🎵";
+    updateMusicUI(false);
   } else {
     audio.play().then(() => {
       isMusicPlaying = true;
-      if (vinyl) vinyl.classList.add("animate-spin-slow");
-      if (eq) { eq.classList.remove("hidden"); eq.classList.add("flex"); }
-      if (text) text.textContent = isHe ? "מנגן עכשיו 🎶" : "Играет мелодия 🎶";
+      updateMusicUI(true);
     }).catch(err => {
       console.log("Audio play error:", err);
     });
+  }
+}
+
+function updateMusicUI(playing) {
+  const vinyl = document.getElementById("vinyl-icon");
+  const eq = document.getElementById("music-eq");
+  const text = document.getElementById("music-status-text");
+  const isHe = (currentLang === 'he');
+
+  if (playing) {
+    if (vinyl) vinyl.classList.add("animate-spin-slow");
+    if (eq) { eq.classList.remove("hidden"); eq.classList.add("flex"); }
+    if (text) text.textContent = isHe ? "מנגן עכשיו 🎶" : "Играет мелодия 🎶";
+  } else {
+    if (vinyl) vinyl.classList.remove("animate-spin-slow");
+    if (eq) { eq.classList.add("hidden"); eq.classList.remove("flex"); }
+    if (text) text.textContent = isHe ? "נגן מוזיקה 🎵" : "Включить музыку 🎵";
   }
 }
 
@@ -208,28 +216,102 @@ function initMusicAutoPlay() {
   const audio = document.getElementById("wedding-audio");
   if (!audio) return;
 
-  const startOnInteraction = () => {
-    if (!isMusicPlaying) {
-      audio.play().then(() => {
-        isMusicPlaying = true;
-        const vinyl = document.getElementById("vinyl-icon");
-        const eq = document.getElementById("music-eq");
-        const text = document.getElementById("music-status-text");
-        const isHe = (currentLang === 'he');
-        if (vinyl) vinyl.classList.add("animate-spin-slow");
-        if (eq) { eq.classList.remove("hidden"); eq.classList.add("flex"); }
-        if (text) text.textContent = isHe ? "מנגן עכשיו 🎶" : "Играет мелодия 🎶";
-      }).catch(() => {});
-    }
-    window.removeEventListener('click', startOnInteraction);
-    window.removeEventListener('touchstart', startOnInteraction);
-    window.removeEventListener('scroll', startOnInteraction);
-  };
+  // Immediate attempt to play
+  audio.play().then(() => {
+    isMusicPlaying = true;
+    updateMusicUI(true);
+  }).catch(() => {
+    // If browser autoplay policy requires user gesture, start on first touch/scroll/click
+    const startOnInteraction = () => {
+      if (!isMusicPlaying) {
+        audio.play().then(() => {
+          isMusicPlaying = true;
+          updateMusicUI(true);
+        }).catch(() => {});
+      }
+      ['click', 'touchstart', 'scroll', 'pointerdown', 'keydown'].forEach(ev => {
+        window.removeEventListener(ev, startOnInteraction);
+      });
+    };
 
-  window.addEventListener('click', startOnInteraction, { once: true });
-  window.addEventListener('touchstart', startOnInteraction, { once: true });
-  window.addEventListener('scroll', startOnInteraction, { once: true });
+    ['click', 'touchstart', 'scroll', 'pointerdown', 'keydown'].forEach(ev => {
+      window.addEventListener(ev, startOnInteraction, { once: true, passive: true });
+    });
+  });
 }
+
+// Photo Stories Dataset & Lightbox Logic
+const photoStories = [
+  {
+    image: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80",
+    title_ru: "Наше маленькое чудо",
+    title_he: "הנס הקטן שלנו",
+    story_ru: "Этот день стал для нас особенным воспоминанием. Мы гуляли по набережной, смеялись над каждой мелочью и именно тогда поняли, что наше счастье — в том, чтобы просто быть рядом друг с другом.",
+    story_he: "היום הזה הפך לזיכרון מתוק ומיוחד עבורנו. טיילנו יחד, צחקנו מכל הלב והבנו שהאושר האמיתי הוא פשוט להיות אחד לצד השנייה."
+  },
+  {
+    image: "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=800&q=80",
+    title_ru: "В лучах заката",
+    title_he: "בשקיעה יפהפייה",
+    story_ru: "Незабываемый тёплый вечер, когда солнце медленно опускалось за горизонт. Мы говорили обо всём на свете и пообещали себе встречать вместе ещё тысячи таких закатов.",
+    story_he: "ערב חמים ובלתי נשכח מול שקיעה עוצרת נשימה. שוחחנו על העתיד והבטחנו לעצמנו לפגוש עוד אינספור שקיעות יחד."
+  },
+  {
+    image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+    title_ru: "Счастье вдвоём",
+    title_he: "אושר ביחד",
+    story_ru: "Кадры, которые не требуют лишних слов. Когда внутри тепло и спокойно, а впереди — целая совместная жизнь, полная любви, заботы и взаимной поддержки.",
+    story_he: "רגעים שלא צריכים מילים. כשיש שלווה עמוקה בלב וידיעה ברורה שלפנינו חיים שלמים של אהבה וחלומות משותפים."
+  },
+  {
+    image: "https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80",
+    title_ru: "Навсегда вместе",
+    title_he: "לתמיד ביחד",
+    story_ru: "Самый искренний взгляд и обещание любить, беречь и поддерживать друг друга в любой ситуации. Это начало нашей красивой и крепкой семейной истории.",
+    story_he: "מבט של אהבה כנה והבטחה לתמוך, לחבק ולצמוח יחד בכל שלב בדרך. ההתחלה של המשפחה החדשה שלנו."
+  }
+];
+
+function openPhotoStory(index) {
+  const story = photoStories[index] || photoStories[0];
+  const isHe = (currentLang === 'he');
+
+  const modal = document.getElementById("photo-story-modal");
+  const card = document.getElementById("photo-story-card");
+  const img = document.getElementById("modal-photo-img");
+  const title = document.getElementById("modal-photo-title");
+  const desc = document.getElementById("modal-photo-desc");
+  const badge = document.getElementById("modal-badge-text");
+
+  if (!modal || !card) return;
+
+  img.src = story.image;
+  title.textContent = isHe ? story.title_he : story.title_ru;
+  desc.textContent = isHe ? story.story_he : story.story_ru;
+  if (badge) badge.textContent = isHe ? "זיכרון של נזר וסופיה" : "Воспоминание Назара и Софии";
+
+  modal.classList.remove("opacity-0", "pointer-events-none");
+  modal.classList.add("opacity-100", "pointer-events-auto");
+  card.classList.remove("scale-95");
+  card.classList.add("scale-100");
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function closePhotoStory() {
+  const modal = document.getElementById("photo-story-modal");
+  const card = document.getElementById("photo-story-card");
+  if (!modal || !card) return;
+
+  modal.classList.remove("opacity-100", "pointer-events-auto");
+  modal.classList.add("opacity-0", "pointer-events-none");
+  card.classList.remove("scale-100");
+  card.classList.add("scale-95");
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closePhotoStory();
+});
 
 async function fetchConfig() {
   try {
@@ -291,37 +373,59 @@ function applyPhotos() {
 
 function galleryPhotosToColumns(photos, container) {
   const captions = [
+    "«Наше маленькое чудо»",
     "«В лучах заката»",
     "«Счастье вдвоём»",
-    "«Самый тёплый день»",
     "«Навсегда вместе»",
     "«Улыбка и нежность»",
-    "«Наше маленькое чудо»",
+    "«Самый тёплый день»",
     "«Момент искренней радости»",
     "«Только ты и я»"
   ];
   const captionsHe = [
+    "«הנס הקטן שלנו»",
     "«בשקיעה יפהפייה»",
     "«אושר ביחד»",
-    "«היום הכי מאושר»",
     "«לתמיד ביחד»",
     "«חיוך ואהבה»",
-    "«הקסם שלנו»",
+    "«היום הכי מאושר»",
     "«רגע של שמחה»",
     "«רק אני ואת»"
   ];
   const isHe = (currentLang === 'he');
 
   photos.forEach((src, idx) => {
+    if (photoStories[idx]) {
+      photoStories[idx].image = src;
+    } else {
+      photoStories.push({
+        image: src,
+        title_ru: captions[idx % captions.length].replace(/«|»/g, ''),
+        title_he: captionsHe[idx % captionsHe.length].replace(/«|»/g, ''),
+        story_ru: "Особенное мгновение нашей любви, наполненное теплом, нежностью и искренней радостью.",
+        story_he: "רגע מיוחד של אהבה, מלא בחום, רוך ושמחה כנה."
+      });
+    }
+
     const card = document.createElement("div");
-    card.className = "photo-story-card bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2";
+    card.className = "photo-story-card cursor-pointer group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden";
+    card.onclick = () => openPhotoStory(idx);
+
     const cap = isHe ? (captionsHe[idx % captionsHe.length]) : (captions[idx % captions.length]);
     card.innerHTML = `
-      <img src="${src}" alt="Wedding Moment" class="w-full h-56 object-cover rounded-xl">
+      <div class="relative overflow-hidden rounded-xl">
+        <img src="${src}" alt="Wedding Moment" class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          <span>${isHe ? 'לקריאת הסיפור' : 'Читать историю'}</span>
+        </div>
+      </div>
       <div class="font-handwritten text-center text-stone-600 text-base">${cap}</div>
     `;
     container.appendChild(card);
   });
+
+  if (window.lucide) lucide.createIcons();
 }
 
 function applyConfig() {
