@@ -93,6 +93,17 @@ const translations = {
     success_desc: "Ваше подтверждение и поздравление успешно отправлены Назару и Софии! До встречи на празднике любви!",
     btn_send_another: "Заполнить ещё один ответ",
 
+    already_reg_title: "Вы уже в списке гостей! 💍",
+    already_reg_reason_phone: "Ваша запись уже существует — этот номер телефона уже зарегистрирован, мы с радостью ждём вас!",
+    already_reg_reason_name: "Ваша запись уже существует — гость с таким именем и фамилией уже зарегистрирован, мы с радостью ждём вас!",
+    already_reg_note_prefix: "Повторная регистрация не нужна. Если вы хотите отменить или изменить запись, пожалуйста, напишите нам по номеру:",
+    btn_back_to_form: "Записать другого гостя",
+    already_reg_status_attending: "Приду",
+    already_reg_status_declined: "Не смогу прийти",
+    already_reg_guests: "Гостей:",
+    inline_dup_phone: "Этот номер телефона уже зарегистрирован в списке гостей.",
+    inline_dup_name: "Гость с таким именем и фамилией уже зарегистрирован.",
+
     footer_love: "С любовью и благодарностью к каждому гостю ❤️"
   },
 
@@ -189,6 +200,17 @@ const translations = {
     success_desc: "אישור ההגעה והברכה שלכם התקבלו בהצלחה אצל נזר וסופיה! מצפים לחגוג יחד!",
     btn_send_another: "מילוי אישור נוסף",
 
+    already_reg_title: "אתם כבר ברשימת האורחים! 💍",
+    already_reg_reason_phone: "הרישום שלכם כבר קיים — מספר הטלפון הזה כבר רשום במערכת, נשמח לחגוג יחד!",
+    already_reg_reason_name: "הרישום שלכם כבר קיים — אורח עם שם פרטי ומשפחה זה כבר רשום, נשמח לחגוג יחד!",
+    already_reg_note_prefix: "אין צורך להירשם שוב. אם ברצונכם לבטל או לעדכן את הרישום, אנא כתבו לנו למספר:",
+    btn_back_to_form: "רישום אורח נוסף",
+    already_reg_status_attending: "מגיע/ה",
+    already_reg_status_declined: "לא אוכל להגיע",
+    already_reg_guests: "אורחים:",
+    inline_dup_phone: "מספר הטלפון הזה כבר רשום ברשימת האורחים.",
+    inline_dup_name: "אורח עם שם פרטי ומשפחה זה כבר רשום.",
+
     footer_love: "באהבה והערכה רבה לכל אחד ואחת מכם ❤️"
   }
 };
@@ -202,9 +224,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) {
     lucide.createIcons();
   }
-  fetchConfig();
+  fetchConfig().then(() => restoreSavedRegistrationState());
   startCountdown();
   initMusicAutoPlay();
+  initRsvpDuplicateCheck();
 });
 
 const MUSIC_TRACKS = [
@@ -1239,6 +1262,17 @@ async function submitRSVP(event) {
     const data = await response.json();
 
     if (response.ok && data.success) {
+      try {
+        localStorage.setItem('wedding_rsvp_registered', JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone,
+          attendance: attendance,
+          guests_count: guestsCount,
+          saved_at: new Date().toISOString()
+        }));
+      } catch (e) {}
+
       if (window.confetti && attendance === 'attending') {
         confetti({
           particleCount: 90,
@@ -1248,7 +1282,10 @@ async function submitRSVP(event) {
       }
 
       document.getElementById("rsvp-form").classList.add("hidden");
+      document.getElementById("rsvp-already-registered").classList.add("hidden");
       document.getElementById("rsvp-success").classList.remove("hidden");
+    } else if (response.status === 409 && data.error === 'already_registered') {
+      showAlreadyRegisteredCard(data.reason, data.existing);
     } else {
       alert("Ошибка отправки: " + (data.error || "Пожалуйста, проверьте данные"));
     }
@@ -1261,6 +1298,168 @@ async function submitRSVP(event) {
   }
 }
 
+function clearDuplicateHints() {
+  const nameHint = document.getElementById("name-duplicate-hint");
+  const phoneHint = document.getElementById("phone-duplicate-hint");
+  if (nameHint) nameHint.classList.add("hidden");
+  if (phoneHint) phoneHint.classList.add("hidden");
+}
+
+function initRsvpDuplicateCheck() {
+  const firstEl = document.getElementById("first_name");
+  const lastEl = document.getElementById("last_name");
+  const phoneEl = document.getElementById("phone");
+
+  if (firstEl && lastEl) {
+    const onNameBlur = () => checkRsvpDuplicateField('name');
+    const onNameInput = () => {
+      const hint = document.getElementById("name-duplicate-hint");
+      if (hint) hint.classList.add("hidden");
+    };
+    firstEl.addEventListener("blur", onNameBlur);
+    lastEl.addEventListener("blur", onNameBlur);
+    firstEl.addEventListener("input", onNameInput);
+    lastEl.addEventListener("input", onNameInput);
+  }
+
+  if (phoneEl) {
+    phoneEl.addEventListener("blur", () => checkRsvpDuplicateField('phone'));
+    phoneEl.addEventListener("input", () => {
+      const hint = document.getElementById("phone-duplicate-hint");
+      if (hint) hint.classList.add("hidden");
+    });
+  }
+}
+
+async function checkRsvpDuplicateField(mode) {
+  const dict = translations[currentLang] || translations.ru;
+  const firstEl = document.getElementById("first_name");
+  const lastEl = document.getElementById("last_name");
+  const phoneEl = document.getElementById("phone");
+
+  const payload = {};
+  if (mode === 'name') {
+    const fn = (firstEl?.value || "").trim();
+    const ln = (lastEl?.value || "").trim();
+    if (!fn || !ln) return;
+    payload.first_name = fn;
+    payload.last_name = ln;
+  } else if (mode === 'phone') {
+    const ph = (phoneEl?.value || "").trim();
+    const digits = ph.replace(/\D/g, "");
+    if (digits.length < 9) return;
+    payload.phone = ph;
+  } else {
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/rsvp/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.registered) {
+      if (mode === 'name' && data.reason === 'name') {
+        const box = document.getElementById("name-duplicate-hint");
+        const txt = document.getElementById("name-duplicate-hint-text");
+        if (box && txt) {
+          txt.textContent = dict.inline_dup_name;
+          box.classList.remove("hidden");
+        }
+      } else if (mode === 'phone' && data.reason === 'phone') {
+        const box = document.getElementById("phone-duplicate-hint");
+        const txt = document.getElementById("phone-duplicate-hint-text");
+        if (box && txt) {
+          txt.textContent = dict.inline_dup_phone;
+          box.classList.remove("hidden");
+        }
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+  } catch (e) {
+    // Non-blocking pre-check
+  }
+}
+
+function showAlreadyRegisteredCard(reason, existing) {
+  const dict = translations[currentLang] || translations.ru;
+  const reasonEl = document.getElementById("already-reg-reason");
+  const detailsEl = document.getElementById("already-reg-details");
+  const noteEl = document.getElementById("already-reg-note");
+
+  if (reasonEl) {
+    reasonEl.textContent = reason === 'phone'
+      ? dict.already_reg_reason_phone
+      : dict.already_reg_reason_name;
+  }
+
+  if (noteEl) {
+    const contactPhone = (weddingConfig && weddingConfig.bit_phone) ? weddingConfig.bit_phone.trim() : "+972 50-000-0000";
+    const telHref = contactPhone.replace(/[^\d+]/g, '');
+    noteEl.innerHTML = `${escapeHtmlSafe(dict.already_reg_note_prefix)} <a href="tel:${escapeHtmlSafe(telHref)}" dir="ltr" class="font-semibold text-stone-900 underline hover:text-champagne-gold transition-colors">${escapeHtmlSafe(contactPhone)}</a>`;
+  }
+
+  if (detailsEl && existing) {
+    const fullName = escapeHtmlSafe(`${existing.first_name || ''} ${existing.last_name || ''}`.trim());
+    const isAttending = existing.attendance === 'attending';
+    const statusLabel = isAttending
+      ? dict.already_reg_status_attending
+      : dict.already_reg_status_declined;
+    const guestsHtml = isAttending
+      ? `<div><span class="text-stone-500">${escapeHtmlSafe(dict.already_reg_guests)}</span> <strong>${Number(existing.guests_count || 1)}</strong></div>`
+      : '';
+    detailsEl.innerHTML = `
+      <div class="font-semibold text-stone-900">${fullName}</div>
+      <div class="text-stone-700">${isAttending ? '🎉' : '💔'} ${escapeHtmlSafe(statusLabel)}</div>
+      ${guestsHtml}
+    `;
+    detailsEl.classList.remove("hidden");
+  } else if (detailsEl) {
+    detailsEl.classList.add("hidden");
+  }
+
+  document.getElementById("rsvp-form").classList.add("hidden");
+  document.getElementById("rsvp-success").classList.add("hidden");
+  document.getElementById("rsvp-already-registered").classList.remove("hidden");
+  if (window.lucide) lucide.createIcons();
+}
+
+async function restoreSavedRegistrationState() {
+  try {
+    const raw = localStorage.getItem('wedding_rsvp_registered');
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (!saved || (!saved.phone && !(saved.first_name && saved.last_name))) return;
+
+    const res = await fetch('/api/rsvp/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name: saved.first_name || '',
+        last_name: saved.last_name || '',
+        phone: saved.phone || ''
+      })
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.registered) {
+      showAlreadyRegisteredCard(data.reason || 'phone', data.existing || saved);
+    } else {
+      localStorage.removeItem('wedding_rsvp_registered');
+    }
+  } catch (e) {
+    // Ignore storage/network errors
+  }
+}
+
+function backToRSVPForm() {
+  document.getElementById("rsvp-already-registered").classList.add("hidden");
+  document.getElementById("rsvp-form").classList.remove("hidden");
+}
+
 function resetRSVPForm() {
   document.getElementById("rsvp-form").reset();
   const childrenContainer = document.getElementById("children_inputs_container");
@@ -1269,7 +1468,9 @@ function resetRSVPForm() {
   if (plusOneContainer) plusOneContainer.innerHTML = "";
   renderChildrenInputs();
   renderPlusOneInputs();
+  clearDuplicateHints();
   document.getElementById("rsvp-form").classList.remove("hidden");
   document.getElementById("rsvp-success").classList.add("hidden");
+  document.getElementById("rsvp-already-registered").classList.add("hidden");
   toggleGuestCount(true);
 }

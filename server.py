@@ -5,6 +5,7 @@ Supports bilingual website, Israeli Bit integration, Telegram notifications, and
 """
 
 import os
+import re
 import sys
 import json
 import sqlite3
@@ -72,6 +73,63 @@ def save_config(cfg):
         json.dump(cfg, f, ensure_ascii=False, indent=2)
 
 
+def normalize_phone(phone):
+    """Normalize Israeli (+972 / 05X) and Russian (+7 / 8) phone numbers to a canonical digit form."""
+    digits = re.sub(r"\D", "", str(phone or ""))
+    if not digits:
+        return ""
+    if digits.startswith("972") and len(digits) == 12:
+        return "972" + digits[3:]
+    if digits.startswith("0") and len(digits) == 10:
+        return "972" + digits[1:]
+    if len(digits) == 9 and digits.startswith("5"):
+        return "972" + digits
+    if len(digits) == 11 and digits[0] in ("7", "8"):
+        return "7" + digits[1:]
+    if len(digits) == 10 and digits.startswith("9"):
+        return "7" + digits
+    return digits
+
+
+def normalize_name_part(value):
+    return " ".join(str(value or "").split()).lower().replace("ё", "е")
+
+
+def build_full_name_key(first_name, last_name):
+    fn = normalize_name_part(first_name)
+    ln = normalize_name_part(last_name)
+    if not fn or not ln:
+        return ""
+    return f"{fn}|{ln}"
+
+
+def find_duplicate_rsvp(cursor, first_name="", last_name="", phone=""):
+    """Check if an RSVP already exists by normalized phone or normalized full name."""
+    norm_phone = normalize_phone(phone)
+    if norm_phone:
+        cursor.execute(
+            "SELECT id, first_name, last_name, phone, attendance, guests_count, created_at "
+            "FROM rsvps WHERE phone_normalized = ? LIMIT 1",
+            (norm_phone,)
+        )
+        row = cursor.fetchone()
+        if row:
+            return "phone", row
+
+    full_name_key = build_full_name_key(first_name, last_name)
+    if full_name_key:
+        cursor.execute(
+            "SELECT id, first_name, last_name, phone, attendance, guests_count, created_at "
+            "FROM rsvps WHERE full_name_normalized = ? LIMIT 1",
+            (full_name_key,)
+        )
+        row = cursor.fetchone()
+        if row:
+            return "name", row
+
+    return None, None
+
+
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -86,6 +144,8 @@ def init_db():
             message TEXT,
             language TEXT DEFAULT 'ru',
             custom_answers TEXT DEFAULT '{}',
+            phone_normalized TEXT DEFAULT '',
+            full_name_normalized TEXT DEFAULT '',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -93,6 +153,23 @@ def init_db():
     cols = [row[1] for row in cursor.fetchall()]
     if "custom_answers" not in cols:
         cursor.execute("ALTER TABLE rsvps ADD COLUMN custom_answers TEXT DEFAULT '{}'")
+    if "phone_normalized" not in cols:
+        cursor.execute("ALTER TABLE rsvps ADD COLUMN phone_normalized TEXT DEFAULT ''")
+    if "full_name_normalized" not in cols:
+        cursor.execute("ALTER TABLE rsvps ADD COLUMN full_name_normalized TEXT DEFAULT ''")
+
+    cursor.execute("SELECT id, first_name, last_name, phone, phone_normalized, full_name_normalized FROM rsvps")
+    for row_id, fn, ln, ph, p_norm, n_norm in cursor.fetchall():
+        expected_p = normalize_phone(ph)
+        expected_n = build_full_name_key(fn, ln)
+        if p_norm != expected_p or n_norm != expected_n:
+            cursor.execute(
+                "UPDATE rsvps SET phone_normalized = ?, full_name_normalized = ? WHERE id = ?",
+                (expected_p, expected_n, row_id)
+            )
+
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_rsvps_phone_norm ON rsvps(phone_normalized)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_rsvps_full_name_norm ON rsvps(full_name_normalized)")
     conn.commit()
     conn.close()
 
@@ -369,6 +446,8 @@ class WeddingHandler(SimpleHTTPRequestHandler):
 
         if path == "/api/rsvp":
             self.handle_post_rsvp(payload)
+        elif path == "/api/rsvp/check":
+            self.handle_check_rsvp(payload)
         elif path == "/api/telegram-webhook":
             self.handle_telegram_webhook(payload)
         elif path == "/api/setup-webhook":
@@ -407,6 +486,35 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         expected_pass = cfg.get("admin", {}).get("password", "wedding2027admin")
         return auth_header == f"Bearer {expected_pass}"
 
+    def handle_check_rsvp(self, payload):
+        first_name = payload.get("first_name", "").strip()
+        last_name = payload.get("last_name", "").strip()
+        phone = payload.get("phone", "").strip()
+
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            reason, existing = find_duplicate_rsvp(cursor, first_name=first_name, last_name=last_name, phone=phone)
+            conn.close()
+        except Exception as e:
+            self.send_json({"error": f"Database error: {str(e)}"}, status=500)
+            return
+
+        if reason and existing:
+            self.send_json({
+                "registered": True,
+                "reason": reason,
+                "existing": {
+                    "first_name": existing[1],
+                    "last_name": existing[2],
+                    "attendance": existing[4],
+                    "guests_count": existing[5],
+                    "created_at": existing[6],
+                }
+            })
+        else:
+            self.send_json({"registered": False})
+
     def handle_post_rsvp(self, payload):
         first_name = payload.get("first_name", "").strip()
         last_name = payload.get("last_name", "").strip()
@@ -424,13 +532,34 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             self.send_json({"error": "First name, last name, and phone are required"}, status=400)
             return
 
+        phone_norm = normalize_phone(phone)
+        full_name_norm = build_full_name_key(first_name, last_name)
+
         try:
             conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
+            dup_reason, existing = find_duplicate_rsvp(
+                cursor, first_name=first_name, last_name=last_name, phone=phone
+            )
+            if dup_reason and existing:
+                conn.close()
+                self.send_json({
+                    "error": "already_registered",
+                    "reason": dup_reason,
+                    "existing": {
+                        "first_name": existing[1],
+                        "last_name": existing[2],
+                        "attendance": existing[4],
+                        "guests_count": existing[5],
+                        "created_at": existing[6],
+                    }
+                }, status=409)
+                return
+
             cursor.execute("""
-                INSERT INTO rsvps (first_name, last_name, phone, attendance, guests_count, message, language, custom_answers)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (first_name, last_name, phone, attendance, guests_count, message, language, custom_answers_json))
+                INSERT INTO rsvps (first_name, last_name, phone, attendance, guests_count, message, language, custom_answers, phone_normalized, full_name_normalized)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (first_name, last_name, phone, attendance, guests_count, message, language, custom_answers_json, phone_norm, full_name_norm))
             conn.commit()
             rsvp_id = cursor.lastrowid
             conn.close()
@@ -732,18 +861,23 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                     (r.get("first_name", ""), r.get("last_name", ""), r.get("phone", ""))
                 )
                 if not cursor.fetchone():
+                    fn = r.get("first_name", "")
+                    ln = r.get("last_name", "")
+                    ph = r.get("phone", "")
                     cursor.execute("""
-                        INSERT INTO rsvps (first_name, last_name, phone, attendance, guests_count, message, language, custom_answers, created_at)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO rsvps (first_name, last_name, phone, attendance, guests_count, message, language, custom_answers, phone_normalized, full_name_normalized, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
-                        r.get("first_name", ""),
-                        r.get("last_name", ""),
-                        r.get("phone", ""),
+                        fn,
+                        ln,
+                        ph,
                         r.get("attendance", "attending"),
                         int(r.get("guests_count", 1)),
                         r.get("message", ""),
                         r.get("language", "ru"),
                         json.dumps(r.get("custom_answers") or {}, ensure_ascii=False),
+                        normalize_phone(ph),
+                        build_full_name_key(fn, ln),
                         r.get("created_at") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     ))
             conn.commit()
