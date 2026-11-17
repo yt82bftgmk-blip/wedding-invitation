@@ -98,6 +98,13 @@ const translations = {
     already_reg_reason_name: "Ваша запись уже существует — гость с таким именем и фамилией уже зарегистрирован, мы с радостью ждём вас!",
     already_reg_note_prefix: "Повторная регистрация не нужна. Если вы хотите отменить или изменить запись, пожалуйста, напишите нам по номеру:",
     btn_back_to_form: "Записать другого гостя",
+    btn_edit_existing: "Редактировать мою запись",
+    btn_save_changes: "Сохранить изменения",
+    btn_load_and_edit: "Редактировать запись →",
+    edit_mode_banner: "Режим редактирования записи — измените количество гостей или данные и сохраните.",
+    btn_cancel_edit: "Отмена",
+    updated_title: "Изменения сохранены! 💍",
+    updated_desc: "Ваша запись успешно обновлена. Назар и София уже получили обновлённую информацию!",
     already_reg_status_attending: "Приду",
     already_reg_status_declined: "Не смогу прийти",
     already_reg_guests: "Гостей:",
@@ -205,6 +212,13 @@ const translations = {
     already_reg_reason_name: "הרישום שלכם כבר קיים — אורח עם שם פרטי ומשפחה זה כבר רשום, נשמח לחגוג יחד!",
     already_reg_note_prefix: "אין צורך להירשם שוב. אם ברצונכם לבטל או לעדכן את הרישום, אנא כתבו לנו למספר:",
     btn_back_to_form: "רישום אורח נוסף",
+    btn_edit_existing: "עריכת הרישום שלי",
+    btn_save_changes: "שמירת שינויים",
+    btn_load_and_edit: "עריכת הרישום ←",
+    edit_mode_banner: "מצב עריכת רישום — ניתן לשנות את מספר האורחים או הפרטים ולשמור.",
+    btn_cancel_edit: "ביטול",
+    updated_title: "השינויים נשמרו! 💍",
+    updated_desc: "הרישום שלכם עודכן בהצלחה. נזר וסופיה כבר קיבלו את הפרטים המעודכנים!",
     already_reg_status_attending: "מגיע/ה",
     already_reg_status_declined: "לא אוכל להגיע",
     already_reg_guests: "אורחים:",
@@ -219,6 +233,8 @@ let currentLang = 'ru';
 let weddingConfig = null;
 let weddingPhotos = null;
 let weddingTargetDate = new Date("2027-09-15T18:00:00").getTime();
+let editingRsvpId = null;
+let pendingExistingRsvp = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) {
@@ -1252,8 +1268,14 @@ async function submitRSVP(event) {
     custom_answers: customAnswers
   };
 
+  const isEditMode = editingRsvpId !== null;
+  const endpoint = isEditMode ? '/api/rsvp/update' : '/api/rsvp';
+  if (isEditMode) {
+    payload.rsvp_id = editingRsvpId;
+  }
+
   try {
-    const response = await fetch('/api/rsvp', {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -1264,6 +1286,7 @@ async function submitRSVP(event) {
     if (response.ok && data.success) {
       try {
         localStorage.setItem('wedding_rsvp_registered', JSON.stringify({
+          id: data.id || editingRsvpId,
           first_name: firstName,
           last_name: lastName,
           phone: phone,
@@ -1281,10 +1304,21 @@ async function submitRSVP(event) {
         });
       }
 
+      const successTitleEl = document.querySelector('#rsvp-success [data-i18n="success_title"]');
+      const successDescEl = document.querySelector('#rsvp-success [data-i18n="success_desc"]');
+      if (successTitleEl) {
+        successTitleEl.textContent = isEditMode ? dict.updated_title : dict.success_title;
+      }
+      if (successDescEl) {
+        successDescEl.textContent = isEditMode ? dict.updated_desc : dict.success_desc;
+      }
+
+      exitEditModeState();
       document.getElementById("rsvp-form").classList.add("hidden");
       document.getElementById("rsvp-already-registered").classList.add("hidden");
       document.getElementById("rsvp-success").classList.remove("hidden");
     } else if (response.status === 409 && data.error === 'already_registered') {
+      pendingExistingRsvp = data.existing || null;
       showAlreadyRegisteredCard(data.reason, data.existing);
     } else {
       alert("Ошибка отправки: " + (data.error || "Пожалуйста, проверьте данные"));
@@ -1294,7 +1328,14 @@ async function submitRSVP(event) {
     alert("Не удалось отправить форму. Проверьте соединение с сервером.");
   } finally {
     btn.disabled = false;
-    btn.innerHTML = originalText;
+    if (editingRsvpId === null) {
+      btn.innerHTML = originalText;
+      const submitSpan = btn.querySelector('[data-i18n="btn_submit_rsvp"]');
+      if (submitSpan) submitSpan.textContent = dict.btn_submit_rsvp;
+    } else {
+      btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i><span>${escapeHtmlSafe(dict.btn_save_changes)}</span>`;
+      if (window.lucide) lucide.createIcons();
+    }
   }
 }
 
@@ -1362,18 +1403,20 @@ async function checkRsvpDuplicateField(mode) {
     if (!res.ok) return;
     const data = await res.json();
     if (data.registered) {
+      pendingExistingRsvp = data.existing || null;
+      const editBtnHtml = ` <button type="button" onclick="editExistingRSVP()" class="underline font-semibold hover:text-amber-950 ml-1">${escapeHtmlSafe(dict.btn_load_and_edit)}</button>`;
       if (mode === 'name' && data.reason === 'name') {
         const box = document.getElementById("name-duplicate-hint");
         const txt = document.getElementById("name-duplicate-hint-text");
         if (box && txt) {
-          txt.textContent = dict.inline_dup_name;
+          txt.innerHTML = escapeHtmlSafe(dict.inline_dup_name) + editBtnHtml;
           box.classList.remove("hidden");
         }
       } else if (mode === 'phone' && data.reason === 'phone') {
         const box = document.getElementById("phone-duplicate-hint");
         const txt = document.getElementById("phone-duplicate-hint-text");
         if (box && txt) {
-          txt.textContent = dict.inline_dup_phone;
+          txt.innerHTML = escapeHtmlSafe(dict.inline_dup_phone) + editBtnHtml;
           box.classList.remove("hidden");
         }
       }
@@ -1385,6 +1428,9 @@ async function checkRsvpDuplicateField(mode) {
 }
 
 function showAlreadyRegisteredCard(reason, existing) {
+  if (existing) {
+    pendingExistingRsvp = existing;
+  }
   const dict = translations[currentLang] || translations.ru;
   const reasonEl = document.getElementById("already-reg-reason");
   const detailsEl = document.getElementById("already-reg-details");
@@ -1455,12 +1501,120 @@ async function restoreSavedRegistrationState() {
   }
 }
 
+function exitEditModeState() {
+  editingRsvpId = null;
+  const banner = document.getElementById("rsvp-edit-banner");
+  if (banner) banner.classList.add("hidden");
+  const dict = translations[currentLang] || translations.ru;
+  const btn = document.getElementById("btn-submit");
+  if (btn) {
+    btn.innerHTML = `<i data-lucide="send" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i><span data-i18n="btn_submit_rsvp">${escapeHtmlSafe(dict.btn_submit_rsvp)}</span>`;
+    if (window.lucide) lucide.createIcons();
+  }
+}
+
+function editExistingRSVP() {
+  const rec = pendingExistingRsvp;
+  if (!rec) return;
+
+  const dict = translations[currentLang] || translations.ru;
+  editingRsvpId = rec.id || null;
+
+  document.getElementById("first_name").value = rec.first_name || "";
+  document.getElementById("last_name").value = rec.last_name || "";
+
+  const rawPhone = rec.phone || "";
+  const digits = rawPhone.replace(/\D/g, "");
+  if (rawPhone.trim().startsWith("+7") || (digits.length === 11 && (digits.startsWith("7") || digits.startsWith("8")))) {
+    setPhoneFormat('ru');
+  } else if (digits.startsWith("05")) {
+    setPhoneFormat('il_local');
+  } else {
+    setPhoneFormat('il_intl');
+  }
+  document.getElementById("phone").value = rawPhone;
+  formatPhoneNumber();
+
+  const att = rec.attendance === 'declined' ? 'declined' : 'attending';
+  const radio = document.querySelector(`input[name="attendance"][value="${att}"]`);
+  if (radio) radio.checked = true;
+  toggleGuestCount(att === 'attending');
+
+  const customAnswers = rec.custom_answers || {};
+
+  // Pre-fill children
+  const childrenData = customAnswers.children_names;
+  const childrenCount = childrenData ? Number(childrenData.count || 0) : 0;
+  const childrenEl = document.getElementById("children_count");
+  if (childrenEl) childrenEl.value = String(childrenCount);
+  renderChildrenInputs();
+  if (childrenData && childrenData.value && isNaN(Number(childrenData.value))) {
+    const names = String(childrenData.value).split(",").map(s => s.trim()).filter(Boolean);
+    document.querySelectorAll(".children-name-input").forEach((inp, idx) => {
+      if (names[idx]) inp.value = names[idx];
+    });
+  }
+
+  // Pre-fill +1 / additional guests
+  const plusOneData = customAnswers.companion_name;
+  const plusOneCount = plusOneData ? Number(plusOneData.count || 0) : 0;
+  const plusOneEl = document.getElementById("plus_one_count");
+  if (plusOneEl) plusOneEl.value = String(plusOneCount);
+  renderPlusOneInputs();
+  if (plusOneData && plusOneData.value && isNaN(Number(plusOneData.value))) {
+    const names = String(plusOneData.value).split(",").map(s => s.trim()).filter(Boolean);
+    document.querySelectorAll(".plus-one-name-input").forEach((inp, idx) => {
+      if (names[idx]) inp.value = names[idx];
+    });
+  }
+
+  updateTotalGuestsBadge();
+
+  // Pre-fill custom fields
+  const customFields = (weddingConfig && Array.isArray(weddingConfig.rsvp_custom_fields))
+    ? weddingConfig.rsvp_custom_fields
+    : [];
+  customFields.forEach(f => {
+    const el = document.querySelector(`[data-custom-id="${CSS.escape(f.id)}"]`);
+    if (!el) return;
+    const savedField = customAnswers[f.id];
+    const val = savedField && typeof savedField === 'object' ? (savedField.value || '') : (savedField || '');
+    if (el.type === "checkbox") {
+      el.checked = (val === "Да" || val === "כן" || val === true);
+    } else if (val !== "") {
+      el.value = val;
+    }
+  });
+
+  document.getElementById("message").value = rec.message || "";
+
+  clearDuplicateHints();
+  const banner = document.getElementById("rsvp-edit-banner");
+  if (banner) banner.classList.remove("hidden");
+
+  const btn = document.getElementById("btn-submit");
+  if (btn) {
+    btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i><span>${escapeHtmlSafe(dict.btn_save_changes)}</span>`;
+  }
+
+  document.getElementById("rsvp-already-registered").classList.add("hidden");
+  document.getElementById("rsvp-success").classList.add("hidden");
+  document.getElementById("rsvp-form").classList.remove("hidden");
+  if (window.lucide) lucide.createIcons();
+}
+
+function cancelEditMode() {
+  resetRSVPForm();
+}
+
 function backToRSVPForm() {
+  exitEditModeState();
   document.getElementById("rsvp-already-registered").classList.add("hidden");
   document.getElementById("rsvp-form").classList.remove("hidden");
 }
 
 function resetRSVPForm() {
+  exitEditModeState();
   document.getElementById("rsvp-form").reset();
   const childrenContainer = document.getElementById("children_inputs_container");
   const plusOneContainer = document.getElementById("plus_one_inputs_container");
@@ -1469,6 +1623,11 @@ function resetRSVPForm() {
   renderChildrenInputs();
   renderPlusOneInputs();
   clearDuplicateHints();
+  const dict = translations[currentLang] || translations.ru;
+  const successTitleEl = document.querySelector('#rsvp-success [data-i18n="success_title"]');
+  const successDescEl = document.querySelector('#rsvp-success [data-i18n="success_desc"]');
+  if (successTitleEl) successTitleEl.textContent = dict.success_title;
+  if (successDescEl) successDescEl.textContent = dict.success_desc;
   document.getElementById("rsvp-form").classList.remove("hidden");
   document.getElementById("rsvp-success").classList.add("hidden");
   document.getElementById("rsvp-already-registered").classList.add("hidden");

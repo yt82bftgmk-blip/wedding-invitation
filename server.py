@@ -103,31 +103,68 @@ def build_full_name_key(first_name, last_name):
     return f"{fn}|{ln}"
 
 
-def find_duplicate_rsvp(cursor, first_name="", last_name="", phone=""):
+def find_duplicate_rsvp(cursor, first_name="", last_name="", phone="", exclude_id=None):
     """Check if an RSVP already exists by normalized phone or normalized full name."""
+    select_cols = (
+        "id, first_name, last_name, phone, attendance, guests_count, "
+        "message, custom_answers, created_at"
+    )
     norm_phone = normalize_phone(phone)
     if norm_phone:
-        cursor.execute(
-            "SELECT id, first_name, last_name, phone, attendance, guests_count, created_at "
-            "FROM rsvps WHERE phone_normalized = ? LIMIT 1",
-            (norm_phone,)
-        )
+        if exclude_id is not None:
+            cursor.execute(
+                f"SELECT {select_cols} FROM rsvps WHERE phone_normalized = ? AND id != ? LIMIT 1",
+                (norm_phone, exclude_id)
+            )
+        else:
+            cursor.execute(
+                f"SELECT {select_cols} FROM rsvps WHERE phone_normalized = ? LIMIT 1",
+                (norm_phone,)
+            )
         row = cursor.fetchone()
         if row:
             return "phone", row
 
     full_name_key = build_full_name_key(first_name, last_name)
     if full_name_key:
-        cursor.execute(
-            "SELECT id, first_name, last_name, phone, attendance, guests_count, created_at "
-            "FROM rsvps WHERE full_name_normalized = ? LIMIT 1",
-            (full_name_key,)
-        )
+        if exclude_id is not None:
+            cursor.execute(
+                f"SELECT {select_cols} FROM rsvps WHERE full_name_normalized = ? AND id != ? LIMIT 1",
+                (full_name_key, exclude_id)
+            )
+        else:
+            cursor.execute(
+                f"SELECT {select_cols} FROM rsvps WHERE full_name_normalized = ? LIMIT 1",
+                (full_name_key,)
+            )
         row = cursor.fetchone()
         if row:
             return "name", row
 
     return None, None
+
+
+def serialize_existing_rsvp(row):
+    if not row:
+        return None
+    raw_custom = row[7]
+    try:
+        custom_answers = json.loads(raw_custom) if raw_custom else {}
+    except Exception:
+        custom_answers = {}
+    if not isinstance(custom_answers, dict):
+        custom_answers = {}
+    return {
+        "id": row[0],
+        "first_name": row[1],
+        "last_name": row[2],
+        "phone": row[3],
+        "attendance": row[4],
+        "guests_count": row[5],
+        "message": row[6] or "",
+        "custom_answers": custom_answers,
+        "created_at": row[8],
+    }
 
 
 def init_db():
@@ -174,7 +211,7 @@ def init_db():
     conn.close()
 
 
-def send_telegram_notification(rsvp_data):
+def send_telegram_notification(rsvp_data, is_update=False, prev_guests_count=None):
     cfg = load_config()
     tg = cfg.get("telegram", {})
     if not tg.get("enabled") or not tg.get("bot_token") or not tg.get("chat_id"):
@@ -195,14 +232,24 @@ def send_telegram_notification(rsvp_data):
 
     status_icon = "🎉" if rsvp_data.get("attendance") == "attending" else "💔"
     status_text = "БУДЕТ ПРИСУТСТВОВАТЬ" if rsvp_data.get("attendance") == "attending" else "НЕ СМОЖЕТ ПРИЙТИ"
+    header = (
+        f"✏️ <b>Гость обновил свою запись!</b>"
+        if is_update
+        else f"{status_icon} <b>Новый ответ на приглашение!</b>"
+    )
+    new_count = rsvp_data.get("guests_count", 1)
+    if is_update and prev_guests_count is not None and prev_guests_count != new_count:
+        guests_line = f"👥 <b>Количество человек:</b> {prev_guests_count} → <b>{new_count}</b>"
+    else:
+        guests_line = f"👥 <b>Количество человек:</b> {new_count}"
 
     msg_lines = [
-        f"{status_icon} <b>Новый ответ на приглашение!</b>",
+        header,
         "",
         f"👤 <b>Гость:</b> {rsvp_data.get('first_name', '')} {rsvp_data.get('last_name', '')}",
         f"📞 <b>Телефон:</b> {rsvp_data.get('phone', '')}",
-        f"📊 <b>Статус:</b> {status_text}",
-        f"👥 <b>Количество человек:</b> {rsvp_data.get('guests_count', 1)}",
+        f"📊 <b>Статус:</b> {status_icon} {status_text}",
+        guests_line,
     ]
 
     if rsvp_data.get("message"):
@@ -448,6 +495,8 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             self.handle_post_rsvp(payload)
         elif path == "/api/rsvp/check":
             self.handle_check_rsvp(payload)
+        elif path == "/api/rsvp/update":
+            self.handle_update_rsvp(payload)
         elif path == "/api/telegram-webhook":
             self.handle_telegram_webhook(payload)
         elif path == "/api/setup-webhook":
@@ -504,16 +553,109 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             self.send_json({
                 "registered": True,
                 "reason": reason,
-                "existing": {
-                    "first_name": existing[1],
-                    "last_name": existing[2],
-                    "attendance": existing[4],
-                    "guests_count": existing[5],
-                    "created_at": existing[6],
-                }
+                "existing": serialize_existing_rsvp(existing),
             })
         else:
             self.send_json({"registered": False})
+
+    def handle_update_rsvp(self, payload):
+        rsvp_id = payload.get("rsvp_id")
+        first_name = payload.get("first_name", "").strip()
+        last_name = payload.get("last_name", "").strip()
+        phone = payload.get("phone", "").strip()
+        attendance = payload.get("attendance", "attending")
+        guests_count = int(payload.get("guests_count", 1))
+        message = payload.get("message", "").strip()
+        language = payload.get("language", "ru")
+        custom_answers = payload.get("custom_answers")
+        if not isinstance(custom_answers, dict):
+            custom_answers = {}
+        custom_answers_json = json.dumps(custom_answers, ensure_ascii=False)
+
+        if not first_name or not last_name or not phone:
+            self.send_json({"error": "First name, last name, and phone are required"}, status=400)
+            return
+
+        phone_norm = normalize_phone(phone)
+        full_name_norm = build_full_name_key(first_name, last_name)
+
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+
+            target_row = None
+            if rsvp_id is not None:
+                cursor.execute(
+                    "SELECT id, guests_count FROM rsvps WHERE id = ? LIMIT 1",
+                    (int(rsvp_id),)
+                )
+                target_row = cursor.fetchone()
+
+            if not target_row:
+                _, dup_row = find_duplicate_rsvp(
+                    cursor, first_name=first_name, last_name=last_name, phone=phone
+                )
+                if dup_row:
+                    target_row = (dup_row[0], dup_row[5])
+
+            if not target_row:
+                conn.close()
+                self.send_json({"error": "Existing RSVP not found"}, status=404)
+                return
+
+            target_id, prev_guests_count = target_row
+
+            conflict_reason, conflict_row = find_duplicate_rsvp(
+                cursor, first_name=first_name, last_name=last_name, phone=phone, exclude_id=target_id
+            )
+            if conflict_reason and conflict_row:
+                conn.close()
+                self.send_json({
+                    "error": "already_registered",
+                    "reason": conflict_reason,
+                    "existing": serialize_existing_rsvp(conflict_row),
+                }, status=409)
+                return
+
+            cursor.execute("""
+                UPDATE rsvps
+                SET first_name = ?, last_name = ?, phone = ?, attendance = ?, guests_count = ?,
+                    message = ?, language = ?, custom_answers = ?, phone_normalized = ?, full_name_normalized = ?
+                WHERE id = ?
+            """, (
+                first_name, last_name, phone, attendance, guests_count,
+                message, language, custom_answers_json, phone_norm, full_name_norm, target_id
+            ))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            self.send_json({"error": f"Database error: {str(e)}"}, status=500)
+            return
+
+        rsvp_data = {
+            "id": target_id,
+            "first_name": first_name,
+            "last_name": last_name,
+            "phone": phone,
+            "attendance": attendance,
+            "guests_count": guests_count,
+            "message": message,
+            "language": language,
+            "custom_answers": custom_answers
+        }
+
+        telegram_sent = send_telegram_notification(
+            rsvp_data, is_update=True, prev_guests_count=prev_guests_count
+        )
+
+        self.send_json({
+            "success": True,
+            "updated": True,
+            "id": target_id,
+            "telegram_sent": telegram_sent,
+            "rsvp": rsvp_data,
+            "message": "RSVP updated successfully"
+        })
 
     def handle_post_rsvp(self, payload):
         first_name = payload.get("first_name", "").strip()
@@ -546,13 +688,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                 self.send_json({
                     "error": "already_registered",
                     "reason": dup_reason,
-                    "existing": {
-                        "first_name": existing[1],
-                        "last_name": existing[2],
-                        "attendance": existing[4],
-                        "guests_count": existing[5],
-                        "created_at": existing[6],
-                    }
+                    "existing": serialize_existing_rsvp(existing),
                 }, status=409)
                 return
 
