@@ -318,8 +318,26 @@
         <div class="space-y-12">
           <!-- Chapter 1 -->
           <div class="photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row items-center gap-8">
-            <div class="w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md shrink-0">
-              <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80" alt="Первая встреча" class="w-full h-full object-cover">
+            <div class="w-full md:w-1/2 space-y-2 shrink-0">
+              <div class="relative h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md group">
+                <img id="story-img-0" src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80" alt="Первая встреча" class="w-full h-full object-cover">
+                <div class="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+                  <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 hover:bg-white text-stone-900 text-xs font-semibold shadow-lg border border-[#E8DFC9] transition-all">
+                    <i data-lucide="camera" class="w-3.5 h-3.5 text-champagne-gold"></i>
+                    <span>Сменить фото</span>
+                    <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'story', 0)">
+                  </label>
+                  <button type="button" onclick="toggleStoryUrlInput(0)" class="p-1.5 rounded-full bg-white/95 hover:bg-white text-stone-700 shadow-lg border border-[#E8DFC9] transition-all" title="Вставить ссылку на фото">
+                    <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="story-url-box-0" class="hidden bg-white/95 p-2 rounded-xl border border-[#E8DFC9] shadow-sm">
+                <div class="flex items-center gap-2">
+                  <input type="text" id="cms-photo-story-0" placeholder="https://..." oninput="updateStoryPhoto(0, this.value)" class="flex-1 px-3 py-1 rounded-lg border border-stone-200 text-xs font-mono bg-[#FAF7F2]">
+                  <button type="button" onclick="toggleStoryUrlInput(0)" class="text-xs text-stone-500 hover:text-stone-900 px-2 py-1">OK</button>
+                </div>
+              </div>
             </div>
             <div class="w-full md:w-1/2 space-y-3 text-left">
               <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
@@ -335,8 +353,26 @@
 
           <!-- Chapter 2 -->
           <div class="photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row-reverse items-center gap-8">
-            <div class="w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md shrink-0">
-              <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80" alt="Первое путешествие" class="w-full h-full object-cover">
+            <div class="w-full md:w-1/2 space-y-2 shrink-0">
+              <div class="relative h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md group">
+                <img id="story-img-1" src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80" alt="Первое путешествие" class="w-full h-full object-cover">
+                <div class="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+                  <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 hover:bg-white text-stone-900 text-xs font-semibold shadow-lg border border-[#E8DFC9] transition-all">
+                    <i data-lucide="camera" class="w-3.5 h-3.5 text-champagne-gold"></i>
+                    <span>Сменить фото</span>
+                    <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'story', 1)">
+                  </label>
+                  <button type="button" onclick="toggleStoryUrlInput(1)" class="p-1.5 rounded-full bg-white/95 hover:bg-white text-stone-700 shadow-lg border border-[#E8DFC9] transition-all" title="Вставить ссылку на фото">
+                    <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="story-url-box-1" class="hidden bg-white/95 p-2 rounded-xl border border-[#E8DFC9] shadow-sm">
+                <div class="flex items-center gap-2">
+                  <input type="text" id="cms-photo-story-1" placeholder="https://..." oninput="updateStoryPhoto(1, this.value)" class="flex-1 px-3 py-1 rounded-lg border border-stone-200 text-xs font-mono bg-[#FAF7F2]">
+                  <button type="button" onclick="toggleStoryUrlInput(1)" class="text-xs text-stone-500 hover:text-stone-900 px-2 py-1">OK</button>
+                </div>
+              </div>
             </div>
             <div class="w-full md:w-1/2 space-y-3 text-left">
               <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
@@ -352,8 +388,26 @@
 
           <!-- Chapter 3 -->
           <div class="photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row items-center gap-8">
-            <div class="w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md shrink-0">
-              <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80" alt="Она сказала Да" class="w-full h-full object-cover">
+            <div class="w-full md:w-1/2 space-y-2 shrink-0">
+              <div class="relative h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md group">
+                <img id="story-img-2" src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80" alt="Она сказала Да" class="w-full h-full object-cover">
+                <div class="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+                  <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 hover:bg-white text-stone-900 text-xs font-semibold shadow-lg border border-[#E8DFC9] transition-all">
+                    <i data-lucide="camera" class="w-3.5 h-3.5 text-champagne-gold"></i>
+                    <span>Сменить фото</span>
+                    <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'story', 2)">
+                  </label>
+                  <button type="button" onclick="toggleStoryUrlInput(2)" class="p-1.5 rounded-full bg-white/95 hover:bg-white text-stone-700 shadow-lg border border-[#E8DFC9] transition-all" title="Вставить ссылку на фото">
+                    <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="story-url-box-2" class="hidden bg-white/95 p-2 rounded-xl border border-[#E8DFC9] shadow-sm">
+                <div class="flex items-center gap-2">
+                  <input type="text" id="cms-photo-story-2" placeholder="https://..." oninput="updateStoryPhoto(2, this.value)" class="flex-1 px-3 py-1 rounded-lg border border-stone-200 text-xs font-mono bg-[#FAF7F2]">
+                  <button type="button" onclick="toggleStoryUrlInput(2)" class="text-xs text-stone-500 hover:text-stone-900 px-2 py-1">OK</button>
+                </div>
+              </div>
             </div>
             <div class="w-full md:w-1/2 space-y-3 text-left">
               <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
@@ -607,14 +661,28 @@
             </div>
           </div>
 
-          <div class="space-y-2.5">
-            <div class="flex items-center justify-between gap-2">
-              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 block" data-i18n="field_guests_count">Количество человек</label>
-              <button type="button" onclick="addGuestOption()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-champagne-gold text-white text-[11px] font-semibold transition-all">
-                <span>+ Добавить вариант</span>
-              </button>
+          <!-- Guest composition preview (children & +1 companion, optional) -->
+          <div class="space-y-4 p-4 rounded-2xl border border-[#E8DFC9] bg-[#FAF7F2]/50">
+            <div class="space-y-1">
+              <div class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_guests_count">Количество человек</div>
+              <p class="text-[11px] text-stone-500" data-i18n="guests_composition_hint">Ваше имя и фамилия обязательны выше. При желании укажите, кто придёт с вами:</p>
             </div>
-            <div id="admin-guest-options-list" class="space-y-2"></div>
+
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
+                <span data-i18n="field_children_names">Если есть дети — имена детей</span>
+                <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
+              </label>
+              <input type="text" disabled placeholder="Например: Ариэль, Майя" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-400">
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
+                <span data-i18n="field_plus_one">Зову кого-то ещё (имя и фамилия)</span>
+                <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
+              </label>
+              <input type="text" disabled placeholder="Например: Анна Коэн" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-400">
+            </div>
           </div>
 
           <!-- Dynamic Custom RSVP Fields Builder -->
@@ -769,8 +837,17 @@
         <span id="modal-badge-text">Воспоминание Назара и Софии</span>
       </div>
 
-      <div class="w-full h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md">
+      <div class="relative w-full h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md">
         <img id="modal-photo-img" src="" alt="Story" class="w-full h-full object-cover">
+        <label class="cursor-pointer absolute top-3 right-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 hover:bg-white text-stone-900 text-xs font-semibold shadow-lg border border-[#E8DFC9] transition-all">
+          <i data-lucide="camera" class="w-3.5 h-3.5 text-champagne-gold"></i>
+          <span>Заменить фото</span>
+          <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'gallery-replace', activeStoryIndex)">
+        </label>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <input type="text" id="modal-photo-url" placeholder="https://..." oninput="updateModalPhotoUrl(this.value)" class="flex-1 px-3 py-1.5 rounded-xl border border-stone-200 text-xs font-mono bg-[#FAF7F2]">
       </div>
 
       <div class="space-y-2">
@@ -941,6 +1018,9 @@
         choice_yes: "Я обязательно приду!",
         choice_no: "К сожалению, не смогу",
         field_guests_count: "Количество человек",
+        guests_composition_hint: "Ваше имя и фамилия обязательны выше. При желании укажите, кто придёт с вами:",
+        field_children_names: "Если есть дети — имена детей",
+        field_plus_one: "Зову кого-то ещё (имя и фамилия)",
         guest_opt_1: "1 человек (только я)",
         guest_opt_2: "2 человека (+1 гость)",
         guest_opt_3: "3 человека",
@@ -1010,6 +1090,9 @@
         choice_yes: "מגיע/ה בשמחה!",
         choice_no: "לצערי לא אוכל להגיע",
         field_guests_count: "מספר אורחים",
+        guests_composition_hint: "השם הפרטי ושם המשפחה שלכם ממולאים למעלה (חובה). אם מגיעים אתכם ילדים או מלווה, ציינו כאן:",
+        field_children_names: "אם יש ילדים — שמות הילדים",
+        field_plus_one: "מזמין/ה מישהו נוסף (שם ושם משפחה)",
         guest_opt_1: "אורח 1 (רק אני)",
         guest_opt_2: "2 אורחים (אני ובן/בת זוג)",
         guest_opt_3: "3 אורחים",
@@ -1294,8 +1377,15 @@
           }
         });
 
+        const DEFAULT_STORY_PHOTOS = [
+          "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80"
+        ];
+        const loadedStory = (cfg.photos && Array.isArray(cfg.photos.story)) ? cfg.photos.story : [];
         editableConfig.photos = {
           hero: (cfg.photos && cfg.photos.hero) || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+          story: DEFAULT_STORY_PHOTOS.map((def, i) => loadedStory[i] || def),
           gallery: Array.isArray(cfg.photos && cfg.photos.gallery) ? [...cfg.photos.gallery] : [],
           stories: Array.isArray(cfg.photos && cfg.photos.stories) ? cfg.photos.stories : []
         };
@@ -1408,6 +1498,15 @@
       if (p.hero) {
         document.getElementById("hero-img").src = p.hero;
         document.getElementById("cms-photo-hero").value = p.hero;
+      }
+
+      if (Array.isArray(p.story)) {
+        p.story.forEach((url, idx) => {
+          const img = document.getElementById(`story-img-${idx}`);
+          const inp = document.getElementById(`cms-photo-story-${idx}`);
+          if (img && url) img.src = url;
+          if (inp && url) inp.value = url;
+        });
       }
     }
 
@@ -1786,9 +1885,15 @@
         const card = document.createElement("div");
         card.className = "photo-story-card group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden";
         card.innerHTML = `
-          <button type="button" onclick="removeGalleryPhoto(${idx})" class="absolute top-5 right-5 z-20 w-7 h-7 bg-stone-900/80 hover:bg-rose-600 text-white rounded-full flex items-center justify-center shadow-md transition-colors" title="Удалить фото">
-            <i data-lucide="x" class="w-3.5 h-3.5"></i>
-          </button>
+          <div class="absolute top-5 right-5 z-20 flex items-center gap-1.5">
+            <label onclick="event.stopPropagation()" class="cursor-pointer w-7 h-7 bg-stone-900/80 hover:bg-champagne-gold text-white rounded-full flex items-center justify-center shadow-md transition-colors" title="Заменить фото">
+              <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+              <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'gallery-replace', ${idx})">
+            </label>
+            <button type="button" onclick="removeGalleryPhoto(${idx})" class="w-7 h-7 bg-stone-900/80 hover:bg-rose-600 text-white rounded-full flex items-center justify-center shadow-md transition-colors" title="Удалить фото">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
           <div class="relative overflow-hidden rounded-xl cursor-pointer" onclick="openPhotoStory(${idx})">
             <img src="${src}" alt="${st.title_ru}" class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105">
             <div class="absolute bottom-2 right-2 bg-stone-900/75 backdrop-blur-sm text-white text-[10px] font-medium px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
@@ -1837,7 +1942,36 @@
       markDirty();
     }
 
-    async function uploadPhoto(input, target) {
+    function toggleStoryUrlInput(idx) {
+      const box = document.getElementById(`story-url-box-${idx}`);
+      if (box) box.classList.toggle("hidden");
+    }
+
+    function updateStoryPhoto(idx, url) {
+      const clean = (url || "").trim();
+      if (!Array.isArray(editableConfig.photos.story)) editableConfig.photos.story = [];
+      editableConfig.photos.story[idx] = clean;
+      const img = document.getElementById(`story-img-${idx}`);
+      if (img && clean) img.src = clean;
+      markDirty();
+    }
+
+    function updateModalPhotoUrl(url) {
+      const clean = (url || "").trim();
+      if (activeStoryIndex === null || activeStoryIndex === undefined) return;
+      if (editableConfig.photos.gallery && activeStoryIndex < editableConfig.photos.gallery.length) {
+        editableConfig.photos.gallery[activeStoryIndex] = clean;
+      }
+      if (photoStories[activeStoryIndex]) {
+        photoStories[activeStoryIndex].image = clean;
+      }
+      const img = document.getElementById("modal-photo-img");
+      if (img && clean) img.src = clean;
+      renderGallery();
+      markDirty();
+    }
+
+    async function uploadPhoto(input, target, idx) {
       const file = input.files[0];
       if (!file) return;
 
@@ -1860,6 +1994,23 @@
               editableConfig.photos.hero = data.url;
               document.getElementById("hero-img").src = data.url;
               document.getElementById("cms-photo-hero").value = data.url;
+            } else if (target === 'story' && typeof idx === 'number') {
+              if (!Array.isArray(editableConfig.photos.story)) editableConfig.photos.story = [];
+              editableConfig.photos.story[idx] = data.url;
+              const img = document.getElementById(`story-img-${idx}`);
+              const inp = document.getElementById(`cms-photo-story-${idx}`);
+              if (img) img.src = data.url;
+              if (inp) inp.value = data.url;
+            } else if (target === 'gallery-replace' && typeof idx === 'number') {
+              editableConfig.photos.gallery[idx] = data.url;
+              if (photoStories[idx]) photoStories[idx].image = data.url;
+              renderGallery();
+              if (activeStoryIndex === idx) {
+                const mImg = document.getElementById("modal-photo-img");
+                const mUrl = document.getElementById("modal-photo-url");
+                if (mImg) mImg.src = data.url;
+                if (mUrl) mUrl.value = data.url;
+              }
             } else if (target === 'gallery') {
               editableConfig.photos.gallery.push(data.url);
               renderGallery();
@@ -1918,6 +2069,8 @@
       const modal = document.getElementById("photo-story-modal");
       const card = document.getElementById("photo-story-card");
       document.getElementById("modal-photo-img").src = story.image;
+      const modalUrlInput = document.getElementById("modal-photo-url");
+      if (modalUrlInput) modalUrlInput.value = story.image || "";
       document.getElementById("modal-photo-title").textContent = isHe ? story.title_he : story.title_ru;
       document.getElementById("modal-photo-desc").textContent = isHe ? story.story_he : story.story_ru;
       document.getElementById("modal-badge-text").textContent = isHe ? "זיכרון של נזר וסופיה" : "Воспоминание Назара и Софии";

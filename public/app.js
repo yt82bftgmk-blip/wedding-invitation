@@ -71,6 +71,9 @@ const translations = {
     choice_yes: "Я обязательно приду!",
     choice_no: "К сожалению, не смогу",
     field_guests_count: "Количество человек",
+    guests_composition_hint: "Ваше имя и фамилия обязательны выше. При желании укажите, кто придёт с вами:",
+    field_children_names: "Если есть дети — имена детей",
+    field_plus_one: "Зову кого-то ещё (имя и фамилия)",
     guest_opt_1: "1 человек (только я)",
     guest_opt_2: "2 человека (+1 гость)",
     guest_opt_3: "3 человека",
@@ -158,6 +161,9 @@ const translations = {
     choice_yes: "מגיע/ה בשמחה!",
     choice_no: "לצערי לא אוכל להגיע",
     field_guests_count: "מספר אורחים",
+    guests_composition_hint: "השם הפרטי ושם המשפחה שלכם ממולאים למעלה (חובה). אם מגיעים אתכם ילדים או מלווה, ציינו כאן:",
+    field_children_names: "אם יש ילדים — שמות הילדים",
+    field_plus_one: "מזמין/ה מישהו נוסף (שם ושם משפחה)",
     guest_opt_1: "אורח 1 (רק אני)",
     guest_opt_2: "2 אורחים (אני ובן/בת זוג)",
     guest_opt_3: "3 אורחים",
@@ -467,6 +473,16 @@ function applyPhotos() {
     if (heroImg) heroImg.src = weddingPhotos.hero;
   }
 
+  // Story Chapter Photos
+  if (Array.isArray(weddingPhotos.story)) {
+    weddingPhotos.story.forEach((url, idx) => {
+      if (url) {
+        const storyImg = document.getElementById(`story-img-${idx}`);
+        if (storyImg) storyImg.src = url;
+      }
+    });
+  }
+
   // Gallery Photos
   if (weddingPhotos.gallery && weddingPhotos.gallery.length > 0) {
     const galleryGrid = document.getElementById("gallery-grid");
@@ -619,14 +635,20 @@ function setLanguage(lang) {
   const fName = document.getElementById('first_name');
   const lName = document.getElementById('last_name');
   const msg = document.getElementById('message');
+  const childrenEl = document.getElementById('children_names');
+  const plusOneEl = document.getElementById('plus_one_name');
   if (lang === 'he') {
     if (fName) fName.placeholder = "דוד";
     if (lName) lName.placeholder = "לוי";
     if (msg) msg.placeholder = "נזר וסופיה היקרים, מאחלים לכם המון מזל טוב...";
+    if (childrenEl) childrenEl.placeholder = "לדוגמה: אריאל, מאיה";
+    if (plusOneEl) plusOneEl.placeholder = "לדוגמה: אנה כהן";
   } else {
     if (fName) fName.placeholder = "Давид";
     if (lName) lName.placeholder = "Леви";
     if (msg) msg.placeholder = "Дорогие Назар и София! От всей души поздравляем вас...";
+    if (childrenEl) childrenEl.placeholder = "Например: Ариэль, Майя";
+    if (plusOneEl) plusOneEl.placeholder = "Например: Анна Коэн";
   }
 
   applyConfig();
@@ -1003,10 +1025,33 @@ async function submitRSVP(event) {
   const lastName = document.getElementById("last_name").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const attendance = document.querySelector('input[name="attendance"]:checked').value;
-  const guestsCount = attendance === 'attending' ? parseInt(document.getElementById("guests_count").value) : 0;
+  const childrenEl = document.getElementById("children_names");
+  const plusOneEl = document.getElementById("plus_one_name");
+  const childrenNames = childrenEl ? childrenEl.value.trim() : "";
+  const plusOneName = plusOneEl ? plusOneEl.value.trim() : "";
+  const countList = (str) => str ? str.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).length : 0;
+  const guestsCount = attendance === 'attending'
+    ? (1 + countList(childrenNames) + countList(plusOneName))
+    : 0;
   const message = document.getElementById("message").value.trim();
 
   const customAnswers = {};
+  if (attendance === 'attending') {
+    if (childrenNames) {
+      customAnswers.children_names = {
+        label_ru: "Дети (имена)",
+        label_he: "שמות הילדים",
+        value: childrenNames
+      };
+    }
+    if (plusOneName) {
+      customAnswers.companion_name = {
+        label_ru: "С кем ещё (имя и фамилия)",
+        label_he: "אורח נוסף (שם ושם משפחה)",
+        value: plusOneName
+      };
+    }
+  }
   const customFields = (weddingConfig && Array.isArray(weddingConfig.rsvp_custom_fields))
     ? weddingConfig.rsvp_custom_fields
     : [];
