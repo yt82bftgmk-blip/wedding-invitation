@@ -244,6 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
   startCountdown();
   initMusicAutoPlay();
   initRsvpDuplicateCheck();
+  initScrollAnimations();
 });
 
 const MUSIC_TRACKS = [
@@ -564,7 +565,8 @@ function galleryPhotosToColumns(photos, container) {
     const cap = isHe ? `«${st.title_he}»` : `«${st.title_ru}»`;
 
     const card = document.createElement("div");
-    card.className = "photo-story-card cursor-pointer group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden active:scale-95 transition-transform";
+    card.className = "reveal-on-scroll photo-story-card cursor-pointer group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden active:scale-95 transition-transform";
+    card.style.setProperty("--reveal-delay", `${(idx % 4) * 80}ms`);
     card.setAttribute("onclick", `openPhotoStory(${idx})`);
 
     card.innerHTML = `
@@ -580,6 +582,7 @@ function galleryPhotosToColumns(photos, container) {
     container.appendChild(card);
   });
 
+  observeRevealElements(container);
   if (window.lucide) lucide.createIcons();
 }
 
@@ -1632,4 +1635,53 @@ function resetRSVPForm() {
   document.getElementById("rsvp-success").classList.add("hidden");
   document.getElementById("rsvp-already-registered").classList.add("hidden");
   toggleGuestCount(true);
+}
+
+let revealObserver = null;
+
+function observeRevealElements(root = document) {
+  const targets = root.querySelectorAll(".reveal-on-scroll, .reveal-icon");
+  if (!targets.length) return;
+
+  if (!("IntersectionObserver" in window)) {
+    targets.forEach(el => el.classList.add("is-visible"));
+    return;
+  }
+
+  if (!revealObserver) {
+    revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.12,
+      rootMargin: "0px 0px -30px 0px"
+    });
+  }
+
+  targets.forEach(el => {
+    if (!el.classList.contains("is-visible")) {
+      revealObserver.observe(el);
+    }
+  });
+}
+
+function initScrollAnimations() {
+  observeRevealElements(document);
+
+  const header = document.getElementById("main-header");
+  if (header) {
+    const updateHeader = () => {
+      if (window.scrollY > 30) {
+        header.classList.add("header-scrolled");
+      } else {
+        header.classList.remove("header-scrolled");
+      }
+    };
+    window.addEventListener("scroll", updateHeader, { passive: true });
+    updateHeader();
+  }
 }

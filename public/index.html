@@ -42,12 +42,12 @@
     }
   </script>
 
-  <link rel="stylesheet" href="/style.css?v=5">
+  <link rel="stylesheet" href="/style.css?v=6">
 </head>
 <body class="bg-[#FAF7F2] text-[#2D2926] font-sans antialiased selection:bg-champagne selection:text-white">
 
   <!-- Floating Romantic Music Player -->
-  <div id="music-player-container" class="fixed bottom-6 left-6 z-50">
+  <div id="music-player-container" class="fixed bottom-6 left-6 z-50 music-pill-enter">
     <button id="btn-toggle-music" onclick="toggleMusic()" class="flex items-center gap-3 px-4 py-2.5 rounded-full bg-white/95 backdrop-blur-md border border-[#D4AF37]/50 shadow-2xl text-stone-800 hover:scale-105 transition-all group">
       <!-- Spinning vinyl disk icon -->
       <div id="vinyl-icon" class="w-8 h-8 rounded-full bg-stone-900 border-2 border-champagne-gold flex items-center justify-center text-champagne-gold transition-transform shrink-0 animate-spin-slow">
@@ -67,7 +67,7 @@
   </div>
 
   <!-- Top Language Switcher Bar -->
-  <header class="fixed top-0 left-0 right-0 z-40 transition-all duration-300 backdrop-blur-md bg-[#FAF7F2]/90 border-b border-[#E8DFC9]/70">
+  <header id="main-header" class="fixed top-0 left-0 right-0 z-40 transition-all duration-300 backdrop-blur-md bg-[#FAF7F2]/90 border-b border-[#E8DFC9]/70">
     <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
       <a href="#hero" class="font-serif text-2xl font-bold tracking-wider text-stone-900 flex items-center gap-2">
         <span>N & S</span>
@@ -86,18 +86,18 @@
   </header>
 
   <!-- Hero Section -->
-  <section id="hero" class="relative min-h-screen flex items-center justify-center text-center px-4 pt-24 pb-20 overflow-hidden bg-gradient-to-b from-[#FAF7F2] via-[#F4EFE6] to-[#ECE5D8]">
+  <section id="hero" class="relative min-h-screen flex items-center justify-center text-center px-4 pt-24 pb-20 overflow-hidden bg-gradient-to-b from-[#FAF7F2] via-[#F4EFE6] to-[#EDE5D7]">
     <!-- Ambient glowing backgrounds -->
-    <div class="absolute top-1/4 -left-20 w-96 h-96 bg-champagne-gold/15 rounded-full blur-3xl -z-10"></div>
-    <div class="absolute bottom-1/4 -right-20 w-[450px] h-[450px] bg-rose-gold/15 rounded-full blur-3xl -z-10"></div>
+    <div class="ambient-orb-1 absolute top-1/4 -left-20 w-96 h-96 bg-champagne-gold/20 rounded-full blur-3xl -z-10"></div>
+    <div class="ambient-orb-2 absolute bottom-1/4 -right-20 w-[450px] h-[450px] bg-rose-gold/20 rounded-full blur-3xl -z-10"></div>
 
     <div class="max-w-3xl mx-auto space-y-8">
-      <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-champagne-gold/40 shadow-sm text-xs font-semibold tracking-widest text-champagne-gold uppercase">
+      <div class="hero-enter-1 inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-white/85 backdrop-blur-sm border border-champagne-gold/45 shadow-sm text-xs font-semibold tracking-widest text-champagne-gold uppercase">
         <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
         <span data-i18n="hero_badge">Приглашение на свадьбу</span>
       </div>
 
-      <div class="space-y-4">
+      <div class="hero-enter-2 space-y-4">
         <h1 class="font-serif text-5xl sm:text-7xl lg:text-8xl font-normal text-stone-900 leading-tight">
           <span id="names-title">Назар & София</span>
         </h1>
@@ -107,7 +107,7 @@
       </div>
 
       <!-- Hero Couple Photo with luxury frame -->
-      <div class="relative w-72 h-96 sm:w-80 sm:h-[440px] mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-white group">
+      <div class="hero-enter-3 hero-photo-frame relative w-72 h-96 sm:w-80 sm:h-[440px] mx-auto rounded-3xl overflow-hidden border-4 border-white group">
         <img 
           id="hero-img"
           src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80" 
@@ -123,7 +123,7 @@
       </div>
 
       <!-- Countdown Timer -->
-      <div class="bg-white/85 backdrop-blur-md p-6 rounded-3xl border border-[#E8DFC9] shadow-xl max-w-lg mx-auto">
+      <div class="hero-enter-4 bg-white/85 backdrop-blur-md p-6 rounded-3xl border border-[#E8DFC9] shadow-xl max-w-lg mx-auto">
         <div class="text-xs uppercase tracking-wider text-stone-500 font-semibold mb-4" data-i18n="timer_title">
           До торжества осталось:
         </div>
@@ -148,8 +148,8 @@
       </div>
 
       <!-- Quick RSVP Button -->
-      <div>
-        <a href="#rsvp" class="inline-flex items-center gap-2 px-8 py-4 bg-stone-900 text-white rounded-full text-base font-medium shadow-2xl hover:bg-champagne-gold hover:text-white transition-all transform hover:-translate-y-0.5">
+      <div class="hero-enter-5">
+        <a href="#rsvp" class="btn-shimmer inline-flex items-center gap-2 px-8 py-4 bg-stone-900 text-white rounded-full text-base font-medium shadow-2xl hover:bg-champagne-gold hover:text-white transition-all transform hover:-translate-y-0.5 active:scale-95">
           <i data-lucide="heart" class="w-5 h-5 text-rose-400"></i>
           <span data-i18n="btn_rsvp_hero">Подтвердить присутствие</span>
         </a>
@@ -160,21 +160,21 @@
   <!-- Story Section: Editorial Chapters with Photos -->
   <section id="story" class="py-24 px-4 bg-[#F5EFEB]/90 border-y border-[#E8DFC9]">
     <div class="max-w-4xl mx-auto space-y-16">
-      <div class="text-center space-y-3">
+      <div class="reveal-on-scroll text-center space-y-3">
         <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="story_tag">Как всё начиналось</span>
         <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="story_title">Наша история</h2>
-        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+        <div class="gold-divider"></div>
         <p class="text-stone-500 text-sm max-w-md mx-auto" data-i18n="story_subtitle">Каждый шаг приближал нас к этому счастливому дню</p>
       </div>
 
       <div class="space-y-12">
         <!-- Chapter 1 -->
-        <div class="photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row items-center gap-8">
+        <div class="reveal-on-scroll photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row items-center gap-8">
           <div class="w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md shrink-0">
             <img id="story-img-0" src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80" alt="Первая встреча" class="w-full h-full object-cover">
           </div>
           <div class="w-full md:w-1/2 space-y-3 text-left">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
+            <div class="reveal-icon inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
               <i data-lucide="compass" class="w-3.5 h-3.5"></i>
               <span data-i18n="story_event1_date">2023 год • Глава I</span>
             </div>
@@ -186,12 +186,12 @@
         </div>
 
         <!-- Chapter 2 -->
-        <div class="photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row-reverse items-center gap-8">
+        <div class="reveal-on-scroll photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row-reverse items-center gap-8">
           <div class="w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md shrink-0">
             <img id="story-img-1" src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80" alt="Первое путешествие" class="w-full h-full object-cover">
           </div>
           <div class="w-full md:w-1/2 space-y-3 text-left">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
+            <div class="reveal-icon inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
               <i data-lucide="plane" class="w-3.5 h-3.5"></i>
               <span data-i18n="story_event2_date">2024 год • Глава II</span>
             </div>
@@ -203,12 +203,12 @@
         </div>
 
         <!-- Chapter 3 -->
-        <div class="photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row items-center gap-8">
+        <div class="reveal-on-scroll photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row items-center gap-8">
           <div class="w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md shrink-0">
             <img id="story-img-2" src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80" alt="Она сказала Да" class="w-full h-full object-cover">
           </div>
           <div class="w-full md:w-1/2 space-y-3 text-left">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
+            <div class="reveal-icon inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
               <i data-lucide="gem" class="w-3.5 h-3.5"></i>
               <span data-i18n="story_event3_date">2025 год • Глава III</span>
             </div>
@@ -225,10 +225,10 @@
   <!-- Photo Gallery Section: Romantic Album Style -->
   <section class="py-24 px-4 bg-[#FAF7F2]">
     <div class="max-w-5xl mx-auto space-y-12">
-      <div class="text-center space-y-3">
+      <div class="reveal-on-scroll text-center space-y-3">
         <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="gallery_tag">Наши моменты</span>
         <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="gallery_title">Фотоальбом любви</h2>
-        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+        <div class="gold-divider"></div>
         <p class="text-stone-500 text-sm max-w-md mx-auto" data-i18n="gallery_subtitle">Тёплые кадры наших счастливых дней</p>
       </div>
 
@@ -284,16 +284,16 @@
   <!-- Schedule of the Day -->
   <section class="py-24 px-4 bg-[#F5EFEB]/90 border-y border-[#E8DFC9]">
     <div class="max-w-3xl mx-auto space-y-12">
-      <div class="text-center space-y-3">
+      <div class="reveal-on-scroll text-center space-y-3">
         <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="schedule_tag">Торжественный день</span>
         <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="schedule_title">Программа свадьбы</h2>
-        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+        <div class="gold-divider"></div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <!-- Item 1 -->
-        <div class="p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm">
+        <div class="reveal-on-scroll p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4" style="--reveal-delay: 0ms;">
+          <div class="reveal-icon w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm" style="--reveal-delay: 120ms;">
             <i data-lucide="wine" class="w-6 h-6"></i>
           </div>
           <div>
@@ -304,8 +304,8 @@
         </div>
 
         <!-- Item 2 -->
-        <div class="p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm">
+        <div class="reveal-on-scroll p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4" style="--reveal-delay: 90ms;">
+          <div class="reveal-icon w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm" style="--reveal-delay: 210ms;">
             <i data-lucide="heart-handshake" class="w-6 h-6"></i>
           </div>
           <div>
@@ -316,8 +316,8 @@
         </div>
 
         <!-- Item 3 -->
-        <div class="p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm">
+        <div class="reveal-on-scroll p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4" style="--reveal-delay: 180ms;">
+          <div class="reveal-icon w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm" style="--reveal-delay: 300ms;">
             <i data-lucide="utensils" class="w-6 h-6"></i>
           </div>
           <div>
@@ -328,8 +328,8 @@
         </div>
 
         <!-- Item 4 -->
-        <div class="p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm">
+        <div class="reveal-on-scroll p-6 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#E8DFC9] shadow-md flex items-start gap-4" style="--reveal-delay: 270ms;">
+          <div class="reveal-icon w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#EBE4D8] flex items-center justify-center text-champagne-gold shrink-0 shadow-sm" style="--reveal-delay: 390ms;">
             <i data-lucide="music" class="w-6 h-6"></i>
           </div>
           <div>
@@ -345,14 +345,14 @@
   <!-- Location & Navigation Section -->
   <section class="py-24 px-4 bg-[#FAF7F2]">
     <div class="max-w-3xl mx-auto space-y-8 text-center">
-      <div class="space-y-3">
+      <div class="reveal-on-scroll space-y-3">
         <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="location_tag">Где нас найти</span>
         <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="location_title">Место проведения</h2>
-        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+        <div class="gold-divider"></div>
       </div>
 
-      <div class="bg-white/95 backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-[#E8DFC9] shadow-xl space-y-6">
-        <div class="w-16 h-16 bg-champagne-gold/15 text-champagne-gold rounded-full flex items-center justify-center mx-auto shadow-inner">
+      <div class="reveal-on-scroll bg-white/95 backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-[#E8DFC9] shadow-xl space-y-6">
+        <div class="reveal-icon w-16 h-16 bg-champagne-gold/15 text-champagne-gold rounded-full flex items-center justify-center mx-auto shadow-inner" style="--reveal-delay: 140ms;">
           <i data-lucide="map-pin" class="w-8 h-8"></i>
         </div>
 
@@ -379,18 +379,18 @@
   <!-- Israeli Bit Gift Card Section -->
   <section class="py-24 px-4 bg-[#F5EFEB]/90 border-y border-[#E8DFC9]">
     <div class="max-w-2xl mx-auto space-y-8 text-center">
-      <div class="space-y-3">
+      <div class="reveal-on-scroll space-y-3">
         <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="gift_tag">Подарки</span>
         <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="gift_title">Свадебный подарок</h2>
-        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+        <div class="gold-divider"></div>
       </div>
 
-      <p class="text-stone-600 max-w-lg mx-auto leading-relaxed text-sm sm:text-base" data-i18n="gift_description">
+      <p class="reveal-on-scroll text-stone-600 max-w-lg mx-auto leading-relaxed text-sm sm:text-base" data-i18n="gift_description">
         Ваше присутствие и тёплые улыбки — самый ценный подарок для нас! Но если вы хотите сделать памятный вклад в нашу молодую семью, вы можете легко воспользоваться израильским приложением <b>Bit</b>.
       </p>
 
       <!-- Bit Card Container -->
-      <div class="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 text-white p-8 rounded-3xl shadow-2xl relative overflow-hidden text-left border border-stone-700">
+      <div class="reveal-on-scroll bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 text-white p-8 rounded-3xl shadow-2xl relative overflow-hidden text-left border border-stone-700">
         <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-bit-blue/20 rounded-full blur-2xl"></div>
 
         <div class="flex items-center justify-between mb-6">
@@ -430,17 +430,17 @@
   <!-- RSVP Section (Бланк регистрации) -->
   <section id="rsvp" class="py-24 px-4 relative bg-[#FAF7F2]">
     <div class="max-w-2xl mx-auto space-y-8">
-      <div class="text-center space-y-3">
+      <div class="reveal-on-scroll text-center space-y-3">
         <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="rsvp_tag">Будем счастливы вас видеть</span>
         <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="rsvp_title">Подтверждение присутствия</h2>
-        <div class="w-16 h-0.5 bg-champagne-gold mx-auto"></div>
+        <div class="gold-divider"></div>
         <p class="text-stone-600 max-w-md mx-auto text-sm" data-i18n="rsvp_desc">
           Пожалуйста, ответьте на приглашение, чтобы мы могли позаботиться о вашем комфорте!
         </p>
       </div>
 
       <!-- RSVP Card with warm luxury styling -->
-      <div class="bg-white/95 backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-[#E8DFC9] shadow-2xl relative">
+      <div class="reveal-on-scroll bg-white/95 backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-[#E8DFC9] shadow-2xl relative">
         <form id="rsvp-form" onsubmit="submitRSVP(event)" class="space-y-6">
           
           <!-- Edit Mode Banner -->
@@ -729,6 +729,6 @@
     </div>
   </div>
 
-  <script src="/app.js?v=14"></script>
+  <script src="/app.js?v=15"></script>
 </body>
 </html>
