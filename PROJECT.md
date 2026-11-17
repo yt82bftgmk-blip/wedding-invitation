@@ -8,8 +8,9 @@
 
 ```text
 wedding-invitation/
-├── server.py               # Python-сервер: статика, API гостей/админки, SQLite и Telegram-бот
-├── config.json             # Конфигурация: данные свадьбы, фото, пароль админа и токены Telegram
+├── server.py               # Python-сервер: статика, API гостей/админки, бэкап, SQLite и Telegram-бот
+├── sync_live.py            # Скрипт: выгружает живые данные с Render (/api/backup) перед git push
+├── config.json             # Конфигурация: данные свадьбы, тексты (RU/HE), фото, пароль и Telegram
 ├── wedding.db              # База данных SQLite (таблица rsvps с ответами гостей)
 ├── Procfile                # Команда запуска на хостинге Render (python3 server.py)
 ├── requirements.txt        # Зависимости Python
@@ -19,7 +20,7 @@ wedding-invitation/
     ├── index.html          # Гостевой сайт-приглашение (RU / HE RTL)
     ├── app.js              # Вся интерактивная логика гостевого сайта
     ├── style.css           # Стили, цветовая палитра (#FAF7F2) и анимации
-    ├── admin.html          # Закрытая админ-панель владельцев (/admin)
+    ├── admin.html          # Закрытая админ-панель (/admin) — визуальная копия сайта с inline-редактированием
     ├── music/
     │   └── wedding.mp3     # Фоновая музыка (автозапуск и цикл)
     ├── images/             # Локальные изображения
@@ -49,11 +50,12 @@ wedding-invitation/
 ---
 
 ### 2. Админ-панель ([`public/admin.html`](file:///Users/viktorkhristenko/.gemini/antigravity/scratch/wedding-invitation/public/admin.html))
-Открывается по адресу `/admin` и защищена паролем из `config.json`:
-* **Гости и статистика** — счётчики («Всего ответов», «Придут», «Не смогут», «Всего персон»), таблица гостей с поздравлениями, удаление отдельных записей и очистка списка.
-* **Экспорт** — скачивание таблицы гостей в формате CSV для Excel (`/api/export-csv`).
-* **Редактор сайта (CMS)** — изменение текстов, даты, ссылок и загрузка новых фотографий (`/api/upload-photo`, `/api/settings`).
-* **Telegram** — проверка отправки и активация webhook-бота (`/api/test-telegram`, `/api/setup-webhook`).
+Открывается по адресу `/admin` и защищена паролем из `config.json`. Выполнена **идентично гостевому сайту** с доступом для редактирования прямо на странице:
+* **Inline-редактор всех текстов (RU / HE RTL)** — редактирование любых заголовков, историй, программы дня, локации, карточки Bit и всех полей формы RSVP (`wedding.texts`), а также подписей и мини-историй к фото (`photos.stories`).
+* **Фото и дата** — загрузка главного фото и фотоальбома (`/api/upload-photo`), выбор даты для таймера, ссылки Waze / Google Maps (`/api/settings`).
+* **Гости и статистика (`#guests-section`)** — счётчики («Всего ответов», «Придут», «Не смогут», «Всего персон»), поиск, фильтры, таблица гостей с WhatsApp и удалением записей.
+* **Экспорт и Бэкап** — выгрузка в CSV (`/api/export-csv`), скачивание/восстановление полной резервной копии `.json` (`/api/backup`, `/api/restore`) и авто-копия в `localStorage`.
+* **Telegram** — тест уведомлений и активация webhook-бота (`/api/test-telegram`, `/api/setup-webhook`).
 
 ---
 
@@ -61,7 +63,7 @@ wedding-invitation/
 * **`server.py`** — единый Python-сервер (`http.server` + `sqlite3`):
   * Отдаёт статику с заголовками `Cache-Control: no-cache, no-store, must-revalidate`.
   * **Гостевые маршруты:** `GET /`, `GET /api/config`, `POST /api/rsvp`.
-  * **Админские маршруты:** `GET /admin`, `GET /api/rsvps`, `DELETE /api/rsvps`, `DELETE /api/rsvps/clear`, `GET /api/export-csv`, `POST /api/settings`, `POST /api/upload-photo`, `POST /api/test-telegram`, `GET /api/setup-webhook`, `GET /api/sync-github`.
+  * **Админские маршруты:** `GET /admin`, `GET /api/rsvps`, `DELETE /api/rsvps`, `DELETE /api/rsvps/clear`, `GET /api/export-csv`, `POST /api/settings`, `POST /api/upload-photo`, `GET /api/backup`, `POST /api/restore`, `POST /api/test-telegram`, `GET /api/setup-webhook`, `GET /api/sync-github`.
   * **Telegram-бот (`POST /api/telegram-webhook`):** мгновенно присылает анкеты новых гостей и отвечает только авторизованным Chat ID на кнопки меню (`📊 Сколько придет`, `📋 Список гостей`, `💔 Кто не сможет`, `💌 Поздравления`).
 * **`config.json`** — хранит имена молодожёнов, дату, ссылки, список фотографий, пароль админки, токен Telegram-бота и разрешённые Chat ID.
 * **`wedding.db`** — SQLite-база с таблицей `rsvps`.
