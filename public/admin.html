@@ -675,9 +675,11 @@
               </label>
               <div class="flex items-center justify-between gap-3">
                 <span class="text-xs text-stone-600">Сколько детей будет с вами?</span>
-                <select disabled class="px-3 py-2 rounded-xl border border-stone-200 bg-white text-sm text-stone-400">
-                  <option>Нет (0) / 1–10</option>
-                </select>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-8 h-8 rounded-xl border border-stone-200 bg-[#FAF7F2] text-stone-400 flex items-center justify-center">−</span>
+                  <input type="number" disabled value="0" class="w-16 px-2 py-1.5 rounded-xl border border-stone-200 bg-white text-center text-sm text-stone-400">
+                  <span class="w-8 h-8 rounded-xl border border-stone-200 bg-[#FAF7F2] text-stone-400 flex items-center justify-center">+</span>
+                </div>
               </div>
             </div>
 

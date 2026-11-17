@@ -10,7 +10,7 @@
 
 ## 📁 Основные файлы
 
-- **`public/index.html`, `public/app.js`, `public/style.css`** — двуязычный гостевой сайт (RU / HE RTL), сейчас подключены `style.css?v=5` и `app.js?v=10`:
+- **`public/index.html`, `public/app.js`, `public/style.css`** — двуязычный гостевой сайт (RU / HE RTL), сейчас подключены `style.css?v=5` и `app.js?v=11`:
   - Случайный музыкальный плеер из 5 спокойных романтических мелодий (`public/music/track_1.mp3`–`track_5.mp3`).
   - Первый экран (`#hero`), блок «Наша история» (3 главы с фото `#story-img-0..2`) и «Фотоальбом любви» (`#gallery-grid`) со всплывающими мини-историями (`#photo-story-modal`).
   - Тайминг дня, карточка зала (Waze / Google Maps), блок подарка **Bit** (ссылка `bit_link` + причина перевода `bit_reason_ru/he`).

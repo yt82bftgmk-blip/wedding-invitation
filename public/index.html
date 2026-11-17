@@ -530,7 +530,7 @@
               </span>
             </div>
 
-            <!-- Children (0..10) -->
+            <!-- Children -->
             <div class="space-y-2 p-3.5 rounded-xl bg-white/80 border border-stone-200/80">
               <label for="children_count" class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
                 <span data-i18n="field_children_names">Дети</span>
@@ -538,23 +538,29 @@
               </label>
               <div class="flex items-center justify-between gap-3">
                 <span class="text-xs text-stone-600" data-i18n="field_children_count">Сколько детей будет с вами?</span>
-                <select
-                  id="children_count"
-                  onchange="renderChildrenInputs()"
-                  class="px-3 py-2 rounded-xl border border-stone-200 bg-white text-sm font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
-                >
-                  <option value="0" data-i18n="count_none">Нет (0)</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
-                  <option value="8">8</option>
-                  <option value="9">9</option>
-                  <option value="10">10</option>
-                </select>
+                <div class="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onclick="stepChildrenCount(-1)"
+                    class="w-9 h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
+                    aria-label="Уменьшить"
+                  >−</button>
+                  <input
+                    type="number"
+                    id="children_count"
+                    min="0"
+                    value="0"
+                    inputmode="numeric"
+                    oninput="renderChildrenInputs()"
+                    class="w-20 px-2 py-2 rounded-xl border border-stone-200 bg-white text-center text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
+                  >
+                  <button
+                    type="button"
+                    onclick="stepChildrenCount(1)"
+                    class="w-9 h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
+                    aria-label="Увеличить"
+                  >+</button>
+                </div>
               </div>
               <div id="children_inputs_container" class="space-y-2 pt-2 hidden"></div>
             </div>
@@ -682,6 +688,6 @@
     </div>
   </div>
 
-  <script src="/app.js?v=10"></script>
+  <script src="/app.js?v=11"></script>
 </body>
 </html>

@@ -1042,18 +1042,20 @@ function renderDynamicNameRows(containerId, count, inputClass, placeholderBase, 
   container.appendChild(fragment);
 }
 
-function getChildrenCount() {
-  const el = document.getElementById("children_count");
-  const val = el ? parseInt(el.value, 10) : 0;
-  return Number.isFinite(val) && val > 0 ? Math.min(val, 10) : 0;
-}
-
-function getPlusOneCount() {
-  const el = document.getElementById("plus_one_count");
+function getCountValue(inputId) {
+  const el = document.getElementById(inputId);
   if (!el) return 0;
   const val = parseInt(el.value, 10);
   if (!Number.isFinite(val) || val < 0) return 0;
   return val;
+}
+
+function getChildrenCount() {
+  return getCountValue("children_count");
+}
+
+function getPlusOneCount() {
+  return getCountValue("plus_one_count");
 }
 
 function updateTotalGuestsBadge() {
@@ -1064,41 +1066,57 @@ function updateTotalGuestsBadge() {
   badge.textContent = `${dict.total_guests_prefix || "Итого:"} ${total}`;
 }
 
-function renderChildrenInputs() {
-  const dict = translations[currentLang] || translations.ru;
-  const count = getChildrenCount();
-  renderDynamicNameRows(
-    "children_inputs_container",
-    count,
-    "children-name-input",
-    dict.child_placeholder || "Имя ребёнка"
-  );
-  updateTotalGuestsBadge();
-}
-
-function renderPlusOneInputs() {
-  const el = document.getElementById("plus_one_count");
-  let count = getPlusOneCount();
+function renderGuestGroupInputs(inputId, containerId, inputClass, placeholderKey, defaultPlaceholder) {
+  const el = document.getElementById(inputId);
+  let count = getCountValue(inputId);
   if (el && el.value !== "" && parseInt(el.value, 10) < 0) {
     el.value = "0";
     count = 0;
   }
   const dict = translations[currentLang] || translations.ru;
   renderDynamicNameRows(
-    "plus_one_inputs_container",
+    containerId,
     count,
-    "plus-one-name-input",
-    dict.plus_one_placeholder || "Имя Фамилия"
+    inputClass,
+    dict[placeholderKey] || defaultPlaceholder
   );
   updateTotalGuestsBadge();
 }
 
-function stepPlusOneCount(delta) {
-  const el = document.getElementById("plus_one_count");
+function renderChildrenInputs() {
+  renderGuestGroupInputs(
+    "children_count",
+    "children_inputs_container",
+    "children-name-input",
+    "child_placeholder",
+    "Имя ребёнка"
+  );
+}
+
+function renderPlusOneInputs() {
+  renderGuestGroupInputs(
+    "plus_one_count",
+    "plus_one_inputs_container",
+    "plus-one-name-input",
+    "plus_one_placeholder",
+    "Имя Фамилия"
+  );
+}
+
+function stepGuestGroupCount(inputId, delta, renderFn) {
+  const el = document.getElementById(inputId);
   if (!el) return;
-  const next = Math.max(0, getPlusOneCount() + delta);
+  const next = Math.max(0, getCountValue(inputId) + delta);
   el.value = String(next);
-  renderPlusOneInputs();
+  renderFn();
+}
+
+function stepChildrenCount(delta) {
+  stepGuestGroupCount("children_count", delta, renderChildrenInputs);
+}
+
+function stepPlusOneCount(delta) {
+  stepGuestGroupCount("plus_one_count", delta, renderPlusOneInputs);
 }
 
 function toggleGuestCount(isAttending) {
