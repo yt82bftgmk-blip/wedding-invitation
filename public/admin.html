@@ -661,27 +661,29 @@
             </div>
           </div>
 
-          <!-- Guest composition preview (children & +1 companion, optional) -->
+          <!-- Guest composition preview (required full name + optional children & +1) -->
           <div class="space-y-4 p-4 rounded-2xl border border-[#E8DFC9] bg-[#FAF7F2]/50">
-            <div class="space-y-1">
-              <div class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_guests_count">Количество человек</div>
-              <p class="text-[11px] text-stone-500" data-i18n="guests_composition_hint">Ваше имя и фамилия обязательны выше. При желании укажите, кто придёт с вами:</p>
+            <div class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_guests_count">Количество человек</div>
+
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 block" data-i18n="field_guest_full_name">Имя и фамилия *</label>
+              <input type="text" disabled placeholder="Давид Леви" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-400">
             </div>
 
             <div class="space-y-1.5">
               <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
-                <span data-i18n="field_children_names">Если есть дети — имена детей</span>
+                <span data-i18n="field_children_names">Дети</span>
                 <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
               </label>
-              <input type="text" disabled placeholder="Например: Ариэль, Майя" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-400">
+              <input type="text" disabled placeholder="Имя ребёнка" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-400">
             </div>
 
             <div class="space-y-1.5">
               <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
-                <span data-i18n="field_plus_one">Зову кого-то ещё (имя и фамилия)</span>
+                <span data-i18n="field_plus_one">Зову кого-то ещё</span>
                 <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
               </label>
-              <input type="text" disabled placeholder="Например: Анна Коэн" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-400">
+              <input type="text" disabled placeholder="Имя Фамилия" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-400">
             </div>
           </div>
 
@@ -1018,9 +1020,9 @@
         choice_yes: "Я обязательно приду!",
         choice_no: "К сожалению, не смогу",
         field_guests_count: "Количество человек",
-        guests_composition_hint: "Ваше имя и фамилия обязательны выше. При желании укажите, кто придёт с вами:",
-        field_children_names: "Если есть дети — имена детей",
-        field_plus_one: "Зову кого-то ещё (имя и фамилия)",
+        field_guest_full_name: "Имя и фамилия *",
+        field_children_names: "Дети",
+        field_plus_one: "Зову кого-то ещё",
         guest_opt_1: "1 человек (только я)",
         guest_opt_2: "2 человека (+1 гость)",
         guest_opt_3: "3 человека",
@@ -1090,9 +1092,9 @@
         choice_yes: "מגיע/ה בשמחה!",
         choice_no: "לצערי לא אוכל להגיע",
         field_guests_count: "מספר אורחים",
-        guests_composition_hint: "השם הפרטי ושם המשפחה שלכם ממולאים למעלה (חובה). אם מגיעים אתכם ילדים או מלווה, ציינו כאן:",
-        field_children_names: "אם יש ילדים — שמות הילדים",
-        field_plus_one: "מזמין/ה מישהו נוסף (שם ושם משפחה)",
+        field_guest_full_name: "שם פרטי ושם משפחה *",
+        field_children_names: "ילדים",
+        field_plus_one: "מזמין/ה מישהו נוסף",
         guest_opt_1: "אורח 1 (רק אני)",
         guest_opt_2: "2 אורחים (אני ובן/בת זוג)",
         guest_opt_3: "3 אורחים",

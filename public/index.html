@@ -521,35 +521,43 @@
             </div>
           </div>
 
-          <!-- Guest composition (children & +1 companion, optional) -->
+          <!-- Guest composition (required full name + optional children & +1) -->
           <div id="guest-count-container" class="space-y-4 p-4 rounded-2xl border border-[#E8DFC9] bg-[#FAF7F2]/50 transition-all">
-            <div class="space-y-1">
-              <div class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_guests_count">Количество человек</div>
-              <p class="text-[11px] text-stone-500" data-i18n="guests_composition_hint">Ваше имя и фамилия обязательны выше. При желании укажите, кто придёт с вами:</p>
-            </div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_guests_count">Количество человек</div>
 
             <div class="space-y-1.5">
-              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
-                <span data-i18n="field_children_names">Если есть дети — имена детей</span>
-                <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
-              </label>
+              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 block" data-i18n="field_guest_full_name">Имя и фамилия *</label>
               <input
                 type="text"
-                id="children_names"
-                placeholder="Например: Ариэль, Майя"
+                id="guest_full_name"
+                required
+                placeholder="Давид Леви"
                 class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
               >
             </div>
 
             <div class="space-y-1.5">
               <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
-                <span data-i18n="field_plus_one">Зову кого-то ещё (имя и фамилия)</span>
+                <span data-i18n="field_children_names">Дети</span>
+                <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
+              </label>
+              <input
+                type="text"
+                id="children_names"
+                placeholder="Имя ребёнка"
+                class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
+              >
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
+                <span data-i18n="field_plus_one">Зову кого-то ещё</span>
                 <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
               </label>
               <input
                 type="text"
                 id="plus_one_name"
-                placeholder="Например: Анна Коэн"
+                placeholder="Имя Фамилия"
                 class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
               >
             </div>
@@ -642,6 +650,6 @@
     </div>
   </div>
 
-  <script src="/app.js?v=7"></script>
+  <script src="/app.js?v=8"></script>
 </body>
 </html>

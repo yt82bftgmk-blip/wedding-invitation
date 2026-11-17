@@ -71,9 +71,9 @@ const translations = {
     choice_yes: "Я обязательно приду!",
     choice_no: "К сожалению, не смогу",
     field_guests_count: "Количество человек",
-    guests_composition_hint: "Ваше имя и фамилия обязательны выше. При желании укажите, кто придёт с вами:",
-    field_children_names: "Если есть дети — имена детей",
-    field_plus_one: "Зову кого-то ещё (имя и фамилия)",
+    field_guest_full_name: "Имя и фамилия *",
+    field_children_names: "Дети",
+    field_plus_one: "Зову кого-то ещё",
     guest_opt_1: "1 человек (только я)",
     guest_opt_2: "2 человека (+1 гость)",
     guest_opt_3: "3 человека",
@@ -161,9 +161,9 @@ const translations = {
     choice_yes: "מגיע/ה בשמחה!",
     choice_no: "לצערי לא אוכל להגיע",
     field_guests_count: "מספר אורחים",
-    guests_composition_hint: "השם הפרטי ושם המשפחה שלכם ממולאים למעלה (חובה). אם מגיעים אתכם ילדים או מלווה, ציינו כאן:",
-    field_children_names: "אם יש ילדים — שמות הילדים",
-    field_plus_one: "מזמין/ה מישהו נוסף (שם ושם משפחה)",
+    field_guest_full_name: "שם פרטי ושם משפחה *",
+    field_children_names: "ילדים",
+    field_plus_one: "מזמין/ה מישהו נוסף",
     guest_opt_1: "אורח 1 (רק אני)",
     guest_opt_2: "2 אורחים (אני ובן/בת זוג)",
     guest_opt_3: "3 אורחים",
@@ -193,6 +193,21 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchConfig();
   startCountdown();
   initMusicAutoPlay();
+
+  const fn = document.getElementById("first_name");
+  const ln = document.getElementById("last_name");
+  const gfn = document.getElementById("guest_full_name");
+  if (fn && ln && gfn) {
+    let manualEdit = false;
+    gfn.addEventListener("input", () => { manualEdit = gfn.value.trim().length > 0; });
+    const syncFullName = () => {
+      if (!manualEdit) {
+        gfn.value = [fn.value.trim(), ln.value.trim()].filter(Boolean).join(" ");
+      }
+    };
+    fn.addEventListener("input", syncFullName);
+    ln.addEventListener("input", syncFullName);
+  }
 });
 
 const MUSIC_TRACKS = [
@@ -635,20 +650,23 @@ function setLanguage(lang) {
   const fName = document.getElementById('first_name');
   const lName = document.getElementById('last_name');
   const msg = document.getElementById('message');
+  const guestFullEl = document.getElementById('guest_full_name');
   const childrenEl = document.getElementById('children_names');
   const plusOneEl = document.getElementById('plus_one_name');
   if (lang === 'he') {
     if (fName) fName.placeholder = "דוד";
     if (lName) lName.placeholder = "לוי";
     if (msg) msg.placeholder = "נזר וסופיה היקרים, מאחלים לכם המון מזל טוב...";
-    if (childrenEl) childrenEl.placeholder = "לדוגמה: אריאל, מאיה";
-    if (plusOneEl) plusOneEl.placeholder = "לדוגמה: אנה כהן";
+    if (guestFullEl) guestFullEl.placeholder = "דוד לוי";
+    if (childrenEl) childrenEl.placeholder = "שם הילד/ה";
+    if (plusOneEl) plusOneEl.placeholder = "שם ושם משפחה";
   } else {
     if (fName) fName.placeholder = "Давид";
     if (lName) lName.placeholder = "Леви";
     if (msg) msg.placeholder = "Дорогие Назар и София! От всей души поздравляем вас...";
-    if (childrenEl) childrenEl.placeholder = "Например: Ариэль, Майя";
-    if (plusOneEl) plusOneEl.placeholder = "Например: Анна Коэн";
+    if (guestFullEl) guestFullEl.placeholder = "Давид Леви";
+    if (childrenEl) childrenEl.placeholder = "Имя ребёнка";
+    if (plusOneEl) plusOneEl.placeholder = "Имя Фамилия";
   }
 
   applyConfig();
@@ -992,6 +1010,11 @@ function toggleGuestCount(isAttending) {
   const container = document.getElementById("guest-count-container");
   if (container) {
     container.style.display = isAttending ? "block" : "none";
+  }
+  const guestFullEl = document.getElementById("guest_full_name");
+  if (guestFullEl) {
+    if (isAttending) guestFullEl.setAttribute('required', '');
+    else guestFullEl.removeAttribute('required');
   }
   document.querySelectorAll('.rsvp-custom-field[data-show-when="attending"]').forEach(el => {
     el.style.display = isAttending ? "block" : "none";
