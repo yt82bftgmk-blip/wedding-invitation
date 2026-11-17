@@ -73,7 +73,13 @@ const translations = {
     field_guests_count: "Количество человек",
     field_guest_full_name: "Имя и фамилия *",
     field_children_names: "Дети",
+    field_children_count: "Сколько детей будет с вами?",
     field_plus_one: "Зову кого-то ещё",
+    field_plus_one_count: "Сколько человек?",
+    count_none: "Нет (0)",
+    child_placeholder: "Имя ребёнка",
+    plus_one_placeholder: "Имя Фамилия",
+    total_guests_prefix: "Итого:",
     guest_opt_1: "1 человек (только я)",
     guest_opt_2: "2 человека (+1 гость)",
     guest_opt_3: "3 человека",
@@ -163,7 +169,13 @@ const translations = {
     field_guests_count: "מספר אורחים",
     field_guest_full_name: "שם פרטי ושם משפחה *",
     field_children_names: "ילדים",
+    field_children_count: "כמה ילדים יגיעו אתכם?",
     field_plus_one: "מזמין/ה מישהו נוסף",
+    field_plus_one_count: "כמה אנשים?",
+    count_none: "ללא (0)",
+    child_placeholder: "שם הילד/ה",
+    plus_one_placeholder: "שם ושם משפחה",
+    total_guests_prefix: "סה״כ:",
     guest_opt_1: "אורח 1 (רק אני)",
     guest_opt_2: "2 אורחים (אני ובן/בת זוג)",
     guest_opt_3: "3 אורחים",
@@ -635,21 +647,19 @@ function setLanguage(lang) {
   const fName = document.getElementById('first_name');
   const lName = document.getElementById('last_name');
   const msg = document.getElementById('message');
-  const childrenEl = document.getElementById('children_names');
-  const plusOneEl = document.getElementById('plus_one_name');
   if (lang === 'he') {
     if (fName) fName.placeholder = "דוד";
     if (lName) lName.placeholder = "לוי";
     if (msg) msg.placeholder = "נזר וסופיה היקרים, מאחלים לכם המון מזל טוב...";
-    if (childrenEl) childrenEl.placeholder = "שם הילד/ה";
-    if (plusOneEl) plusOneEl.placeholder = "שם ושם משפחה";
   } else {
     if (fName) fName.placeholder = "Давид";
     if (lName) lName.placeholder = "Леви";
     if (msg) msg.placeholder = "Дорогие Назар и София! От всей души поздравляем вас...";
-    if (childrenEl) childrenEl.placeholder = "Имя ребёнка";
-    if (plusOneEl) plusOneEl.placeholder = "Имя Фамилия";
   }
+
+  renderChildrenInputs();
+  renderPlusOneInputs();
+  updateTotalGuestsBadge();
 
   applyConfig();
   applyPhotos();
@@ -988,6 +998,109 @@ function renderCustomRsvpFields() {
   });
 }
 
+function renderDynamicNameRows(containerId, count, inputClass, placeholderBase, scrollableThreshold = 6) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const existingValues = Array.from(container.querySelectorAll(`.${inputClass}`)).map(el => el.value);
+  container.innerHTML = "";
+
+  if (count <= 0) {
+    container.classList.add("hidden");
+    container.classList.remove("max-h-72", "overflow-y-auto", "pr-1");
+    return;
+  }
+
+  container.classList.remove("hidden");
+  if (count > scrollableThreshold) {
+    container.classList.add("max-h-72", "overflow-y-auto", "pr-1");
+  } else {
+    container.classList.remove("max-h-72", "overflow-y-auto", "pr-1");
+  }
+
+  const fragment = document.createDocumentFragment();
+  for (let i = 0; i < count; i++) {
+    const row = document.createElement("div");
+    row.className = "flex items-center gap-2";
+
+    const badge = document.createElement("span");
+    badge.className = "w-7 h-7 rounded-lg bg-[#FAF7F2] border border-[#E8DFC9] text-[11px] font-semibold text-stone-600 flex items-center justify-center shrink-0";
+    badge.textContent = String(i + 1);
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = `${inputClass} flex-1 px-3.5 py-2.5 rounded-xl border border-stone-200 bg-[#FAF7F2]/40 focus:bg-white text-sm focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all`;
+    input.placeholder = `${placeholderBase} ${i + 1}`;
+    if (existingValues[i] !== undefined) {
+      input.value = existingValues[i];
+    }
+
+    row.appendChild(badge);
+    row.appendChild(input);
+    fragment.appendChild(row);
+  }
+  container.appendChild(fragment);
+}
+
+function getChildrenCount() {
+  const el = document.getElementById("children_count");
+  const val = el ? parseInt(el.value, 10) : 0;
+  return Number.isFinite(val) && val > 0 ? Math.min(val, 10) : 0;
+}
+
+function getPlusOneCount() {
+  const el = document.getElementById("plus_one_count");
+  if (!el) return 0;
+  const val = parseInt(el.value, 10);
+  if (!Number.isFinite(val) || val < 0) return 0;
+  return val;
+}
+
+function updateTotalGuestsBadge() {
+  const badge = document.getElementById("rsvp-total-guests-badge");
+  if (!badge) return;
+  const dict = translations[currentLang] || translations.ru;
+  const total = 1 + getChildrenCount() + getPlusOneCount();
+  badge.textContent = `${dict.total_guests_prefix || "Итого:"} ${total}`;
+}
+
+function renderChildrenInputs() {
+  const dict = translations[currentLang] || translations.ru;
+  const count = getChildrenCount();
+  renderDynamicNameRows(
+    "children_inputs_container",
+    count,
+    "children-name-input",
+    dict.child_placeholder || "Имя ребёнка"
+  );
+  updateTotalGuestsBadge();
+}
+
+function renderPlusOneInputs() {
+  const el = document.getElementById("plus_one_count");
+  let count = getPlusOneCount();
+  if (el && el.value !== "" && parseInt(el.value, 10) < 0) {
+    el.value = "0";
+    count = 0;
+  }
+  const dict = translations[currentLang] || translations.ru;
+  renderDynamicNameRows(
+    "plus_one_inputs_container",
+    count,
+    "plus-one-name-input",
+    dict.plus_one_placeholder || "Имя Фамилия"
+  );
+  updateTotalGuestsBadge();
+}
+
+function stepPlusOneCount(delta) {
+  const el = document.getElementById("plus_one_count");
+  if (!el) return;
+  const next = Math.max(0, getPlusOneCount() + delta);
+  el.value = String(next);
+  renderPlusOneInputs();
+}
+
 function toggleGuestCount(isAttending) {
   const container = document.getElementById("guest-count-container");
   if (container) {
@@ -1025,30 +1138,43 @@ async function submitRSVP(event) {
   const lastName = document.getElementById("last_name").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const attendance = document.querySelector('input[name="attendance"]:checked').value;
-  const childrenEl = document.getElementById("children_names");
-  const plusOneEl = document.getElementById("plus_one_name");
-  const childrenNames = childrenEl ? childrenEl.value.trim() : "";
-  const plusOneName = plusOneEl ? plusOneEl.value.trim() : "";
-  const countList = (str) => str ? str.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).length : 0;
+
+  const childrenCount = getChildrenCount();
+  const plusOneCount = getPlusOneCount();
+  const childrenNamesList = Array.from(document.querySelectorAll(".children-name-input"))
+    .map(el => el.value.trim())
+    .filter(Boolean);
+  const plusOneNamesList = Array.from(document.querySelectorAll(".plus-one-name-input"))
+    .map(el => el.value.trim())
+    .filter(Boolean);
+
+  const effectiveChildrenCount = Math.max(childrenCount, childrenNamesList.length);
+  const effectivePlusOneCount = Math.max(plusOneCount, plusOneNamesList.length);
   const guestsCount = attendance === 'attending'
-    ? (1 + countList(childrenNames) + countList(plusOneName))
+    ? (1 + effectiveChildrenCount + effectivePlusOneCount)
     : 0;
   const message = document.getElementById("message").value.trim();
 
   const customAnswers = {};
   if (attendance === 'attending') {
-    if (childrenNames) {
+    if (effectiveChildrenCount > 0) {
       customAnswers.children_names = {
         label_ru: "Дети (имена)",
         label_he: "שמות הילדים",
-        value: childrenNames
+        count: effectiveChildrenCount,
+        value: childrenNamesList.length > 0
+          ? childrenNamesList.join(", ")
+          : `${effectiveChildrenCount}`
       };
     }
-    if (plusOneName) {
+    if (effectivePlusOneCount > 0) {
       customAnswers.companion_name = {
-        label_ru: "С кем ещё (имя и фамилия)",
-        label_he: "אורח נוסף (שם ושם משפחה)",
-        value: plusOneName
+        label_ru: "Зову кого-то ещё",
+        label_he: "אורחים נוספים",
+        count: effectivePlusOneCount,
+        value: plusOneNamesList.length > 0
+          ? plusOneNamesList.join(", ")
+          : `${effectivePlusOneCount}`
       };
     }
   }
@@ -1119,6 +1245,12 @@ async function submitRSVP(event) {
 
 function resetRSVPForm() {
   document.getElementById("rsvp-form").reset();
+  const childrenContainer = document.getElementById("children_inputs_container");
+  const plusOneContainer = document.getElementById("plus_one_inputs_container");
+  if (childrenContainer) childrenContainer.innerHTML = "";
+  if (plusOneContainer) plusOneContainer.innerHTML = "";
+  renderChildrenInputs();
+  renderPlusOneInputs();
   document.getElementById("rsvp-form").classList.remove("hidden");
   document.getElementById("rsvp-success").classList.add("hidden");
   toggleGuestCount(true);

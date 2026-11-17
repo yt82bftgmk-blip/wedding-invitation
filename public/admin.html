@@ -663,22 +663,37 @@
 
           <!-- Guest composition preview (optional children & +1) -->
           <div class="space-y-4 p-4 rounded-2xl border border-[#E8DFC9] bg-[#FAF7F2]/50">
-            <div class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_guests_count">Количество человек</div>
+            <div class="flex items-center justify-between gap-2">
+              <div class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_guests_count">Количество человек</div>
+              <span class="px-2.5 py-1 rounded-full bg-white border border-[#E8DFC9] text-xs font-semibold text-stone-500">Итого: 1</span>
+            </div>
 
-            <div class="space-y-1.5">
+            <div class="space-y-2 p-3.5 rounded-xl bg-white/80 border border-stone-200/80">
               <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
                 <span data-i18n="field_children_names">Дети</span>
                 <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
               </label>
-              <input type="text" disabled placeholder="Имя ребёнка" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-400">
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-xs text-stone-600">Сколько детей будет с вами?</span>
+                <select disabled class="px-3 py-2 rounded-xl border border-stone-200 bg-white text-sm text-stone-400">
+                  <option>Нет (0) / 1–10</option>
+                </select>
+              </div>
             </div>
 
-            <div class="space-y-1.5">
+            <div class="space-y-2 p-3.5 rounded-xl bg-white/80 border border-stone-200/80">
               <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
                 <span data-i18n="field_plus_one">Зову кого-то ещё</span>
                 <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
               </label>
-              <input type="text" disabled placeholder="Имя Фамилия" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-400">
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-xs text-stone-600">Сколько человек?</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-8 h-8 rounded-xl border border-stone-200 bg-[#FAF7F2] text-stone-400 flex items-center justify-center">−</span>
+                  <input type="number" disabled value="0" class="w-16 px-2 py-1.5 rounded-xl border border-stone-200 bg-white text-center text-sm text-stone-400">
+                  <span class="w-8 h-8 rounded-xl border border-stone-200 bg-[#FAF7F2] text-stone-400 flex items-center justify-center">+</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -731,6 +746,7 @@
             <div>
               <div class="text-[11px] text-stone-500 font-semibold uppercase tracking-wider">Придут (чел.)</div>
               <div id="stat-total-people" class="font-serif text-3xl sm:text-4xl font-bold text-emerald-700 mt-1">0</div>
+              <div id="stat-people-breakdown" class="text-[11px] text-stone-500 mt-1">Осн: 0 • Дет: 0 • Доп: 0</div>
             </div>
             <div class="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
               <i data-lucide="users" class="w-5 h-5"></i>
@@ -771,6 +787,15 @@
               <button type="button" onclick="filterGuests('declined')" id="btn-filter-declined" class="px-4 py-2 text-xs font-semibold rounded-full bg-[#FAF7F2] text-stone-700 border border-[#E8DFC9] hover:bg-[#F4EFE6] transition-all">
                 Не смогут
               </button>
+              <button type="button" onclick="filterGuests('with_children')" id="btn-filter-with_children" class="px-4 py-2 text-xs font-semibold rounded-full bg-[#FAF7F2] text-stone-700 border border-[#E8DFC9] hover:bg-[#F4EFE6] transition-all">
+                С детьми
+              </button>
+              <button type="button" onclick="filterGuests('with_plus_one')" id="btn-filter-with_plus_one" class="px-4 py-2 text-xs font-semibold rounded-full bg-[#FAF7F2] text-stone-700 border border-[#E8DFC9] hover:bg-[#F4EFE6] transition-all">
+                С доп. гостями
+              </button>
+              <button type="button" onclick="filterGuests('with_custom')" id="btn-filter-with_custom" class="px-4 py-2 text-xs font-semibold rounded-full bg-[#FAF7F2] text-stone-700 border border-[#E8DFC9] hover:bg-[#F4EFE6] transition-all">
+                Доп. параметры
+              </button>
             </div>
 
             <div class="flex flex-wrap items-center gap-2.5">
@@ -800,6 +825,9 @@
                   <th class="py-3 px-4">Телефон</th>
                   <th class="py-3 px-4">Статус</th>
                   <th class="py-3 px-4">Персон</th>
+                  <th class="py-3 px-4">Дети</th>
+                  <th class="py-3 px-4">Доп. гости</th>
+                  <th class="py-3 px-4">Доп. параметры</th>
                   <th class="py-3 px-4">Поздравление</th>
                   <th class="py-3 px-4">Дата</th>
                   <th class="py-3 px-4 text-right">Действие</th>
@@ -1361,8 +1389,8 @@
         document.getElementById("admin-app").classList.remove("hidden");
         document.getElementById("btn-export-csv").href = `/api/export-csv?key=${encodeURIComponent(adminPass)}`;
 
-        renderStats(data.stats);
         allRSVPs = data.rsvps || [];
+        renderStats(data.stats);
         renderTable();
 
         const cfg = data.config || {};
@@ -2192,6 +2220,34 @@
       }
     }
 
+    function extractGuestBreakdown(r) {
+      const ca = (r.custom_answers && typeof r.custom_answers === 'object') ? r.custom_answers : {};
+      const splitNames = (val) => {
+        if (!val || typeof val !== 'string') return [];
+        const trimmed = val.trim();
+        if (!trimmed || /^\d+$/.test(trimmed)) return [];
+        return trimmed.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+      };
+
+      const childrenEntry = ca.children_names;
+      const childrenVal = (childrenEntry && typeof childrenEntry === 'object') ? (childrenEntry.value ?? '') : (childrenEntry ?? '');
+      const childrenNames = splitNames(String(childrenVal));
+      const childrenCount = (childrenEntry && typeof childrenEntry === 'object' && Number.isFinite(Number(childrenEntry.count)))
+        ? Math.max(Number(childrenEntry.count), childrenNames.length)
+        : (childrenNames.length || (/^\d+$/.test(String(childrenVal).trim()) ? parseInt(childrenVal, 10) : 0));
+
+      const plusOneEntry = ca.companion_name;
+      const plusOneVal = (plusOneEntry && typeof plusOneEntry === 'object') ? (plusOneEntry.value ?? '') : (plusOneEntry ?? '');
+      const plusOneNames = splitNames(String(plusOneVal));
+      const plusOneCount = (plusOneEntry && typeof plusOneEntry === 'object' && Number.isFinite(Number(plusOneEntry.count)))
+        ? Math.max(Number(plusOneEntry.count), plusOneNames.length)
+        : (plusOneNames.length || (/^\d+$/.test(String(plusOneVal).trim()) ? parseInt(plusOneVal, 10) : 0));
+
+      const otherCustom = Object.entries(ca).filter(([k]) => k !== 'children_names' && k !== 'companion_name');
+
+      return { childrenCount, childrenNames, plusOneCount, plusOneNames, otherCustom };
+    }
+
     function renderStats(stats) {
       const total = stats.total_responses || 0;
       document.getElementById("stat-total-responses").textContent = total;
@@ -2199,12 +2255,29 @@
       document.getElementById("stat-total-people").textContent = stats.total_people_attending || 0;
       document.getElementById("stat-attending-responses").textContent = stats.attending_responses || 0;
       document.getElementById("stat-declined-responses").textContent = stats.declined_responses || 0;
+
+      const breakdownEl = document.getElementById("stat-people-breakdown");
+      if (breakdownEl) {
+        let adults = 0;
+        let children = 0;
+        let plusOnes = 0;
+        (allRSVPs || []).forEach(r => {
+          if (r.attendance !== 'attending') return;
+          const b = extractGuestBreakdown(r);
+          children += b.childrenCount;
+          plusOnes += b.plusOneCount;
+          const totalForRow = Number(r.guests_count) || 1;
+          adults += Math.max(1, totalForRow - b.childrenCount - b.plusOneCount);
+        });
+        breakdownEl.textContent = `Осн: ${adults} • Дет: ${children} • Доп: ${plusOnes}`;
+      }
     }
 
     function filterGuests(type) {
       currentFilter = type;
-      ['all', 'attending', 'declined'].forEach(f => {
+      ['all', 'attending', 'declined', 'with_children', 'with_plus_one', 'with_custom'].forEach(f => {
         const btn = document.getElementById(`btn-filter-${f}`);
+        if (!btn) return;
         if (f === type) {
           btn.className = "px-4 py-2 text-xs font-semibold rounded-full bg-stone-900 text-white transition-all";
         } else {
@@ -2218,6 +2291,15 @@
       renderTable();
     }
 
+    function renderBadgeList(names, count, emptyClass = "text-stone-300") {
+      if (count <= 0 && names.length === 0) {
+        return `<span class="${emptyClass}">—</span>`;
+      }
+      const countBadge = `<span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FAF7F2] border border-[#E8DFC9] text-stone-800 mr-1 mb-1">${count} чел.</span>`;
+      const nameBadges = names.map(n => `<span class="inline-block px-2 py-0.5 rounded-md bg-white border border-stone-200 text-[11px] text-stone-700 mr-1 mb-1">${escapeHtml(n)}</span>`).join('');
+      return `<div class="flex flex-wrap items-center">${countBadge}${nameBadges}</div>`;
+    }
+
     function renderTable() {
       const search = (document.getElementById("search-input").value || "").toLowerCase();
       const tbody = document.getElementById("guests-table-body");
@@ -2225,10 +2307,23 @@
       tbody.innerHTML = "";
 
       const filtered = allRSVPs.filter(item => {
-        const matchFilter = currentFilter === 'all' || item.attendance === currentFilter;
+        const b = extractGuestBreakdown(item);
+        let matchFilter = true;
+        if (currentFilter === 'attending' || currentFilter === 'declined') {
+          matchFilter = item.attendance === currentFilter;
+        } else if (currentFilter === 'with_children') {
+          matchFilter = item.attendance === 'attending' && (b.childrenCount > 0 || b.childrenNames.length > 0);
+        } else if (currentFilter === 'with_plus_one') {
+          matchFilter = item.attendance === 'attending' && (b.plusOneCount > 0 || b.plusOneNames.length > 0);
+        } else if (currentFilter === 'with_custom') {
+          matchFilter = b.otherCustom.length > 0;
+        }
+
+        const extraText = [...b.childrenNames, ...b.plusOneNames].join(' ').toLowerCase();
         const matchSearch = !search ||
           `${item.first_name} ${item.last_name}`.toLowerCase().includes(search) ||
-          (item.phone && item.phone.includes(search));
+          (item.phone && item.phone.includes(search)) ||
+          extraText.includes(search);
         return matchFilter && matchSearch;
       });
 
@@ -2236,9 +2331,26 @@
 
       filtered.forEach(r => {
         const isAttending = r.attendance === 'attending';
+        const b = extractGuestBreakdown(r);
         const tr = document.createElement("tr");
         tr.className = "hover:bg-[#FAF7F2]/80 transition-colors";
         const cleanPhone = (r.phone || "").replace(/[^0-9]/g, '');
+
+        const breakdownParts = [];
+        if (isAttending && (b.childrenCount > 0 || b.plusOneCount > 0)) {
+          const mainCount = Math.max(1, (r.guests_count || 1) - b.childrenCount - b.plusOneCount);
+          breakdownParts.push(`${mainCount} осн.`);
+          if (b.childrenCount > 0) breakdownParts.push(`${b.childrenCount} дет.`);
+          if (b.plusOneCount > 0) breakdownParts.push(`${b.plusOneCount} доп.`);
+        }
+
+        const customHtml = b.otherCustom.length > 0
+          ? `<div class="flex flex-wrap gap-1">${b.otherCustom.map(([k, v]) => {
+              const lbl = (v && typeof v === 'object') ? (v.label_ru || v.label_he || k) : k;
+              const val = (v && typeof v === 'object') ? (v.value ?? '') : v;
+              return `<span class="inline-block px-2 py-0.5 rounded-md bg-[#FAF7F2] border border-[#E8DFC9] text-[10px] text-stone-700"><b>${escapeHtml(lbl)}:</b> ${escapeHtml(val)}</span>`;
+            }).join('')}</div>`
+          : '<span class="text-stone-300">—</span>';
 
         tr.innerHTML = `
           <td class="py-3 px-4 font-semibold text-stone-900">
@@ -2256,19 +2368,21 @@
             }
           </td>
           <td class="py-3 px-4 text-xs font-bold text-stone-800">
-            ${isAttending ? r.guests_count : '—'}
+            ${isAttending ? `<div>${r.guests_count}</div>${breakdownParts.length ? `<div class="text-[10px] font-normal text-stone-500 whitespace-nowrap">${breakdownParts.join(' + ')}</div>` : ''}` : '—'}
+          </td>
+          <td class="py-3 px-4 text-xs max-w-[180px]">
+            ${isAttending ? renderBadgeList(b.childrenNames, b.childrenCount) : '<span class="text-stone-300">—</span>'}
+          </td>
+          <td class="py-3 px-4 text-xs max-w-[180px]">
+            ${isAttending ? renderBadgeList(b.plusOneNames, b.plusOneCount) : '<span class="text-stone-300">—</span>'}
+          </td>
+          <td class="py-3 px-4 text-xs max-w-[200px]">
+            ${customHtml}
           </td>
           <td class="py-3 px-4 text-xs text-stone-600 max-w-xs">
             ${r.message ? `<div class="italic">«${escapeHtml(r.message)}»</div>` : '<span class="text-stone-300">—</span>'}
-            ${r.custom_answers && typeof r.custom_answers === 'object' && Object.keys(r.custom_answers).length > 0
-              ? `<div class="mt-1.5 flex flex-wrap gap-1">${Object.entries(r.custom_answers).map(([k, v]) => {
-                  const lbl = (v && typeof v === 'object') ? (v.label_ru || v.label_he || k) : k;
-                  const val = (v && typeof v === 'object') ? (v.value ?? '') : v;
-                  return `<span class="inline-block px-2 py-0.5 rounded-md bg-[#FAF7F2] border border-[#E8DFC9] text-[10px] text-stone-700"><b>${escapeHtml(lbl)}:</b> ${escapeHtml(val)}</span>`;
-                }).join('')}</div>`
-              : ''}
           </td>
-          <td class="py-3 px-4 text-[11px] text-stone-400 font-mono">
+          <td class="py-3 px-4 text-[11px] text-stone-400 font-mono whitespace-nowrap">
             ${r.created_at || ''}
           </td>
           <td class="py-3 px-4 text-right">
