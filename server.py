@@ -47,7 +47,10 @@ def load_config():
             "waze_link": "https://waze.com/ul",
             "google_maps_link": "https://maps.google.com",
             "bit_phone": "+972 50-000-0000",
-            "bit_name": "Nazar & Sofia"
+            "bit_name": "Nazar & Sofia",
+            "bit_link": "",
+            "bit_reason_ru": "Подарок на свадьбу Назара и Софии",
+            "bit_reason_he": "מתנה לחתונה של נזר וסופיה"
         },
         "photos": {
             "hero": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
@@ -82,9 +85,14 @@ def init_db():
             guests_count INTEGER DEFAULT 1,
             message TEXT,
             language TEXT DEFAULT 'ru',
+            custom_answers TEXT DEFAULT '{}',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    cursor.execute("PRAGMA table_info(rsvps)")
+    cols = [row[1] for row in cursor.fetchall()]
+    if "custom_answers" not in cols:
+        cursor.execute("ALTER TABLE rsvps ADD COLUMN custom_answers TEXT DEFAULT '{}'")
     conn.commit()
     conn.close()
 
@@ -122,6 +130,18 @@ def send_telegram_notification(rsvp_data):
 
     if rsvp_data.get("message"):
         msg_lines.append(f"💌 <b>Поздравление:</b>\n<i>«{rsvp_data.get('message')}»</i>")
+
+    custom_answers = rsvp_data.get("custom_answers") or {}
+    if isinstance(custom_answers, dict) and custom_answers:
+        for k, v in custom_answers.items():
+            if isinstance(v, dict):
+                label = v.get("label_ru") or v.get("label_he") or k
+                val = v.get("value", "")
+            else:
+                label = k
+                val = v
+            if val not in (None, ""):
+                msg_lines.append(f"📝 <b>{label}:</b> {val}")
 
     msg_lines.append("")
     msg_lines.append(f"⏰ {datetime.now().strftime('%Y-%m-%d %H:%M')}")
@@ -395,6 +415,10 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         guests_count = int(payload.get("guests_count", 1))
         message = payload.get("message", "").strip()
         language = payload.get("language", "ru")
+        custom_answers = payload.get("custom_answers")
+        if not isinstance(custom_answers, dict):
+            custom_answers = {}
+        custom_answers_json = json.dumps(custom_answers, ensure_ascii=False)
 
         if not first_name or not last_name or not phone:
             self.send_json({"error": "First name, last name, and phone are required"}, status=400)
@@ -404,9 +428,9 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO rsvps (first_name, last_name, phone, attendance, guests_count, message, language)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (first_name, last_name, phone, attendance, guests_count, message, language))
+                INSERT INTO rsvps (first_name, last_name, phone, attendance, guests_count, message, language, custom_answers)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (first_name, last_name, phone, attendance, guests_count, message, language, custom_answers_json))
             conn.commit()
             rsvp_id = cursor.lastrowid
             conn.close()
@@ -422,7 +446,8 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             "attendance": attendance,
             "guests_count": guests_count,
             "message": message,
-            "language": language
+            "language": language,
+            "custom_answers": custom_answers
         }
 
         telegram_sent = send_telegram_notification(rsvp_data)
@@ -441,7 +466,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
 
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute("SELECT id, first_name, last_name, phone, attendance, guests_count, message, language, created_at FROM rsvps ORDER BY id DESC")
+        cursor.execute("SELECT id, first_name, last_name, phone, attendance, guests_count, message, language, created_at, custom_answers FROM rsvps ORDER BY id DESC")
         rows = cursor.fetchall()
         conn.close()
 
@@ -458,6 +483,11 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             else:
                 declined_count += 1
 
+            try:
+                ca = json.loads(r[9]) if r[9] else {}
+            except Exception:
+                ca = {}
+
             items.append({
                 "id": r[0],
                 "first_name": r[1],
@@ -467,7 +497,8 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                 "guests_count": r[5],
                 "message": r[6],
                 "language": r[7],
-                "created_at": r[8]
+                "created_at": r[8],
+                "custom_answers": ca
             })
 
         cfg = load_config()
@@ -565,7 +596,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
 
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute("SELECT id, first_name, last_name, phone, attendance, guests_count, message, language, created_at FROM rsvps ORDER BY id ASC")
+        cursor.execute("SELECT id, first_name, last_name, phone, attendance, guests_count, message, language, created_at, custom_answers FROM rsvps ORDER BY id ASC")
         rows = cursor.fetchall()
         conn.close()
 
@@ -573,10 +604,23 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         import io
         output = io.StringIO()
         writer = csv.writer(output)
-        writer.writerow(["ID", "Имя", "Фамилия", "Телефон", "Присутствие", "Кол-во гостей", "Поздравление", "Язык", "Дата регистрации"])
+        writer.writerow(["ID", "Имя", "Фамилия", "Телефон", "Присутствие", "Кол-во гостей", "Поздравление", "Доп. пункты", "Язык", "Дата регистрации"])
 
         for r in rows:
-            writer.writerow([r[0], r[1], r[2], r[3], "Придет" if r[4] == "attending" else "Не придет", r[5], r[6], r[7], r[8]])
+            ca_str = ""
+            try:
+                ca = json.loads(r[9]) if r[9] else {}
+                if isinstance(ca, dict) and ca:
+                    parts = []
+                    for k, v in ca.items():
+                        if isinstance(v, dict):
+                            parts.append(f"{v.get('label_ru') or k}: {v.get('value', '')}")
+                        else:
+                            parts.append(f"{k}: {v}")
+                    ca_str = "; ".join(parts)
+            except Exception:
+                ca_str = ""
+            writer.writerow([r[0], r[1], r[2], r[3], "Придет" if r[4] == "attending" else "Не придет", r[5], r[6], ca_str, r[7], r[8]])
 
         csv_data = output.getvalue().encode("utf-8-sig")
 
@@ -612,7 +656,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         cfg = load_config()
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute("SELECT id, first_name, last_name, phone, attendance, guests_count, message, language, created_at FROM rsvps ORDER BY id ASC")
+        cursor.execute("SELECT id, first_name, last_name, phone, attendance, guests_count, message, language, created_at, custom_answers FROM rsvps ORDER BY id ASC")
         rows = cursor.fetchall()
         conn.close()
 
@@ -626,7 +670,8 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                 "guests_count": r[5],
                 "message": r[6],
                 "language": r[7],
-                "created_at": r[8]
+                "created_at": r[8],
+                "custom_answers": json.loads(r[9]) if r[9] else {}
             }
             for r in rows
         ]
@@ -688,8 +733,8 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                 )
                 if not cursor.fetchone():
                     cursor.execute("""
-                        INSERT INTO rsvps (first_name, last_name, phone, attendance, guests_count, message, language, created_at)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO rsvps (first_name, last_name, phone, attendance, guests_count, message, language, custom_answers, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
                         r.get("first_name", ""),
                         r.get("last_name", ""),
@@ -698,6 +743,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                         int(r.get("guests_count", 1)),
                         r.get("message", ""),
                         r.get("language", "ru"),
+                        json.dumps(r.get("custom_answers") or {}, ensure_ascii=False),
                         r.get("created_at") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     ))
             conn.commit()

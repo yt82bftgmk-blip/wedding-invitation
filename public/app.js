@@ -56,6 +56,7 @@ const translations = {
     gift_title: "Свадебный подарок",
     gift_description: "Ваше присутствие и тёплые улыбки — самый ценный подарок для нас! Но если вы хотите сделать памятный вклад в нашу молодую семью, вы можете легко воспользоваться израильским приложением Bit.",
     bit_recipient: "Получатель",
+    bit_reason_label: "Назначение:",
     bit_copy_btn: "Скопировать номер",
     bit_copied: "Номер скопирован! ✓",
     bit_open_app: "Открыть Bit",
@@ -142,6 +143,7 @@ const translations = {
     gift_title: "מתנה לחתונה",
     gift_description: "הנוכחות והחיוך שלכם הם המתנה היקרה ביותר עבורנו! אך אם ברצונכם להעניק לנו מתנה כספית, ניתן לעשות זאת בקלות באמצעות אפליקציית Bit.",
     bit_recipient: "שם המוטב",
+    bit_reason_label: "סיבה:",
     bit_copy_btn: "העתק מספר טלפון",
     bit_copied: "המספר הועתק! ✓",
     bit_open_app: "פתח ב-Bit",
@@ -187,8 +189,35 @@ document.addEventListener("DOMContentLoaded", () => {
   initMusicAutoPlay();
 });
 
+const MUSIC_TRACKS = [
+  "/music/track_1.mp3",
+  "/music/track_2.mp3",
+  "/music/track_3.mp3",
+  "/music/track_4.mp3",
+  "/music/track_5.mp3"
+];
+let currentTrackIndex = -1;
 let isMusicPlaying = false;
 let userPausedMusic = false;
+
+function pickNextRandomTrack(audio) {
+  let prev = currentTrackIndex;
+  if (prev === -1) {
+    try {
+      const saved = parseInt(localStorage.getItem("wedding_last_track"), 10);
+      if (!isNaN(saved)) prev = saved;
+    } catch (e) {}
+  }
+  const candidates = MUSIC_TRACKS.map((_, i) => i).filter(i => i !== prev);
+  const nextIdx = candidates[Math.floor(Math.random() * candidates.length)] ?? 0;
+  currentTrackIndex = nextIdx;
+  try {
+    localStorage.setItem("wedding_last_track", String(nextIdx));
+  } catch (e) {}
+  if (audio) {
+    audio.src = MUSIC_TRACKS[nextIdx];
+  }
+}
 
 function toggleMusic() {
   const audio = document.getElementById("wedding-audio");
@@ -231,6 +260,14 @@ function initMusicAutoPlay() {
   const audio = document.getElementById("wedding-audio");
   if (!audio) return;
   audio.volume = 0.75;
+
+  pickNextRandomTrack(audio);
+  audio.addEventListener("ended", () => {
+    pickNextRandomTrack(audio);
+    if (!userPausedMusic) {
+      audio.play().catch(() => {});
+    }
+  });
 
   const unlockEvents = ['click', 'touchstart', 'touchend', 'pointerdown', 'pointerup', 'keydown'];
 
@@ -511,6 +548,35 @@ function applyConfig() {
     bitPhone.textContent = weddingConfig.bit_phone;
   }
 
+  const bitReasonWrapper = document.getElementById("bit-reason-wrapper");
+  const bitReasonEl = document.getElementById("bit-reason-display");
+  const bitReason = isHe ? (weddingConfig.bit_reason_he || "") : (weddingConfig.bit_reason_ru || "");
+  if (bitReasonWrapper && bitReasonEl) {
+    if (bitReason.trim()) {
+      bitReasonEl.textContent = bitReason.trim();
+      bitReasonWrapper.classList.remove("hidden");
+    } else {
+      bitReasonWrapper.classList.add("hidden");
+    }
+  }
+
+  const btnOpenBit = document.getElementById("btn-open-bit");
+  if (btnOpenBit) {
+    const bitLink = (weddingConfig.bit_link || "").trim();
+    if (/^https?:\/\//i.test(bitLink)) {
+      btnOpenBit.href = bitLink;
+      btnOpenBit.target = "_blank";
+      btnOpenBit.rel = "noopener noreferrer";
+    } else {
+      btnOpenBit.href = "bit://";
+      btnOpenBit.removeAttribute("target");
+      btnOpenBit.removeAttribute("rel");
+    }
+  }
+
+  renderGuestOptions();
+  renderCustomRsvpFields();
+
   const btnWaze = document.getElementById("btn-waze");
   if (btnWaze && weddingConfig.waze_link) {
     btnWaze.href = weddingConfig.waze_link;
@@ -614,6 +680,16 @@ function copyBitNumber() {
   }).catch(() => {
     alert("Номер телефона: " + phone);
   });
+}
+
+function handleOpenBitClick() {
+  const isHe = currentLang === 'he';
+  const reason = weddingConfig
+    ? (isHe ? (weddingConfig.bit_reason_he || "") : (weddingConfig.bit_reason_ru || "")).trim()
+    : "";
+  if (reason && navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(reason).catch(() => {});
+  }
 }
 
 let currentPhoneFormat = 'il_intl'; // 'il_intl', 'il_local', 'ru'
@@ -771,10 +847,143 @@ function validatePhoneNumber() {
   return true;
 }
 
+function escapeHtmlSafe(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getDefaultGuestOptions() {
+  const dictRu = translations.ru;
+  const dictHe = translations.he;
+  return [
+    { value: 1, label_ru: dictRu.guest_opt_1 || "1 человек (только я)", label_he: dictHe.guest_opt_1 || "אורח 1 (רק אני)" },
+    { value: 2, label_ru: dictRu.guest_opt_2 || "2 человека (+1 гость)", label_he: dictHe.guest_opt_2 || "2 אורחים (אני ובן/בת זוג)" },
+    { value: 3, label_ru: dictRu.guest_opt_3 || "3 человека", label_he: dictHe.guest_opt_3 || "3 אורחים" },
+    { value: 4, label_ru: dictRu.guest_opt_4 || "4+ человека (с семьёй)", label_he: dictHe.guest_opt_4 || "4+ אורחים (עם המשפחה)" }
+  ];
+}
+
+function renderGuestOptions() {
+  const select = document.getElementById("guests_count");
+  if (!select) return;
+  const prevVal = select.value;
+  const isHe = currentLang === 'he';
+  const opts = (weddingConfig && Array.isArray(weddingConfig.guest_options) && weddingConfig.guest_options.length > 0)
+    ? weddingConfig.guest_options
+    : getDefaultGuestOptions();
+
+  select.innerHTML = opts.map(o => {
+    const label = isHe ? (o.label_he || o.label_ru || o.value) : (o.label_ru || o.label_he || o.value);
+    const val = parseInt(o.value, 10) || 1;
+    return `<option value="${val}">${escapeHtmlSafe(label)}</option>`;
+  }).join("");
+
+  if (prevVal && Array.from(select.options).some(opt => opt.value === prevVal)) {
+    select.value = prevVal;
+  }
+}
+
+function renderCustomRsvpFields() {
+  const container = document.getElementById("rsvp-custom-fields");
+  if (!container) return;
+
+  // Preserve current values before re-rendering on language switch
+  const prevValues = {};
+  container.querySelectorAll("[data-custom-id]").forEach(el => {
+    const id = el.getAttribute("data-custom-id");
+    prevValues[id] = el.type === "checkbox" ? el.checked : el.value;
+  });
+
+  const fields = (weddingConfig && Array.isArray(weddingConfig.rsvp_custom_fields))
+    ? weddingConfig.rsvp_custom_fields
+    : [];
+
+  if (fields.length === 0) {
+    container.innerHTML = "";
+    return;
+  }
+
+  const isHe = currentLang === 'he';
+  const attendanceEl = document.querySelector('input[name="attendance"]:checked');
+  const isAttending = !attendanceEl || attendanceEl.value === 'attending';
+
+  container.innerHTML = fields.map(f => {
+    const label = isHe ? (f.label_he || f.label_ru || "") : (f.label_ru || f.label_he || "");
+    const showWhen = f.show_when || 'attending';
+    const hiddenStyle = (showWhen === 'attending' && !isAttending) ? 'style="display:none"' : '';
+    const reqAttr = f.required ? 'required' : '';
+    const reqStar = f.required ? ' *' : '';
+
+    if (f.type === 'select') {
+      const opts = Array.isArray(f.options) ? f.options : [];
+      const optHtml = opts.map(o => {
+        const oLabel = isHe ? (o.label_he || o.label_ru || "") : (o.label_ru || o.label_he || "");
+        return `<option value="${escapeHtmlSafe(oLabel)}">${escapeHtmlSafe(oLabel)}</option>`;
+      }).join("");
+      return `
+        <div class="space-y-1.5 rsvp-custom-field" data-show-when="${escapeHtmlSafe(showWhen)}" ${hiddenStyle}>
+          <label class="text-xs font-semibold uppercase tracking-wider text-stone-700">${escapeHtmlSafe(label)}${reqStar}</label>
+          <select data-custom-id="${escapeHtmlSafe(f.id)}" ${reqAttr} class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-[#FAF7F2]/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all">
+            ${optHtml}
+          </select>
+        </div>
+      `;
+    }
+
+    if (f.type === 'checkbox') {
+      return `
+        <div class="rsvp-custom-field" data-show-when="${escapeHtmlSafe(showWhen)}" ${hiddenStyle}>
+          <label class="flex items-center gap-3 p-4 rounded-xl border border-stone-200 bg-[#FAF7F2]/60 cursor-pointer hover:border-champagne-gold transition-all">
+            <input type="checkbox" data-custom-id="${escapeHtmlSafe(f.id)}" ${reqAttr} class="accent-stone-900 w-4 h-4">
+            <span class="text-sm font-medium text-stone-900">${escapeHtmlSafe(label)}${reqStar}</span>
+          </label>
+        </div>
+      `;
+    }
+
+    const placeholder = isHe ? (f.placeholder_he || "") : (f.placeholder_ru || "");
+    return `
+      <div class="space-y-1.5 rsvp-custom-field" data-show-when="${escapeHtmlSafe(showWhen)}" ${hiddenStyle}>
+        <label class="text-xs font-semibold uppercase tracking-wider text-stone-700">${escapeHtmlSafe(label)}${reqStar}</label>
+        <input type="text" data-custom-id="${escapeHtmlSafe(f.id)}" ${reqAttr} placeholder="${escapeHtmlSafe(placeholder)}" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-[#FAF7F2]/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all">
+      </div>
+    `;
+  }).join("");
+
+  // Restore previous values
+  Object.keys(prevValues).forEach(id => {
+    const el = container.querySelector(`[data-custom-id="${CSS.escape(id)}"]`);
+    if (!el) return;
+    if (el.type === "checkbox") {
+      el.checked = Boolean(prevValues[id]);
+    } else {
+      el.value = prevValues[id];
+    }
+  });
+}
+
 function toggleGuestCount(isAttending) {
   const container = document.getElementById("guest-count-container");
-  if (!container) return;
-  container.style.display = isAttending ? "block" : "none";
+  if (container) {
+    container.style.display = isAttending ? "block" : "none";
+  }
+  document.querySelectorAll('.rsvp-custom-field[data-show-when="attending"]').forEach(el => {
+    el.style.display = isAttending ? "block" : "none";
+    el.querySelectorAll('input, select').forEach(inp => {
+      if (!isAttending) {
+        if (inp.hasAttribute('required')) {
+          inp.setAttribute('data-was-required', '1');
+          inp.removeAttribute('required');
+        }
+      } else if (inp.getAttribute('data-was-required') === '1') {
+        inp.setAttribute('required', '');
+      }
+    });
+  });
 }
 
 async function submitRSVP(event) {
@@ -797,6 +1006,29 @@ async function submitRSVP(event) {
   const guestsCount = attendance === 'attending' ? parseInt(document.getElementById("guests_count").value) : 0;
   const message = document.getElementById("message").value.trim();
 
+  const customAnswers = {};
+  const customFields = (weddingConfig && Array.isArray(weddingConfig.rsvp_custom_fields))
+    ? weddingConfig.rsvp_custom_fields
+    : [];
+  customFields.forEach(f => {
+    if ((f.show_when || 'attending') === 'attending' && attendance !== 'attending') return;
+    const el = document.querySelector(`[data-custom-id="${CSS.escape(f.id)}"]`);
+    if (!el) return;
+    let val = "";
+    if (el.type === "checkbox") {
+      val = el.checked ? (currentLang === 'he' ? "כן" : "Да") : (currentLang === 'he' ? "לא" : "Нет");
+    } else {
+      val = (el.value || "").trim();
+    }
+    if (val !== "") {
+      customAnswers[f.id] = {
+        label_ru: f.label_ru || f.label_he || f.id,
+        label_he: f.label_he || f.label_ru || f.id,
+        value: val
+      };
+    }
+  });
+
   const payload = {
     first_name: firstName,
     last_name: lastName,
@@ -804,7 +1036,8 @@ async function submitRSVP(event) {
     attendance: attendance,
     guests_count: guestsCount,
     message: message,
-    language: currentLang
+    language: currentLang,
+    custom_answers: customAnswers
   };
 
   try {

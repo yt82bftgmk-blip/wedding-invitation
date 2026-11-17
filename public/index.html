@@ -42,7 +42,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="/style.css?v=4">
+  <link rel="stylesheet" href="/style.css?v=5">
 </head>
 <body class="bg-[#FAF7F2] text-[#2D2926] font-sans antialiased selection:bg-champagne selection:text-white">
 
@@ -63,7 +63,7 @@
         <span class="w-1 bg-champagne-gold rounded-full eq-bar-3"></span>
       </div>
     </button>
-    <audio id="wedding-audio" autoplay loop preload="auto" src="/music/wedding.mp3"></audio>
+    <audio id="wedding-audio" preload="auto"></audio>
   </div>
 
   <!-- Top Language Switcher Bar -->
@@ -407,6 +407,10 @@
           <div class="text-xs text-stone-400 uppercase tracking-widest" data-i18n="bit_recipient">Получатель</div>
           <div id="bit-name-display" class="font-serif text-2xl font-bold text-champagne-gold">Назар & София</div>
           <div id="bit-phone-display" class="text-xl font-mono text-white tracking-wider mt-1">+972 50-000-0000</div>
+          <div id="bit-reason-wrapper" class="pt-2 flex items-center gap-2 text-xs text-stone-300 hidden">
+            <span class="text-stone-400" data-i18n="bit_reason_label">Назначение:</span>
+            <span id="bit-reason-display" class="text-white/90 font-medium">Подарок на свадьбу Назара и Софии</span>
+          </div>
         </div>
 
         <div class="flex flex-col sm:flex-row gap-3">
@@ -414,7 +418,7 @@
             <i data-lucide="copy" class="w-4 h-4"></i>
             <span id="btn-copy-bit-text" data-i18n="bit_copy_btn">Скопировать номер</span>
           </button>
-          <a id="btn-open-bit" href="bit://" class="inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-bit-blue hover:bg-[#00929d] text-white rounded-xl font-semibold transition-all shadow-md">
+          <a id="btn-open-bit" href="bit://" onclick="handleOpenBitClick(event)" class="inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-bit-blue hover:bg-[#00929d] text-white rounded-xl font-semibold transition-all shadow-md">
             <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
             <span data-i18n="bit_open_app">Открыть Bit</span>
           </a>
@@ -528,6 +532,9 @@
             </select>
           </div>
 
+          <!-- Dynamic Custom RSVP Fields -->
+          <div id="rsvp-custom-fields" class="space-y-6"></div>
+
           <!-- Warm Congratulations / Wishes -->
           <div class="space-y-1.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between">
@@ -612,6 +619,6 @@
     </div>
   </div>
 
-  <script src="/app.js?v=4"></script>
+  <script src="/app.js?v=6"></script>
 </body>
 </html>
