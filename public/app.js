@@ -193,21 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchConfig();
   startCountdown();
   initMusicAutoPlay();
-
-  const fn = document.getElementById("first_name");
-  const ln = document.getElementById("last_name");
-  const gfn = document.getElementById("guest_full_name");
-  if (fn && ln && gfn) {
-    let manualEdit = false;
-    gfn.addEventListener("input", () => { manualEdit = gfn.value.trim().length > 0; });
-    const syncFullName = () => {
-      if (!manualEdit) {
-        gfn.value = [fn.value.trim(), ln.value.trim()].filter(Boolean).join(" ");
-      }
-    };
-    fn.addEventListener("input", syncFullName);
-    ln.addEventListener("input", syncFullName);
-  }
 });
 
 const MUSIC_TRACKS = [
@@ -650,21 +635,18 @@ function setLanguage(lang) {
   const fName = document.getElementById('first_name');
   const lName = document.getElementById('last_name');
   const msg = document.getElementById('message');
-  const guestFullEl = document.getElementById('guest_full_name');
   const childrenEl = document.getElementById('children_names');
   const plusOneEl = document.getElementById('plus_one_name');
   if (lang === 'he') {
     if (fName) fName.placeholder = "דוד";
     if (lName) lName.placeholder = "לוי";
     if (msg) msg.placeholder = "נזר וסופיה היקרים, מאחלים לכם המון מזל טוב...";
-    if (guestFullEl) guestFullEl.placeholder = "דוד לוי";
     if (childrenEl) childrenEl.placeholder = "שם הילד/ה";
     if (plusOneEl) plusOneEl.placeholder = "שם ושם משפחה";
   } else {
     if (fName) fName.placeholder = "Давид";
     if (lName) lName.placeholder = "Леви";
     if (msg) msg.placeholder = "Дорогие Назар и София! От всей души поздравляем вас...";
-    if (guestFullEl) guestFullEl.placeholder = "Давид Леви";
     if (childrenEl) childrenEl.placeholder = "Имя ребёнка";
     if (plusOneEl) plusOneEl.placeholder = "Имя Фамилия";
   }
@@ -1010,11 +992,6 @@ function toggleGuestCount(isAttending) {
   const container = document.getElementById("guest-count-container");
   if (container) {
     container.style.display = isAttending ? "block" : "none";
-  }
-  const guestFullEl = document.getElementById("guest_full_name");
-  if (guestFullEl) {
-    if (isAttending) guestFullEl.setAttribute('required', '');
-    else guestFullEl.removeAttribute('required');
   }
   document.querySelectorAll('.rsvp-custom-field[data-show-when="attending"]').forEach(el => {
     el.style.display = isAttending ? "block" : "none";
