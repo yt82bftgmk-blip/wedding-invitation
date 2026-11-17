@@ -10,24 +10,29 @@
 
 ## 📁 Структура и основные файлы
 
-- **`public/index.html`, `public/app.js`, `public/style.css`** — двуязычный гостевой сайт (RU / HE RTL), сейчас подключены `style.css?v=5` и `app.js?v=11`:
+- **`public/index.html`, `public/app.js`, `public/style.css`** — двуязычный гостевой сайт (RU / HE RTL), сейчас подключены `style.css?v=5` и `app.js?v=14`:
   - Случайный музыкальный плеер из 5 спокойных романтических мелодий (`public/music/track_1.mp3`–`track_5.mp3`).
   - Первый экран (`#hero`), блок «Наша история» (3 главы с фото `#story-img-0..2`) и «Фотоальбом любви» (`#gallery-grid`) со всплывающими мини-историями (`#photo-story-modal`).
   - Тайминг дня, карточка зала (Waze / Google Maps), блок подарка **Bit** (`bit_link`, `bit_name`, `bit_phone`, `bit_reason_ru/he`).
-  - **Форма RSVP (`#rsvp-form`):** обязательные `Имя *` (`#first_name`), `Фамилия *` (`#last_name`), `Телефон *` (`#phone`), выбор присутствия и раздел «Количество человек» (`#guest-count-container`) с живым счётчиком (`#rsvp-total-guests-badge`):
-    - **Дети** (`#children_count`, кнопки `−` / `+` и ввод числа) — при указании `N` сразу открывается `N` строк (`#children_inputs_container`) для ввода имён детей.
-    - **Зову кого-то ещё** (`#plus_one_count`, кнопки `−` / `+` и ввод числа без ограничений) — при указании `N` сразу открывается `N` строк (`#plus_one_inputs_container`) для ввода имён гостей.
-    - Итоговое `guests_count` считается автоматически (`1 + дети + доп. гости`, либо `0` при отказе), а имена и количества сохраняются в `custom_answers` (`children_names`, `companion_name`) вместе с кастомными полями `rsvp_custom_fields`.
+  - **Форма RSVP (`#rsvp-form`) с защитой от дубликатов и редактированием записи:**
+    - Обязательные `Имя *` (`#first_name`), `Фамилия *` (`#last_name`), `Телефон *` (`#phone`), выбор присутствия и раздел «Количество человек» (`#guest-count-container`) с живым счётчиком (`#rsvp-total-guests-badge`):
+      - **Дети** (`#children_count`, кнопки `−` / `+` и ввод числа) — при указании `N` сразу открывается `N` строк (`#children_inputs_container`) для ввода имён детей.
+      - **Зову кого-то ещё** (`#plus_one_count`, кнопки `−` / `+` и ввод числа) — при указании `N` сразу открывается `N` строк (`#plus_one_inputs_container`) для ввода имён гостей.
+      - Итоговое `guests_count` считается автоматически (`1 + дети + доп. гости`, либо `0` при отказе), а имена и количества сохраняются в `custom_answers` (`children_names`, `companion_name`) вместе с кастомными полями `rsvp_custom_fields`.
+    - **Аутентификация / защита от дубликатов и редактирование:**
+      - При повторном заходе с того же браузера (`localStorage`: `wedding_rsvp_registered` + проверка через `POST /api/rsvp/check`) или при вводе уже существующего номера телефона / имени+фамилии система не создаёт дубликат, а показывает карточку `#rsvp-already-registered` («Вы уже в списке гостей! 💍» с номером телефона для связи из `bit_phone`) и кнопку **«Редактировать мою запись»**.
+      - В режиме редактирования (`#rsvp-edit-banner`) форма предзаполняется текущими данными гостя, позволяет добавить/убрать гостей или изменить статус и сохраняет изменения через `POST /api/rsvp/update` (перезаписывая запись в базе, админке и отправляя обновление в Telegram).
 - **`public/admin.html`** — закрытая админ-панель (`/admin`), визуальная копия сайта:
   - Inline-редактирование всех текстов (RU / HE RTL) и настроек Bit (`bit_link`, `bit_name`, `bit_phone`, `bit_reason_ru/he`).
   - Редактирование **всех фотографий** на сайте: главного фото (`hero`), всех 3 фото в «Нашей истории» (`story-img-0..2`, загрузка или ссылка) и фотоальбома (добавление, замена в карточке или модальном окне, удаление, редактирование подписей и историй).
   - Конструктор доп. пунктов анкеты (`rsvp_custom_fields`), статистика с разбивкой (`#stat-people-breakdown`: Осн / Дет / Доп), фильтры (**Все ответы**, **Придут**, **Не смогут**, **С детьми**, **С доп. гостями**, **Доп. параметры**), таблица гостей с отдельными колонками (**Персон**, **Дети**, **Доп. гости**, **Доп. параметры**, **Поздравление**), экспорт CSV, кнопка «Бэкап» (`/api/backup`, `/api/restore`) и Telegram-настройки.
 - **`server.py`** — Python-сервер (`http.server` + `sqlite3`):
   - Статика с `Cache-Control: no-cache, no-store, must-revalidate`.
-  - API гостя и админки (`/api/config`, `/api/rsvp`, `/api/rsvps`, `/api/settings`, `/api/upload-photo`, `/api/backup`, `/api/restore`, `/api/export-csv`, `/api/sync-github`).
-  - Telegram-бот (`/api/telegram-webhook`) — уведомления о новых анкетах (включая `custom_answers`) и команды статистики.
+  - API гостя и админки (`/api/config`, `/api/rsvp`, `/api/rsvp/check`, `/api/rsvp/update`, `/api/rsvps`, `/api/settings`, `/api/upload-photo`, `/api/backup`, `/api/restore`, `/api/export-csv`, `/api/sync-github`).
+  - Нормализация телефонов (`+972`/`05X` и `+7`/`8`) и имён (`phone_normalized`, `full_name_normalized`) для предотвращения дубликатов и обновления существующих записей.
+  - Telegram-бот (`/api/telegram-webhook`) — уведомления о новых анкетах и обновлениях записей (`✏️ Гость обновил свою запись!`), а также команды статистики.
 - **`config.json`** — настройки свадьбы, тексты (`wedding.texts`), Bit, `rsvp_custom_fields`, фото (`photos.hero`, `photos.story`, `photos.gallery`, `photos.stories`), пароль админа и токены Telegram.
-- **`wedding.db`** — SQLite-база с таблицей `rsvps` (включая колонку `custom_answers`).
+- **`wedding.db`** — SQLite-база с таблицей `rsvps` (включая `custom_answers`, `phone_normalized`, `full_name_normalized`).
 - **`sync_live.py`** — скрипт выгрузки живых данных с Render (`/api/backup`) в локальный репозиторий.
 - **`public/images/`, `public/music/`, `public/uploads/`** — статические картинки, 5 аудио-треков и загруженные фото.
 
@@ -38,4 +43,6 @@
 1. Сохраняй поддержку двух языков (**русский** и **иврит RTL**).
 2. Не добавляй ссылку на `/admin` в публичный футер гостевого сайта.
 3. **ПЕРЕД любым `git push`** обязательно запускай `python3 sync_live.py`, чтобы не затереть правки владельцев и фото/гостей на живом сервере.
-4. После изменений в `public/` обновляй версию `?v=...` в `public/index.html` (сейчас `style.css?v=5`, `app.js?v=11`), пушь в GitHub и при необходимости синхронизируй живой сервер через `GET /api/sync-github`.
+4. После изменений в `public/` обновляй версию `?v=...` в `public/index.html` (сейчас `style.css?v=5`, `app.js?v=14`), пушь в GitHub и при необходимости синхронизируй живой сервер через `GET /api/sync-github`.
+
+МОЯ СЛЕД ЗАДАЧА: 
