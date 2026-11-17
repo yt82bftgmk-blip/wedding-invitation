@@ -66,14 +66,83 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* =========================================================
-   Luxury Palette & Visual Polish
+   Luxury Palette & Iridescent Color Flow
    ========================================================= */
+@keyframes gradient-drift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.bg-iridescent-hero {
+  background:
+    radial-gradient(circle at 18% 22%, rgba(212, 175, 55, 0.16), transparent 48%),
+    radial-gradient(circle at 84% 72%, rgba(194, 130, 133, 0.18), transparent 52%),
+    linear-gradient(135deg, #FBF8F3 0%, #F5ECE2 35%, #EFE3D6 68%, #F8F1E7 100%);
+  background-size: 160% 160%;
+  animation: gradient-drift 16s ease-in-out infinite;
+}
+
+.bg-iridescent-ivory {
+  background:
+    radial-gradient(circle at 85% 15%, rgba(212, 175, 55, 0.09), transparent 45%),
+    radial-gradient(circle at 12% 85%, rgba(194, 130, 133, 0.09), transparent 45%),
+    linear-gradient(125deg, #FAF7F2 0%, #F7EFE5 45%, #FBF6EE 100%);
+  background-size: 180% 180%;
+  animation: gradient-drift 18s ease-in-out infinite;
+}
+
+.bg-iridescent-blush {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(194, 130, 133, 0.12), transparent 50%),
+    radial-gradient(circle at 88% 80%, rgba(197, 160, 89, 0.12), transparent 50%),
+    linear-gradient(135deg, #F6EFE9 0%, #F2E6DF 48%, #F7EFE6 100%);
+  background-size: 180% 180%;
+  animation: gradient-drift 15s ease-in-out infinite reverse;
+}
+
+.iridescent-title {
+  background: linear-gradient(120deg, #2D2926 0%, #7C5C2B 35%, #C5A059 50%, #8C585B 68%, #2D2926 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-drift 10s ease-in-out infinite;
+}
+
+.iridescent-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(251, 246, 238, 0.9) 55%, rgba(248, 239, 234, 0.92) 100%);
+  background-size: 160% 160%;
+  animation: gradient-drift 14s ease-in-out infinite;
+  box-shadow: 0 14px 36px -14px rgba(164, 127, 68, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.countdown-tile {
+  background: linear-gradient(160deg, #FFFDF9 0%, #F7EFE4 60%, #F3E7DD 100%);
+  background-size: 160% 160%;
+  animation: gradient-drift 12s ease-in-out infinite;
+}
+
+.bit-card-iridescent {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(197, 160, 89, 0.18), transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(0, 168, 181, 0.22), transparent 50%),
+    linear-gradient(135deg, #231F1D 0%, #2F2926 48%, #1E2426 100%);
+  background-size: 170% 170%;
+  animation: gradient-drift 14s ease-in-out infinite;
+}
+
 .gold-divider {
-  width: 5rem;
+  width: 6rem;
   height: 2px;
   margin-left: auto;
   margin-right: auto;
-  background: linear-gradient(90deg, transparent, #C5A059, #E3C78A, #C5A059, transparent);
+  background: linear-gradient(90deg, transparent, #C5A059, #E5C98B, #C28285, #C5A059, transparent);
+  background-size: 200% auto;
+  animation: gradient-drift 8s ease-in-out infinite;
   border-radius: 9999px;
 }
 
@@ -193,6 +262,14 @@ input:focus, textarea:focus, select:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bg-iridescent-hero,
+  .bg-iridescent-ivory,
+  .bg-iridescent-blush,
+  .iridescent-title,
+  .iridescent-card,
+  .countdown-tile,
+  .bit-card-iridescent,
+  .gold-divider,
   .ambient-orb-1,
   .ambient-orb-2,
   .btn-shimmer::after,
