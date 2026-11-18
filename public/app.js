@@ -65,6 +65,7 @@ const translations = {
     rsvp_title: "Подтверждение присутствия",
     rsvp_tap_hint: "Нажмите, чтобы заполнить анкету",
     rsvp_tap_hint_open: "Нажмите, чтобы свернуть анкету",
+    btn_back_to_invite: "Назад к приглашению",
     rsvp_desc: "Пожалуйста, ответьте на приглашение, чтобы мы могли позаботиться о вашем комфорте!",
     field_first_name: "Имя *",
     field_last_name: "Фамилия *",
@@ -190,6 +191,7 @@ const translations = {
     rsvp_title: "אישור הגעה",
     rsvp_tap_hint: "לחצו למילוי הטופס",
     rsvp_tap_hint_open: "לחצו לסגירת הטופס",
+    btn_back_to_invite: "חזרה להזמנה",
     rsvp_desc: "אנא אשרו את הגעתכם כדי שנוכל להיערך בצורה הטובה ביותר עבורכם!",
     field_first_name: "שם פרטי *",
     field_last_name: "שם משפחה *",
@@ -1843,21 +1845,30 @@ function updateRsvpTapHint() {
   const hint = document.getElementById("rsvp-tap-hint");
   if (!hint) return;
   const dict = translations[currentLang] || translations.ru;
-  hint.textContent = isRsvpSectionOpen
-    ? (dict.rsvp_tap_hint_open || "Нажмите, чтобы свернуть анкету")
-    : (dict.rsvp_tap_hint || "Нажмите, чтобы заполнить анкету");
+  hint.textContent = dict.rsvp_tap_hint || "Нажмите, чтобы заполнить анкету";
 }
 
 function setRsvpSectionOpen(open) {
   isRsvpSectionOpen = Boolean(open);
   const btn = document.getElementById("rsvp-toggle-btn");
-  const panel = document.getElementById("rsvp-collapsible");
+  const overlay = document.getElementById("rsvp-page-overlay");
   if (btn) {
     btn.setAttribute("aria-expanded", isRsvpSectionOpen ? "true" : "false");
   }
-  if (panel) {
-    panel.classList.toggle("is-open", isRsvpSectionOpen);
-    panel.setAttribute("aria-hidden", isRsvpSectionOpen ? "false" : "true");
+  if (overlay) {
+    if (isRsvpSectionOpen) {
+      overlay.classList.remove("hidden");
+      overlay.classList.add("is-open");
+      overlay.setAttribute("aria-hidden", "false");
+      overlay.scrollTop = 0;
+      document.body.style.overflow = "hidden";
+      if (window.lucide) lucide.createIcons();
+    } else {
+      overlay.classList.remove("is-open");
+      overlay.classList.add("hidden");
+      overlay.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
   }
   updateRsvpTapHint();
 }
@@ -1869,3 +1880,13 @@ function toggleRsvpSection() {
 function openRsvpSection() {
   setRsvpSectionOpen(true);
 }
+
+function closeRsvpSection() {
+  setRsvpSectionOpen(false);
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && isRsvpSectionOpen) {
+    closeRsvpSection();
+  }
+});

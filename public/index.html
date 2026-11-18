@@ -42,7 +42,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="/style.css?v=8">
+  <link rel="stylesheet" href="/style.css?v=9">
 </head>
 <body class="bg-[#FAF7F2] text-[#2D2926] font-sans antialiased selection:bg-champagne selection:text-white">
 
@@ -149,7 +149,7 @@
 
       <!-- Quick RSVP Button -->
       <div class="hero-enter-5">
-        <a href="#rsvp" onclick="openRsvpSection()" class="btn-shimmer inline-flex items-center gap-2 px-8 py-4 bg-stone-900 text-white rounded-full text-base font-medium shadow-2xl hover:bg-champagne-gold hover:text-white transition-all transform hover:-translate-y-0.5 active:scale-95">
+        <a href="#rsvp" onclick="event.preventDefault(); openRsvpSection()" class="btn-shimmer inline-flex items-center gap-2 px-8 py-4 bg-stone-900 text-white rounded-full text-base font-medium shadow-2xl hover:bg-champagne-gold hover:text-white transition-all transform hover:-translate-y-0.5 active:scale-95">
           <i data-lucide="heart" class="w-5 h-5 text-rose-400"></i>
           <span data-i18n="btn_rsvp_hero">Подтвердить присутствие</span>
         </a>
@@ -427,9 +427,9 @@
     </div>
   </section>
 
-  <!-- RSVP Section (Бланк регистрации) -->
+  <!-- RSVP Section (Кнопка перехода на страницу подтверждения) -->
   <section id="rsvp" class="py-24 px-4 relative bg-iridescent-ivory">
-    <div class="max-w-2xl mx-auto space-y-6">
+    <div class="max-w-2xl mx-auto">
       <div class="reveal-on-scroll text-center space-y-4">
         <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest block" data-i18n="rsvp_tag">Будем счастливы вас видеть</span>
 
@@ -437,9 +437,9 @@
           <button
             type="button"
             id="rsvp-toggle-btn"
-            onclick="toggleRsvpSection()"
+            onclick="openRsvpSection()"
             aria-expanded="false"
-            aria-controls="rsvp-collapsible"
+            aria-controls="rsvp-page-overlay"
             class="rsvp-trigger-btn group inline-flex items-center justify-center gap-3 sm:gap-4 px-6 sm:px-9 py-4 sm:py-5 rounded-2xl sm:rounded-full border border-[#D8B878]/70 text-white transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer max-w-full"
           >
             <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#C5A059]/20 border border-[#E5C98B]/50 flex items-center justify-center shrink-0">
@@ -447,13 +447,13 @@
             </span>
             <h2 class="font-serif text-2xl sm:text-4xl text-white tracking-wide leading-tight" data-i18n="rsvp_title">Подтверждение присутствия</h2>
             <span class="w-8 h-8 rounded-full bg-white/10 border border-[#E5C98B]/40 flex items-center justify-center shrink-0">
-              <i data-lucide="chevron-down" class="rsvp-trigger-chevron w-4 h-4 text-[#E5C98B]"></i>
+              <i data-lucide="arrow-right" class="rsvp-trigger-arrow w-4 h-4 text-[#E5C98B] rtl:rotate-180"></i>
             </span>
           </button>
 
           <button
             type="button"
-            onclick="toggleRsvpSection()"
+            onclick="openRsvpSection()"
             class="inline-flex items-center gap-2 text-xs font-medium text-champagne-gold hover:text-stone-900 transition-colors cursor-pointer"
           >
             <span class="relative flex h-2 w-2">
@@ -469,12 +469,73 @@
           Пожалуйста, ответьте на приглашение, чтобы мы могли позаботиться о вашем комфорте!
         </p>
       </div>
+    </div>
+  </section>
 
-      <!-- Collapsible RSVP Card (hidden until user clicks Подтверждение присутствия) -->
-      <div id="rsvp-collapsible" class="rsvp-collapsible" aria-hidden="true">
-        <div class="rsvp-collapsible-inner pt-2 pb-4 px-1">
-          <!-- RSVP Card with warm luxury styling -->
-          <div class="iridescent-card backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-[#E8DFC9] shadow-2xl relative">
+  <!-- Dedicated Full-Screen RSVP Page Overlay -->
+  <div id="rsvp-page-overlay" class="rsvp-page-overlay fixed inset-0 z-50 hidden overflow-y-auto rsvp-page-bg" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="rsvp-page-heading">
+    <!-- Subtle Luxury Pattern & Ambient Glows -->
+    <div class="fixed inset-0 rsvp-page-pattern pointer-events-none opacity-80"></div>
+    <div class="fixed -top-24 -left-24 w-80 h-80 rounded-full bg-[#C5A059]/20 blur-3xl pointer-events-none ambient-orb-1"></div>
+    <div class="fixed -bottom-24 -right-24 w-96 h-96 rounded-full bg-[#C28285]/20 blur-3xl pointer-events-none ambient-orb-2"></div>
+
+    <!-- Delicate Botanical Corner SVG Ornaments -->
+    <svg class="fixed top-14 left-0 w-40 h-40 text-[#C5A059]/20 pointer-events-none hidden sm:block" viewBox="0 0 160 160" fill="none" aria-hidden="true">
+      <path d="M12 148C14 86 48 34 128 16" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M36 96C52 84 62 70 66 52C48 58 38 72 36 96Z" stroke="currentColor" stroke-width="1.1"/>
+      <path d="M68 54C86 48 100 38 112 24C92 26 78 36 68 54Z" stroke="currentColor" stroke-width="1.1"/>
+      <circle cx="132" cy="15" r="2.5" fill="currentColor"/>
+    </svg>
+    <svg class="fixed bottom-0 right-0 w-44 h-44 text-[#C28285]/20 pointer-events-none rotate-180 hidden sm:block" viewBox="0 0 160 160" fill="none" aria-hidden="true">
+      <path d="M12 148C14 86 48 34 128 16" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M36 96C52 84 62 70 66 52C48 58 38 72 36 96Z" stroke="currentColor" stroke-width="1.1"/>
+      <path d="M68 54C86 48 100 38 112 24C92 26 78 36 68 54Z" stroke="currentColor" stroke-width="1.1"/>
+      <circle cx="132" cy="15" r="2.5" fill="currentColor"/>
+    </svg>
+
+    <!-- Sticky Top Navigation Bar -->
+    <div class="sticky top-0 z-20 bg-[#FAF7F2]/80 backdrop-blur-md border-b border-[#E8DFC9]/80">
+      <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        <button type="button" onclick="closeRsvpSection()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/80 hover:bg-white border border-[#E8DFC9] text-stone-800 text-xs sm:text-sm font-medium shadow-sm transition-all cursor-pointer">
+          <i data-lucide="arrow-left" class="w-4 h-4 text-champagne-gold rtl:rotate-180"></i>
+          <span data-i18n="btn_back_to_invite">Назад к приглашению</span>
+        </button>
+
+        <div class="font-serif text-lg sm:text-xl font-bold text-stone-800 tracking-wide flex items-center gap-1.5">
+          <span>N</span>
+          <span class="text-champagne-gold text-sm">&amp;</span>
+          <span>S</span>
+        </div>
+
+        <button type="button" onclick="closeRsvpSection()" aria-label="Закрыть" class="w-9 h-9 rounded-full bg-white/80 hover:bg-white border border-[#E8DFC9] text-stone-600 hover:text-stone-900 flex items-center justify-center shadow-sm transition-all cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Centered RSVP Page Content -->
+    <div class="rsvp-page-content relative z-10 max-w-2xl mx-auto px-4 pt-8 pb-16 space-y-7">
+      <div class="text-center space-y-3">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-[#E8DFC9] shadow-sm text-champagne-gold text-xs font-semibold uppercase tracking-widest">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span data-i18n="rsvp_tag">Будем счастливы вас видеть</span>
+        </div>
+        <h2 id="rsvp-page-heading" class="font-serif text-4xl sm:text-5xl iridescent-title leading-tight" data-i18n="rsvp_title">Подтверждение присутствия</h2>
+        <div class="gold-divider"></div>
+        <p class="text-stone-600 max-w-md mx-auto text-sm leading-relaxed" data-i18n="rsvp_desc">
+          Пожалуйста, ответьте на приглашение, чтобы мы могли позаботиться о вашем комфорте!
+        </p>
+      </div>
+
+      <!-- Ornate Gold Corner Wrapper around RSVP Card -->
+      <div class="relative p-1.5 sm:p-2 rounded-[2rem] bg-gradient-to-br from-[#E5C98B]/40 via-white/50 to-[#C28285]/30 shadow-[0_24px_60px_-15px_rgba(140,104,54,0.28)]">
+        <span class="pointer-events-none absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-[#C5A059]/60 rounded-tl-xl"></span>
+        <span class="pointer-events-none absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-[#C5A059]/60 rounded-tr-xl"></span>
+        <span class="pointer-events-none absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-[#C5A059]/60 rounded-bl-xl"></span>
+        <span class="pointer-events-none absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-[#C5A059]/60 rounded-br-xl"></span>
+
+        <!-- RSVP Card with warm luxury styling -->
+        <div class="iridescent-card backdrop-blur-md p-6 sm:p-10 rounded-3xl border border-[#E8DFC9] shadow-xl relative">
         <form id="rsvp-form" onsubmit="submitRSVP(event)" class="space-y-6">
           
           <!-- Edit Mode Banner -->
@@ -629,9 +690,12 @@
 
               <!-- 1.2 Spouse / Teens 12+ / Adult family -->
               <div class="space-y-2">
-                <label for="family_adults_count" class="text-xs font-semibold tracking-wide text-stone-800 flex flex-wrap items-baseline gap-1.5">
-                  <span class="uppercase tracking-wider" data-i18n="field_family_adults">Муж / Жена и родные</span>
-                  <span class="text-[11px] text-stone-400 font-normal lowercase" data-i18n="family_adults_note">(подростки 12+ и взрослые)</span>
+                <label for="family_adults_count" class="text-xs font-semibold tracking-wide text-stone-800 flex items-center justify-between gap-2">
+                  <span class="flex flex-wrap items-baseline gap-1.5">
+                    <span class="uppercase tracking-wider" data-i18n="field_family_adults">Муж / Жена и родные</span>
+                    <span class="text-[11px] text-stone-400 font-normal lowercase" data-i18n="family_adults_note">(подростки 12+ и взрослые)</span>
+                  </span>
+                  <span class="text-[11px] text-stone-400 font-normal lowercase shrink-0" data-i18n="optional_tag">(по желанию)</span>
                 </label>
                 <div class="flex items-center justify-between gap-3">
                   <span class="text-xs text-stone-600" data-i18n="field_family_adults_count">Имя и фамилия</span>
@@ -772,7 +836,7 @@
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
   <!-- Footer -->
   <footer class="py-12 border-t border-[#E8DFC9] text-center text-stone-500 text-xs space-y-3 bg-[#F5EFEB]/60">
@@ -816,6 +880,6 @@
     </div>
   </div>
 
-  <script src="/app.js?v=22"></script>
+  <script src="/app.js?v=23"></script>
 </body>
 </html>

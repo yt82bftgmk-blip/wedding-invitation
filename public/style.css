@@ -190,31 +190,53 @@ input:focus, textarea:focus, select:focus {
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
-.rsvp-trigger-chevron {
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+.rsvp-trigger-arrow {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.rsvp-trigger-btn[aria-expanded="true"] .rsvp-trigger-chevron {
-  transform: rotate(180deg);
+.rsvp-trigger-btn:hover .rsvp-trigger-arrow {
+  transform: translateX(3px);
 }
 
-.rsvp-collapsible {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition:
-    grid-template-rows 0.48s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.36s ease;
+[dir="rtl"] .rsvp-trigger-btn:hover .rsvp-trigger-arrow {
+  transform: translateX(-3px);
 }
 
-.rsvp-collapsible.is-open {
-  grid-template-rows: 1fr;
-  opacity: 1;
+/* =========================================================
+   Dedicated Full-Screen RSVP Page Overlay
+   ========================================================= */
+.rsvp-page-bg {
+  background:
+    radial-gradient(circle at 12% 14%, rgba(197, 160, 89, 0.22), transparent 42%),
+    radial-gradient(circle at 88% 18%, rgba(194, 130, 133, 0.20), transparent 45%),
+    radial-gradient(circle at 82% 84%, rgba(212, 175, 55, 0.16), transparent 46%),
+    radial-gradient(circle at 16% 86%, rgba(194, 130, 133, 0.14), transparent 45%),
+    linear-gradient(145deg, #FCF9F4 0%, #F6EDE2 38%, #F3E6DC 70%, #FAF3EA 100%);
+  background-size: 160% 160%;
+  animation: gradient-drift 14s ease-in-out infinite;
 }
 
-.rsvp-collapsible-inner {
-  overflow: hidden;
-  min-height: 0;
+.rsvp-page-pattern {
+  background-image:
+    radial-gradient(rgba(197, 160, 89, 0.13) 1px, transparent 1px),
+    radial-gradient(rgba(194, 130, 133, 0.09) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+}
+
+@keyframes rsvp-page-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.rsvp-page-overlay.is-open .rsvp-page-content {
+  animation: rsvp-page-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes ambient-float {
@@ -337,6 +359,8 @@ input:focus, textarea:focus, select:focus {
   .btn-shimmer::after,
   .rsvp-trigger-btn,
   .rsvp-trigger-btn::after,
+  .rsvp-page-bg,
+  .rsvp-page-overlay.is-open .rsvp-page-content,
   .hero-enter-1,
   .hero-enter-2,
   .hero-enter-3,
