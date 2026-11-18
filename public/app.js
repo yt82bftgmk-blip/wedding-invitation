@@ -592,7 +592,7 @@ function galleryPhotosToColumns(photos, container) {
     const cap = isHe ? `«${st.title_he}»` : `«${st.title_ru}»`;
 
     const card = document.createElement("div");
-    card.className = "reveal-on-scroll photo-story-card cursor-pointer group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden active:scale-95 transition-transform";
+    card.className = "reveal-photo photo-story-card cursor-pointer group bg-white p-3 rounded-2xl border border-[#E8DFC9] shadow-md space-y-2 relative overflow-hidden active:scale-95 transition-transform";
     card.style.setProperty("--reveal-delay", `${(idx % 4) * 80}ms`);
     card.setAttribute("onclick", `openPhotoStory(${idx})`);
 
@@ -1793,7 +1793,7 @@ function resetRSVPForm() {
 let revealObserver = null;
 
 function observeRevealElements(root = document) {
-  const targets = root.querySelectorAll(".reveal-on-scroll, .reveal-icon");
+  const targets = root.querySelectorAll(".reveal-on-scroll, .reveal-icon, .reveal-left, .reveal-right, .reveal-photo, .reveal-scale");
   if (!targets.length) return;
 
   if (!("IntersectionObserver" in window)) {

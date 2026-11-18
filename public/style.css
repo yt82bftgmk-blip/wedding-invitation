@@ -316,32 +316,6 @@ input:focus, textarea:focus, select:focus {
   .hero-enter-5 { animation: hero-fade-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.52s both; }
   .music-pill-enter { animation: music-pill-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.75s both; }
 
-  .reveal-on-scroll {
-    opacity: 0;
-    transform: translate3d(0, 24px, 0);
-    transition:
-      opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
-      transform 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
-  }
-
-  .reveal-on-scroll.is-visible {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-
-  .reveal-icon {
-    opacity: 0;
-    transform: scale(0.76) translate3d(0, 10px, 0);
-    transition:
-      opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) var(--reveal-delay, 80ms),
-      transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) var(--reveal-delay, 80ms);
-  }
-
-  .reveal-icon.is-visible {
-    opacity: 1;
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-
   /* Prevent iOS Safari / mobile WebKit memory crash on pinch-to-zoom */
   .backdrop-blur-sm,
   .backdrop-blur-md,
@@ -372,6 +346,71 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
+/* =========================================================
+   Smooth Scroll Reveal Animations (All Devices)
+   ========================================================= */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  transition:
+    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translate3d(-24px, 0, 0);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translate3d(24px, 0, 0);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+}
+
+.reveal-photo {
+  opacity: 0;
+  transform: scale(0.92) translate3d(0, 20px, 0);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.95) translate3d(0, 16px, 0);
+  transition:
+    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+}
+
+.reveal-on-scroll.is-visible,
+.reveal-left.is-visible,
+.reveal-right.is-visible,
+.reveal-photo.is-visible,
+.reveal-scale.is-visible {
+  opacity: 1;
+  transform: scale(1) translate3d(0, 0, 0);
+}
+
+.reveal-icon {
+  opacity: 0;
+  transform: scale(0.76) translate3d(0, 10px, 0);
+  transition:
+    opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) var(--reveal-delay, 80ms),
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) var(--reveal-delay, 80ms);
+}
+
+.reveal-icon.is-visible {
+  opacity: 1;
+  transform: scale(1) translate3d(0, 0, 0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bg-iridescent-hero,
   .bg-iridescent-ivory,
@@ -398,6 +437,10 @@ input:focus, textarea:focus, select:focus {
   }
 
   .reveal-on-scroll,
+  .reveal-left,
+  .reveal-right,
+  .reveal-photo,
+  .reveal-scale,
   .reveal-icon {
     opacity: 1 !important;
     transform: none !important;
