@@ -1081,24 +1081,15 @@ function renderDynamicNameRows(containerId, count, inputClass, placeholderBase, 
 
   const fragment = document.createDocumentFragment();
   for (let i = 0; i < count; i++) {
-    const row = document.createElement("div");
-    row.className = "flex items-center gap-2";
-
-    const badge = document.createElement("span");
-    badge.className = "w-7 h-7 rounded-lg bg-[#FAF7F2] border border-[#E8DFC9] text-[11px] font-semibold text-stone-600 flex items-center justify-center shrink-0";
-    badge.textContent = String(i + 1);
-
     const input = document.createElement("input");
     input.type = "text";
-    input.className = `${inputClass} flex-1 px-3.5 py-2.5 rounded-xl border border-stone-200 bg-[#FAF7F2]/40 focus:bg-white text-sm focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all`;
+    input.className = `${inputClass} w-full px-3.5 py-2.5 rounded-xl border border-stone-200 bg-[#FAF7F2]/40 focus:bg-white text-sm focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all`;
     input.placeholder = placeholderBase;
     if (existingValues[i] !== undefined) {
       input.value = existingValues[i];
     }
 
-    row.appendChild(badge);
-    row.appendChild(input);
-    fragment.appendChild(row);
+    fragment.appendChild(input);
   }
   container.appendChild(fragment);
 }
