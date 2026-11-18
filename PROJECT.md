@@ -10,8 +10,11 @@
 
 ## 📁 Структура и основные файлы
 
-- **`public/index.html`, `public/app.js`, `public/style.css`** — двуязычный гостевой сайт (RU / HE RTL), сейчас подключены `style.css?v=5` и `app.js?v=14`:
-  - Случайный музыкальный плеер из 5 спокойных романтических мелодий (`public/music/track_1.mp3`–`track_5.mp3`).
+- **`public/index.html`, `public/app.js`, `public/style.css`** — двуязычный гостевой сайт (RU / HE RTL), сейчас подключены `style.css?v=7` и `app.js?v=15`:
+  - Случайный музыкальный плеер из 5 мелодий (`public/music/track_1.mp3`–`track_5.mp3`, включая обновлённые `track_2.mp3` — *Jeon Su Yeon — Breeze* и `track_5.mp3` — *Jermaine Gordon — Better Together*).
+  - **Мобильные анимации (`@media (max-width: 768px)`) и переливающаяся палитра:**
+    - Только на телефонах при открытии плавно выезжают элементы первого экрана (`.hero-enter-1`–`5`, `.music-pill-enter`), а при скролле через `IntersectionObserver` (`initScrollAnimations`) появляются карточки, тексты и иконки (`.reveal-on-scroll`, `.reveal-icon`).
+    - Единый тёплый перелив в гамме шампань / слоновая кость / перламутр / розовое золото (`gradient-drift`: `.bg-iridescent-hero`, `.bg-iridescent-ivory`, `.bg-iridescent-blush`, `.iridescent-title`, `.iridescent-card`, `.countdown-tile`, `.bit-card-iridescent`, `.gold-divider`).
   - Первый экран (`#hero`), блок «Наша история» (3 главы с фото `#story-img-0..2`) и «Фотоальбом любви» (`#gallery-grid`) со всплывающими мини-историями (`#photo-story-modal`).
   - Тайминг дня, карточка зала (Waze / Google Maps), блок подарка **Bit** (`bit_link`, `bit_name`, `bit_phone`, `bit_reason_ru/he`).
   - **Форма RSVP (`#rsvp-form`) с защитой от дубликатов и редактированием записи:**
@@ -31,7 +34,7 @@
   - API гостя и админки (`/api/config`, `/api/rsvp`, `/api/rsvp/check`, `/api/rsvp/update`, `/api/rsvps`, `/api/settings`, `/api/upload-photo`, `/api/backup`, `/api/restore`, `/api/export-csv`, `/api/sync-github`).
   - Нормализация телефонов (`+972`/`05X` и `+7`/`8`) и имён (`phone_normalized`, `full_name_normalized`) для предотвращения дубликатов и обновления существующих записей.
   - Telegram-бот (`/api/telegram-webhook`) — уведомления о новых анкетах и обновлениях записей (`✏️ Гость обновил свою запись!`), а также команды статистики.
-- **`config.json`** — настройки свадьбы, тексты (`wedding.texts`), Bit, `rsvp_custom_fields`, фото (`photos.hero`, `photos.story`, `photos.gallery`, `photos.stories`), пароль админа и токены Telegram.
+- **`config.json`** — настройки свадьбы, тексты (`wedding.texts`), Bit (`bit_phone`: `0586331035`), `rsvp_custom_fields`, фото (`photos.hero`, `photos.story`, `photos.gallery`, `photos.stories`), пароль админа и токены Telegram.
 - **`wedding.db`** — SQLite-база с таблицей `rsvps` (включая `custom_answers`, `phone_normalized`, `full_name_normalized`).
 - **`sync_live.py`** — скрипт выгрузки живых данных с Render (`/api/backup`) в локальный репозиторий.
 - **`public/images/`, `public/music/`, `public/uploads/`** — статические картинки, 5 аудио-треков и загруженные фото.
@@ -42,7 +45,7 @@
 
 1. Сохраняй поддержку двух языков (**русский** и **иврит RTL**).
 2. Не добавляй ссылку на `/admin` в публичный футер гостевого сайта.
-3. **ПЕРЕД любым `git push`** обязательно запускай `python3 sync_live.py`, чтобы не затереть правки владельцев и фото/гостей на живом сервере.
-4. После изменений в `public/` обновляй версию `?v=...` в `public/index.html` (сейчас `style.css?v=5`, `app.js?v=14`), пушь в GitHub и при необходимости синхронизируй живой сервер через `GET /api/sync-github`.
+3. **ПЕРЕД любым `git push`** обязательно запускай `python3 sync_live.py` (и коммить обновлённые `config.json`/`public/uploads`/`wedding.db`, если на живом сервере были правки), чтобы не затереть правки владельцев и фото/гостей на Render.
+4. После изменений в `public/` обновляй версию `?v=...` в `public/index.html` (сейчас `style.css?v=7`, `app.js?v=15`), пушь в GitHub и при необходимости синхронизируй живой сервер через `GET /api/sync-github`.
 
 МОЯ СЛЕД ЗАДАЧА: 
