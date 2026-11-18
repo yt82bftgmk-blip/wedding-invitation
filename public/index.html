@@ -42,7 +42,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="/style.css?v=7">
+  <link rel="stylesheet" href="/style.css?v=8">
 </head>
 <body class="bg-[#FAF7F2] text-[#2D2926] font-sans antialiased selection:bg-champagne selection:text-white">
 
@@ -149,7 +149,7 @@
 
       <!-- Quick RSVP Button -->
       <div class="hero-enter-5">
-        <a href="#rsvp" class="btn-shimmer inline-flex items-center gap-2 px-8 py-4 bg-stone-900 text-white rounded-full text-base font-medium shadow-2xl hover:bg-champagne-gold hover:text-white transition-all transform hover:-translate-y-0.5 active:scale-95">
+        <a href="#rsvp" onclick="openRsvpSection()" class="btn-shimmer inline-flex items-center gap-2 px-8 py-4 bg-stone-900 text-white rounded-full text-base font-medium shadow-2xl hover:bg-champagne-gold hover:text-white transition-all transform hover:-translate-y-0.5 active:scale-95">
           <i data-lucide="heart" class="w-5 h-5 text-rose-400"></i>
           <span data-i18n="btn_rsvp_hero">Подтвердить присутствие</span>
         </a>
@@ -429,18 +429,52 @@
 
   <!-- RSVP Section (Бланк регистрации) -->
   <section id="rsvp" class="py-24 px-4 relative bg-iridescent-ivory">
-    <div class="max-w-2xl mx-auto space-y-8">
-      <div class="reveal-on-scroll text-center space-y-3">
-        <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest" data-i18n="rsvp_tag">Будем счастливы вас видеть</span>
-        <h2 class="font-serif text-4xl sm:text-5xl text-stone-900" data-i18n="rsvp_title">Подтверждение присутствия</h2>
+    <div class="max-w-2xl mx-auto space-y-6">
+      <div class="reveal-on-scroll text-center space-y-4">
+        <span class="text-champagne-gold font-semibold text-xs uppercase tracking-widest block" data-i18n="rsvp_tag">Будем счастливы вас видеть</span>
+
+        <div class="flex flex-col items-center gap-2.5 pt-1">
+          <button
+            type="button"
+            id="rsvp-toggle-btn"
+            onclick="toggleRsvpSection()"
+            aria-expanded="false"
+            aria-controls="rsvp-collapsible"
+            class="rsvp-trigger-btn group inline-flex items-center justify-center gap-3 sm:gap-4 px-6 sm:px-9 py-4 sm:py-5 rounded-2xl sm:rounded-full border border-[#D8B878]/70 text-white transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer max-w-full"
+          >
+            <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#C5A059]/20 border border-[#E5C98B]/50 flex items-center justify-center shrink-0">
+              <i data-lucide="mail-open" class="w-4 h-4 sm:w-5 sm:h-5 text-[#E5C98B]"></i>
+            </span>
+            <h2 class="font-serif text-2xl sm:text-4xl text-white tracking-wide leading-tight" data-i18n="rsvp_title">Подтверждение присутствия</h2>
+            <span class="w-8 h-8 rounded-full bg-white/10 border border-[#E5C98B]/40 flex items-center justify-center shrink-0">
+              <i data-lucide="chevron-down" class="rsvp-trigger-chevron w-4 h-4 text-[#E5C98B]"></i>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onclick="toggleRsvpSection()"
+            class="inline-flex items-center gap-2 text-xs font-medium text-champagne-gold hover:text-stone-900 transition-colors cursor-pointer"
+          >
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-champagne-gold opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-champagne-gold"></span>
+            </span>
+            <span id="rsvp-tap-hint" data-i18n="rsvp_tap_hint">Нажмите, чтобы заполнить анкету</span>
+          </button>
+        </div>
+
         <div class="gold-divider"></div>
         <p class="text-stone-600 max-w-md mx-auto text-sm" data-i18n="rsvp_desc">
           Пожалуйста, ответьте на приглашение, чтобы мы могли позаботиться о вашем комфорте!
         </p>
       </div>
 
-      <!-- RSVP Card with warm luxury styling -->
-      <div class="reveal-on-scroll iridescent-card backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-[#E8DFC9] shadow-2xl relative">
+      <!-- Collapsible RSVP Card (hidden until user clicks Подтверждение присутствия) -->
+      <div id="rsvp-collapsible" class="rsvp-collapsible" aria-hidden="true">
+        <div class="rsvp-collapsible-inner pt-2 pb-4 px-1">
+          <!-- RSVP Card with warm luxury styling -->
+          <div class="iridescent-card backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-[#E8DFC9] shadow-2xl relative">
         <form id="rsvp-form" onsubmit="submitRSVP(event)" class="space-y-6">
           
           <!-- Edit Mode Banner -->
@@ -734,6 +768,8 @@
             </button>
           </div>
         </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -780,6 +816,6 @@
     </div>
   </div>
 
-  <script src="/app.js?v=21"></script>
+  <script src="/app.js?v=22"></script>
 </body>
 </html>

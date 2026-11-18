@@ -155,6 +155,68 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 8px 24px -10px rgba(36, 32, 29, 0.12);
 }
 
+/* =========================================================
+   Interactive RSVP Trigger Button & Smooth Collapsible Panel
+   ========================================================= */
+.rsvp-trigger-btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2B2522 0%, #3E332C 48%, #26201D 100%);
+  background-size: 180% 180%;
+  animation: gradient-drift 10s ease-in-out infinite;
+  box-shadow:
+    0 16px 36px -12px rgba(45, 37, 32, 0.45),
+    0 6px 20px -6px rgba(197, 160, 89, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.rsvp-trigger-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(229, 201, 139, 0.24), transparent);
+  transform: skewX(-20deg);
+  animation: shimmer-sweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.rsvp-trigger-btn:hover {
+  box-shadow:
+    0 20px 42px -12px rgba(45, 37, 32, 0.5),
+    0 10px 26px -6px rgba(197, 160, 89, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.rsvp-trigger-chevron {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rsvp-trigger-btn[aria-expanded="true"] .rsvp-trigger-chevron {
+  transform: rotate(180deg);
+}
+
+.rsvp-collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.36s ease;
+}
+
+.rsvp-collapsible.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.rsvp-collapsible-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
 @keyframes ambient-float {
   0%, 100% {
     transform: translate3d(0, 0, 0) scale(1);
@@ -273,6 +335,8 @@ input:focus, textarea:focus, select:focus {
   .ambient-orb-1,
   .ambient-orb-2,
   .btn-shimmer::after,
+  .rsvp-trigger-btn,
+  .rsvp-trigger-btn::after,
   .hero-enter-1,
   .hero-enter-2,
   .hero-enter-3,

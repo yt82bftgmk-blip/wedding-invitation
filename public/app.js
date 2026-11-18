@@ -63,6 +63,8 @@ const translations = {
 
     rsvp_tag: "Будем счастливы вас видеть",
     rsvp_title: "Подтверждение присутствия",
+    rsvp_tap_hint: "Нажмите, чтобы заполнить анкету",
+    rsvp_tap_hint_open: "Нажмите, чтобы свернуть анкету",
     rsvp_desc: "Пожалуйста, ответьте на приглашение, чтобы мы могли позаботиться о вашем комфорте!",
     field_first_name: "Имя *",
     field_last_name: "Фамилия *",
@@ -186,6 +188,8 @@ const translations = {
 
     rsvp_tag: "נשמח מאוד לראותכם",
     rsvp_title: "אישור הגעה",
+    rsvp_tap_hint: "לחצו למילוי הטופס",
+    rsvp_tap_hint_open: "לחצו לסגירת הטופס",
     rsvp_desc: "אנא אשרו את הגעתכם כדי שנוכל להיערך בצורה הטובה ביותר עבורכם!",
     field_first_name: "שם פרטי *",
     field_last_name: "שם משפחה *",
@@ -263,6 +267,9 @@ document.addEventListener("DOMContentLoaded", () => {
   initMusicAutoPlay();
   initRsvpDuplicateCheck();
   initScrollAnimations();
+  if (window.location.hash === "#rsvp") {
+    openRsvpSection();
+  }
 });
 
 const MUSIC_TRACKS = [
@@ -703,6 +710,7 @@ function setLanguage(lang) {
       el.textContent = dict[key];
     }
   });
+  updateRsvpTapHint();
 
   const fName = document.getElementById('first_name');
   const lName = document.getElementById('last_name');
@@ -1827,4 +1835,37 @@ function initScrollAnimations() {
     window.addEventListener("scroll", updateHeader, { passive: true });
     updateHeader();
   }
+}
+
+let isRsvpSectionOpen = false;
+
+function updateRsvpTapHint() {
+  const hint = document.getElementById("rsvp-tap-hint");
+  if (!hint) return;
+  const dict = translations[currentLang] || translations.ru;
+  hint.textContent = isRsvpSectionOpen
+    ? (dict.rsvp_tap_hint_open || "Нажмите, чтобы свернуть анкету")
+    : (dict.rsvp_tap_hint || "Нажмите, чтобы заполнить анкету");
+}
+
+function setRsvpSectionOpen(open) {
+  isRsvpSectionOpen = Boolean(open);
+  const btn = document.getElementById("rsvp-toggle-btn");
+  const panel = document.getElementById("rsvp-collapsible");
+  if (btn) {
+    btn.setAttribute("aria-expanded", isRsvpSectionOpen ? "true" : "false");
+  }
+  if (panel) {
+    panel.classList.toggle("is-open", isRsvpSectionOpen);
+    panel.setAttribute("aria-hidden", isRsvpSectionOpen ? "false" : "true");
+  }
+  updateRsvpTapHint();
+}
+
+function toggleRsvpSection() {
+  setRsvpSectionOpen(!isRsvpSectionOpen);
+}
+
+function openRsvpSection() {
+  setRsvpSectionOpen(true);
 }
