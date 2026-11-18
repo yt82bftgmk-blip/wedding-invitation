@@ -661,35 +661,59 @@
             </div>
           </div>
 
-          <!-- Guest composition preview (optional children & +1) -->
-          <div class="space-y-4 p-4 rounded-2xl border border-[#E8DFC9] bg-[#FAF7F2]/50">
+          <!-- Guest composition preview (Family: Children & Spouse/Partner + Additional guests) -->
+          <div class="space-y-4 p-4 rounded-2xl border border-[#E8DFC9] bg-[#FAF7F2]/60">
             <div class="flex items-center justify-between gap-2">
               <div class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_guests_count">Количество человек</div>
               <span class="px-2.5 py-1 rounded-full bg-white border border-[#E8DFC9] text-xs font-semibold text-stone-500">Итого: 1</span>
             </div>
 
-            <div class="space-y-2 p-3.5 rounded-xl bg-white/80 border border-stone-200/80">
-              <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
-                <span data-i18n="field_children_names">Дети</span>
-                <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
-              </label>
-              <div class="flex items-center justify-between gap-3">
-                <span class="text-xs text-stone-600">Сколько детей будет с вами?</span>
-                <div class="flex items-center gap-1.5">
-                  <span class="w-8 h-8 rounded-xl border border-stone-200 bg-[#FAF7F2] text-stone-400 flex items-center justify-center">−</span>
-                  <input type="number" disabled value="0" class="w-16 px-2 py-1.5 rounded-xl border border-stone-200 bg-white text-center text-sm text-stone-400">
-                  <span class="w-8 h-8 rounded-xl border border-stone-200 bg-[#FAF7F2] text-stone-400 flex items-center justify-center">+</span>
+            <div class="space-y-3.5 p-3.5 rounded-2xl bg-white/90 border border-[#E8DFC9]/90 shadow-sm">
+              <div class="flex items-center justify-between gap-2 pb-2 border-b border-[#F1EAE0]">
+                <span class="text-xs font-semibold uppercase tracking-wider text-champagne-gold" data-i18n="family_section_title">Семья</span>
+                <span class="text-[11px] text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-xs font-semibold tracking-wide text-stone-800 flex flex-wrap items-baseline gap-1.5">
+                  <span class="uppercase tracking-wider" data-i18n="field_children_names">Дети</span>
+                  <span class="text-[11px] text-stone-400 font-normal lowercase" data-i18n="children_age_note">(только дети до 12 лет)</span>
+                </label>
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-xs text-stone-600" data-i18n="field_children_count">Сколько детей будет с вами?</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-8 h-8 rounded-xl border border-stone-200 bg-[#FAF7F2] text-stone-400 flex items-center justify-center">−</span>
+                    <input type="number" disabled value="0" class="w-16 px-2 py-1.5 rounded-xl border border-stone-200 bg-white text-center text-sm text-stone-400">
+                    <span class="w-8 h-8 rounded-xl border border-stone-200 bg-[#FAF7F2] text-stone-400 flex items-center justify-center">+</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="border-t border-dashed border-[#E8DFC9]/80"></div>
+
+              <div class="space-y-2">
+                <label class="text-xs font-semibold tracking-wide text-stone-800 flex flex-wrap items-baseline gap-1.5">
+                  <span class="uppercase tracking-wider" data-i18n="field_family_adults">Муж / Жена и близкие</span>
+                  <span class="text-[11px] text-stone-400 font-normal lowercase" data-i18n="family_adults_note">(взрослые члены семьи)</span>
+                </label>
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-xs text-stone-600" data-i18n="field_family_adults_count">Сколько человек с вами?</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-8 h-8 rounded-xl border border-stone-200 bg-[#FAF7F2] text-stone-400 flex items-center justify-center">−</span>
+                    <input type="number" disabled value="0" class="w-16 px-2 py-1.5 rounded-xl border border-stone-200 bg-white text-center text-sm text-stone-400">
+                    <span class="w-8 h-8 rounded-xl border border-stone-200 bg-[#FAF7F2] text-stone-400 flex items-center justify-center">+</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="space-y-2 p-3.5 rounded-xl bg-white/80 border border-stone-200/80">
+            <div class="space-y-2 p-3.5 rounded-2xl bg-white/90 border border-[#E8DFC9]/90 shadow-sm">
               <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
-                <span data-i18n="field_plus_one">Зову кого-то ещё</span>
-                <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
+                <span data-i18n="field_plus_one">Дополнительные гости</span>
+                <span class="text-[11px] text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
               </label>
               <div class="flex items-center justify-between gap-3">
-                <span class="text-xs text-stone-600">Сколько человек?</span>
+                <span class="text-xs text-stone-600" data-i18n="field_plus_one_count">Если зовёте кого-то ещё — сколько человек?</span>
                 <div class="flex items-center gap-1.5">
                   <span class="w-8 h-8 rounded-xl border border-stone-200 bg-[#FAF7F2] text-stone-400 flex items-center justify-center">−</span>
                   <input type="number" disabled value="0" class="w-16 px-2 py-1.5 rounded-xl border border-stone-200 bg-white text-center text-sm text-stone-400">
@@ -1046,8 +1070,15 @@
         choice_no: "К сожалению, не смогу",
         field_guests_count: "Количество человек",
         field_guest_full_name: "Имя и фамилия *",
+        family_section_title: "Семья",
         field_children_names: "Дети",
-        field_plus_one: "Зову кого-то ещё",
+        children_age_note: "(только дети до 12 лет)",
+        field_children_count: "Сколько детей будет с вами?",
+        field_family_adults: "Муж / Жена и близкие",
+        family_adults_note: "(взрослые члены семьи)",
+        field_family_adults_count: "Сколько человек с вами?",
+        field_plus_one: "Дополнительные гости",
+        field_plus_one_count: "Если зовёте кого-то ещё — сколько человек?",
         guest_opt_1: "1 человек (только я)",
         guest_opt_2: "2 человека (+1 гость)",
         guest_opt_3: "3 человека",
@@ -1118,8 +1149,15 @@
         choice_no: "לצערי לא אוכל להגיע",
         field_guests_count: "מספר אורחים",
         field_guest_full_name: "שם פרטי ושם משפחה *",
+        family_section_title: "המשפחה",
         field_children_names: "ילדים",
-        field_plus_one: "מזמין/ה מישהו נוסף",
+        children_age_note: "(ילדים עד גיל 12 בלבד)",
+        field_children_count: "כמה ילדים יגיעו אתכם?",
+        field_family_adults: "בן / בת זוג ומשפחה",
+        family_adults_note: "(בני משפחה מבוגרים)",
+        field_family_adults_count: "כמה מבוגרים יצטרפו?",
+        field_plus_one: "אורחים נוספים",
+        field_plus_one_count: "אם אתם מזמינים מישהו נוסף — כמה אנשים?",
         guest_opt_1: "אורח 1 (רק אני)",
         guest_opt_2: "2 אורחים (אני ובן/בת זוג)",
         guest_opt_3: "3 אורחים",
@@ -2238,6 +2276,13 @@
         ? Math.max(Number(childrenEntry.count), childrenNames.length)
         : (childrenNames.length || (/^\d+$/.test(String(childrenVal).trim()) ? parseInt(childrenVal, 10) : 0));
 
+      const familyAdultsEntry = ca.family_adults;
+      const familyAdultsVal = (familyAdultsEntry && typeof familyAdultsEntry === 'object') ? (familyAdultsEntry.value ?? '') : (familyAdultsEntry ?? '');
+      const familyAdultsNames = splitNames(String(familyAdultsVal));
+      const familyAdultsCount = (familyAdultsEntry && typeof familyAdultsEntry === 'object' && Number.isFinite(Number(familyAdultsEntry.count)))
+        ? Math.max(Number(familyAdultsEntry.count), familyAdultsNames.length)
+        : (familyAdultsNames.length || (/^\d+$/.test(String(familyAdultsVal).trim()) ? parseInt(familyAdultsVal, 10) : 0));
+
       const plusOneEntry = ca.companion_name;
       const plusOneVal = (plusOneEntry && typeof plusOneEntry === 'object') ? (plusOneEntry.value ?? '') : (plusOneEntry ?? '');
       const plusOneNames = splitNames(String(plusOneVal));
@@ -2247,7 +2292,7 @@
 
       const otherCustom = Object.entries(ca).filter(([k]) => k !== 'children_names' && k !== 'companion_name');
 
-      return { childrenCount, childrenNames, plusOneCount, plusOneNames, otherCustom };
+      return { childrenCount, childrenNames, familyAdultsCount, familyAdultsNames, plusOneCount, plusOneNames, otherCustom };
     }
 
     function renderStats(stats) {
@@ -2321,7 +2366,7 @@
           matchFilter = b.otherCustom.length > 0;
         }
 
-        const extraText = [...b.childrenNames, ...b.plusOneNames].join(' ').toLowerCase();
+        const extraText = [...b.childrenNames, ...b.familyAdultsNames, ...b.plusOneNames].join(' ').toLowerCase();
         const matchSearch = !search ||
           `${item.first_name} ${item.last_name}`.toLowerCase().includes(search) ||
           (item.phone && item.phone.includes(search)) ||

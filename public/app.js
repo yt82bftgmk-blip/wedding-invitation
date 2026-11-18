@@ -72,12 +72,18 @@ const translations = {
     choice_no: "К сожалению, не смогу",
     field_guests_count: "Количество человек",
     field_guest_full_name: "Имя и фамилия *",
+    family_section_title: "Семья",
     field_children_names: "Дети",
+    children_age_note: "(только дети до 12 лет)",
     field_children_count: "Сколько детей будет с вами?",
-    field_plus_one: "Зову кого-то ещё",
-    field_plus_one_count: "Сколько человек?",
+    field_family_adults: "Муж / Жена и близкие",
+    family_adults_note: "(взрослые члены семьи)",
+    field_family_adults_count: "Сколько человек с вами?",
+    field_plus_one: "Дополнительные гости",
+    field_plus_one_count: "Если зовёте кого-то ещё — сколько человек?",
     count_none: "Нет (0)",
     child_placeholder: "Имя ребёнка",
+    family_adult_placeholder: "Имя Фамилия",
     plus_one_placeholder: "Имя Фамилия",
     total_guests_prefix: "Итого:",
     guest_opt_1: "1 человек (только я)",
@@ -186,12 +192,18 @@ const translations = {
     choice_no: "לצערי לא אוכל להגיע",
     field_guests_count: "מספר אורחים",
     field_guest_full_name: "שם פרטי ושם משפחה *",
+    family_section_title: "המשפחה",
     field_children_names: "ילדים",
+    children_age_note: "(ילדים עד גיל 12 בלבד)",
     field_children_count: "כמה ילדים יגיעו אתכם?",
-    field_plus_one: "מזמין/ה מישהו נוסף",
-    field_plus_one_count: "כמה אנשים?",
+    field_family_adults: "בן / בת זוג ומשפחה",
+    family_adults_note: "(בני משפחה מבוגרים)",
+    field_family_adults_count: "כמה מבוגרים יצטרפו?",
+    field_plus_one: "אורחים נוספים",
+    field_plus_one_count: "אם אתם מזמינים מישהו נוסף — כמה אנשים?",
     count_none: "ללא (0)",
     child_placeholder: "שם הילד/ה",
+    family_adult_placeholder: "שם פרטי ומשפחה",
     plus_one_placeholder: "שם ושם משפחה",
     total_guests_prefix: "סה״כ:",
     guest_opt_1: "אורח 1 (רק אני)",
@@ -700,6 +712,7 @@ function setLanguage(lang) {
   }
 
   renderChildrenInputs();
+  renderFamilyAdultsInputs();
   renderPlusOneInputs();
   updateTotalGuestsBadge();
 
@@ -1096,6 +1109,10 @@ function getChildrenCount() {
   return getCountValue("children_count");
 }
 
+function getFamilyAdultsCount() {
+  return getCountValue("family_adults_count");
+}
+
 function getPlusOneCount() {
   return getCountValue("plus_one_count");
 }
@@ -1104,7 +1121,7 @@ function updateTotalGuestsBadge() {
   const badge = document.getElementById("rsvp-total-guests-badge");
   if (!badge) return;
   const dict = translations[currentLang] || translations.ru;
-  const total = 1 + getChildrenCount() + getPlusOneCount();
+  const total = 1 + getChildrenCount() + getFamilyAdultsCount() + getPlusOneCount();
   badge.textContent = `${dict.total_guests_prefix || "Итого:"} ${total}`;
 }
 
@@ -1135,6 +1152,16 @@ function renderChildrenInputs() {
   );
 }
 
+function renderFamilyAdultsInputs() {
+  renderGuestGroupInputs(
+    "family_adults_count",
+    "family_adults_inputs_container",
+    "family-adult-name-input",
+    "family_adult_placeholder",
+    "Имя Фамилия"
+  );
+}
+
 function renderPlusOneInputs() {
   renderGuestGroupInputs(
     "plus_one_count",
@@ -1155,6 +1182,10 @@ function stepGuestGroupCount(inputId, delta, renderFn) {
 
 function stepChildrenCount(delta) {
   stepGuestGroupCount("children_count", delta, renderChildrenInputs);
+}
+
+function stepFamilyAdultsCount(delta) {
+  stepGuestGroupCount("family_adults_count", delta, renderFamilyAdultsInputs);
 }
 
 function stepPlusOneCount(delta) {
@@ -1200,8 +1231,12 @@ async function submitRSVP(event) {
   const attendance = document.querySelector('input[name="attendance"]:checked').value;
 
   const childrenCount = getChildrenCount();
+  const familyAdultsCount = getFamilyAdultsCount();
   const plusOneCount = getPlusOneCount();
   const childrenNamesList = Array.from(document.querySelectorAll(".children-name-input"))
+    .map(el => el.value.trim())
+    .filter(Boolean);
+  const familyAdultsNamesList = Array.from(document.querySelectorAll(".family-adult-name-input"))
     .map(el => el.value.trim())
     .filter(Boolean);
   const plusOneNamesList = Array.from(document.querySelectorAll(".plus-one-name-input"))
@@ -1209,9 +1244,10 @@ async function submitRSVP(event) {
     .filter(Boolean);
 
   const effectiveChildrenCount = Math.max(childrenCount, childrenNamesList.length);
+  const effectiveFamilyAdultsCount = Math.max(familyAdultsCount, familyAdultsNamesList.length);
   const effectivePlusOneCount = Math.max(plusOneCount, plusOneNamesList.length);
   const guestsCount = attendance === 'attending'
-    ? (1 + effectiveChildrenCount + effectivePlusOneCount)
+    ? (1 + effectiveChildrenCount + effectiveFamilyAdultsCount + effectivePlusOneCount)
     : 0;
   const message = document.getElementById("message").value.trim();
 
@@ -1227,9 +1263,19 @@ async function submitRSVP(event) {
           : `${effectiveChildrenCount}`
       };
     }
+    if (effectiveFamilyAdultsCount > 0) {
+      customAnswers.family_adults = {
+        label_ru: "Муж / Жена и близкие",
+        label_he: "בן/בת זוג ומשפחה",
+        count: effectiveFamilyAdultsCount,
+        value: familyAdultsNamesList.length > 0
+          ? familyAdultsNamesList.join(", ")
+          : `${effectiveFamilyAdultsCount}`
+      };
+    }
     if (effectivePlusOneCount > 0) {
       customAnswers.companion_name = {
-        label_ru: "Зову кого-то ещё",
+        label_ru: "Дополнительные гости",
         label_he: "אורחים נוספים",
         count: effectivePlusOneCount,
         value: plusOneNamesList.length > 0
@@ -1558,6 +1604,19 @@ function editExistingRSVP() {
     });
   }
 
+  // Pre-fill family adults (spouse / partner)
+  const familyAdultsData = customAnswers.family_adults;
+  const familyAdultsCount = familyAdultsData ? Number(familyAdultsData.count || 0) : 0;
+  const familyAdultsEl = document.getElementById("family_adults_count");
+  if (familyAdultsEl) familyAdultsEl.value = String(familyAdultsCount);
+  renderFamilyAdultsInputs();
+  if (familyAdultsData && familyAdultsData.value && isNaN(Number(familyAdultsData.value))) {
+    const names = String(familyAdultsData.value).split(",").map(s => s.trim()).filter(Boolean);
+    document.querySelectorAll(".family-adult-name-input").forEach((inp, idx) => {
+      if (names[idx]) inp.value = names[idx];
+    });
+  }
+
   // Pre-fill +1 / additional guests
   const plusOneData = customAnswers.companion_name;
   const plusOneCount = plusOneData ? Number(plusOneData.count || 0) : 0;
@@ -1620,10 +1679,13 @@ function resetRSVPForm() {
   exitEditModeState();
   document.getElementById("rsvp-form").reset();
   const childrenContainer = document.getElementById("children_inputs_container");
+  const familyAdultsContainer = document.getElementById("family_adults_inputs_container");
   const plusOneContainer = document.getElementById("plus_one_inputs_container");
   if (childrenContainer) childrenContainer.innerHTML = "";
+  if (familyAdultsContainer) familyAdultsContainer.innerHTML = "";
   if (plusOneContainer) plusOneContainer.innerHTML = "";
   renderChildrenInputs();
+  renderFamilyAdultsInputs();
   renderPlusOneInputs();
   clearDuplicateHints();
   const dict = translations[currentLang] || translations.ru;
