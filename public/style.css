@@ -322,7 +322,6 @@ input:focus, textarea:focus, select:focus {
     transition:
       opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
       transform 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
-    will-change: opacity, transform;
   }
 
   .reveal-on-scroll.is-visible {
@@ -336,12 +335,40 @@ input:focus, textarea:focus, select:focus {
     transition:
       opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) var(--reveal-delay, 80ms),
       transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) var(--reveal-delay, 80ms);
-    will-change: opacity, transform;
   }
 
   .reveal-icon.is-visible {
     opacity: 1;
     transform: scale(1) translate3d(0, 0, 0);
+  }
+
+  /* Prevent iOS Safari / mobile WebKit memory crash on pinch-to-zoom */
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-xl,
+  .backdrop-blur-\[2px\] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .blur-3xl,
+  .blur-2xl {
+    filter: none !important;
+    -webkit-filter: none !important;
+    opacity: 0.28;
+  }
+
+  .ambient-orb-1,
+  .ambient-orb-2,
+  .bg-iridescent-hero,
+  .bg-iridescent-ivory,
+  .bg-iridescent-blush,
+  .iridescent-card,
+  .countdown-tile,
+  .bit-card-iridescent,
+  .rsvp-page-bg {
+    animation: none !important;
+    background-size: 100% 100%;
   }
 }
 
