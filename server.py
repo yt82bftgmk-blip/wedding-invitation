@@ -95,12 +95,117 @@ def normalize_name_part(value):
     return " ".join(str(value or "").split()).lower().replace("ё", "е")
 
 
+def normalize_full_name_string(value):
+    return " ".join(normalize_name_part(value).split())
+
+
+def is_valid_full_name(value):
+    parts = [p for p in normalize_full_name_string(value).split() if p]
+    return len(parts) >= 2
+
+
 def build_full_name_key(first_name, last_name):
     fn = normalize_name_part(first_name)
     ln = normalize_name_part(last_name)
     if not fn or not ln:
         return ""
     return f"{fn}|{ln}"
+
+
+def extract_adult_names_from_custom(custom_answers):
+    """Return list of (group_key, raw_name) from family_adults and companion_name."""
+    results = []
+    if not isinstance(custom_answers, dict):
+        return results
+    for key in ("family_adults", "companion_name"):
+        entry = custom_answers.get(key)
+        if not entry:
+            continue
+        raw_val = entry.get("value", "") if isinstance(entry, dict) else str(entry)
+        raw_str = str(raw_val or "").strip()
+        if not raw_str or raw_str.isdigit():
+            continue
+        for part in re.split(r"[,;\n]+", raw_str):
+            cleaned = " ".join(part.split()).strip()
+            if cleaned:
+                results.append((key, cleaned))
+    return results
+
+
+def validate_adult_names_and_duplicates(cursor, first_name, last_name, attendance, custom_answers, exclude_id=None):
+    """Validate full names (first + last) for non-child guests and check duplicates across form & DB."""
+    if attendance == "attending":
+        # 1. Validate that every family_adults / companion_name entry has full name (2+ words)
+        if isinstance(custom_answers, dict):
+            for key in ("family_adults", "companion_name"):
+                entry = custom_answers.get(key)
+                if not isinstance(entry, dict):
+                    continue
+                count = int(entry.get("count") or 0)
+                names = [n for k, n in extract_adult_names_from_custom({key: entry}) if k == key]
+                if count > 0 and len(names) < count:
+                    return 400, {
+                        "error": "invalid_adult_name",
+                        "message_ru": "Укажите полное имя и фамилию для каждого гостя (кроме детей).",
+                        "message_he": "יש להזין שם פרטי ושם משפחה מלאים לכל אורח/ת (למעט ילדים).",
+                    }
+                for raw_name in names:
+                    if not is_valid_full_name(raw_name):
+                        return 400, {
+                            "error": "invalid_adult_name",
+                            "name": raw_name,
+                            "message_ru": f"Укажите имя и фамилию полностью для «{raw_name}».",
+                            "message_he": f"יש להזין שם פרטי ושם משפחה מלאים עבור «{raw_name}».",
+                        }
+
+        # 2. Check internal duplicates within this submission
+        primary_raw = f"{first_name} {last_name}".strip()
+        submitted = [(primary_raw, normalize_full_name_string(primary_raw))]
+        for _, raw_name in extract_adult_names_from_custom(custom_answers):
+            submitted.append((raw_name, normalize_full_name_string(raw_name)))
+
+        seen = set()
+        for raw_name, norm_name in submitted:
+            if not norm_name:
+                continue
+            if norm_name in seen:
+                return 409, {
+                    "error": "duplicate_guest_name",
+                    "duplicate_name": raw_name,
+                    "message_ru": f"Этот человек («{raw_name}») уже указан в списке!",
+                    "message_he": f"אורח/ת זה («{raw_name}») כבר רשום/ה ברשימה!",
+                }
+            seen.add(norm_name)
+
+        # 3. Check against all existing adult guests in DB (primary + family_adults + companion_name)
+        if exclude_id is not None:
+            cursor.execute("SELECT id, first_name, last_name, custom_answers FROM rsvps WHERE id != ?", (exclude_id,))
+        else:
+            cursor.execute("SELECT id, first_name, last_name, custom_answers FROM rsvps")
+        existing_norms = set()
+        for row in cursor.fetchall():
+            row_primary = normalize_full_name_string(f"{row[1]} {row[2]}")
+            if row_primary:
+                existing_norms.add(row_primary)
+            try:
+                row_ca = json.loads(row[3]) if row[3] else {}
+            except Exception:
+                row_ca = {}
+            for _, ex_name in extract_adult_names_from_custom(row_ca):
+                ex_norm = normalize_full_name_string(ex_name)
+                if ex_norm:
+                    existing_norms.add(ex_norm)
+
+        for raw_name, norm_name in submitted:
+            if norm_name and norm_name in existing_norms:
+                return 409, {
+                    "error": "duplicate_guest_name",
+                    "duplicate_name": raw_name,
+                    "message_ru": f"Этот человек («{raw_name}») уже записан в списке гостей!",
+                    "message_he": f"אורח/ת זה («{raw_name}») כבר רשום/ה ברשימת האורחים!",
+                }
+
+    return None, None
 
 
 def find_duplicate_rsvp(cursor, first_name="", last_name="", phone="", exclude_id=None):
@@ -617,6 +722,14 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                 }, status=409)
                 return
 
+            err_status, err_body = validate_adult_names_and_duplicates(
+                cursor, first_name, last_name, attendance, custom_answers, exclude_id=target_id
+            )
+            if err_status:
+                conn.close()
+                self.send_json(err_body, status=err_status)
+                return
+
             cursor.execute("""
                 UPDATE rsvps
                 SET first_name = ?, last_name = ?, phone = ?, attendance = ?, guests_count = ?,
@@ -690,6 +803,14 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                     "reason": dup_reason,
                     "existing": serialize_existing_rsvp(existing),
                 }, status=409)
+                return
+
+            err_status, err_body = validate_adult_names_and_duplicates(
+                cursor, first_name, last_name, attendance, custom_answers
+            )
+            if err_status:
+                conn.close()
+                self.send_json(err_body, status=err_status)
                 return
 
             cursor.execute("""

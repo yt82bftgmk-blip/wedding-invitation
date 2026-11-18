@@ -83,8 +83,11 @@ const translations = {
     field_plus_one_count: "Имя и фамилия",
     count_none: "Нет (0)",
     child_placeholder: "Имя ребёнка",
-    family_adult_placeholder: "Имя Фамилия",
-    plus_one_placeholder: "Имя Фамилия",
+    family_adult_placeholder: "Имя и фамилия *",
+    plus_one_placeholder: "Имя и фамилия *",
+    err_adult_full_name_required: "Укажите полное имя и фамилию (2 слова) для всех гостей, кроме детей.",
+    err_duplicate_guest_in_form: "Человек «{name}» уже указан — этот человек уже записан!",
+    err_duplicate_guest_in_db: "Этот человек («{name}») уже записан в списке гостей!",
     total_guests_prefix: "Итого:",
     guest_opt_1: "1 человек (только я)",
     guest_opt_2: "2 человека (+1 гость)",
@@ -203,8 +206,11 @@ const translations = {
     field_plus_one_count: "שם פרטי ומשפחה",
     count_none: "ללא (0)",
     child_placeholder: "שם הילד/ה",
-    family_adult_placeholder: "שם פרטי ומשפחה",
-    plus_one_placeholder: "שם ושם משפחה",
+    family_adult_placeholder: "שם פרטי ומשפחה *",
+    plus_one_placeholder: "שם פרטי ומשפחה *",
+    err_adult_full_name_required: "יש להזין שם פרטי ושם משפחה מלאים (2 מילים) לכל האורחים (למעט ילדים).",
+    err_duplicate_guest_in_form: "האורח/ת «{name}» כבר מופיע/ה ברשימה — לא ניתן לרשום פעמיים!",
+    err_duplicate_guest_in_db: "אורח/ת זה («{name}») כבר רשום/ה ברשימת האורחים!",
     total_guests_prefix: "סה״כ:",
     guest_opt_1: "אורח 1 (רק אני)",
     guest_opt_2: "2 אורחים (אני ובן/בת זוג)",
@@ -1212,23 +1218,92 @@ function toggleGuestCount(isAttending) {
   });
 }
 
+function normalizeFullNameClient(value) {
+  return String(value || "").trim().replace(/\s+/g, " ").toLowerCase().replace(/ё/g, "е");
+}
+
+function isFullNameTwoWords(value) {
+  const parts = String(value || "").trim().split(/\s+/).filter(Boolean);
+  return parts.length >= 2;
+}
+
+function clearRsvpValidationError() {
+  const box = document.getElementById("rsvp-validation-error");
+  if (box) box.classList.add("hidden");
+  document.querySelectorAll(".rsvp-input-error").forEach(el => {
+    el.classList.remove("rsvp-input-error", "border-rose-400", "ring-2", "ring-rose-200");
+  });
+}
+
+function showRsvpValidationError(message, focusEl = null) {
+  const box = document.getElementById("rsvp-validation-error");
+  const textEl = document.getElementById("rsvp-validation-error-text");
+  if (textEl) textEl.textContent = message;
+  if (box) {
+    box.classList.remove("hidden");
+    if (window.lucide) lucide.createIcons();
+  }
+  if (focusEl) {
+    focusEl.classList.add("rsvp-input-error", "border-rose-400", "ring-2", "ring-rose-200");
+    focusEl.focus();
+    focusEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
 async function submitRSVP(event) {
   event.preventDefault();
   const btn = document.getElementById("btn-submit");
   const dict = translations[currentLang];
   const originalText = btn.innerHTML;
 
+  clearRsvpValidationError();
+
   if (!validatePhoneNumber()) {
     return;
   }
-
-  btn.disabled = true;
-  btn.innerHTML = `<span class="animate-spin mr-2">⏳</span> ${dict.btn_submitting || 'Отправка...'}`;
 
   const firstName = document.getElementById("first_name").value.trim();
   const lastName = document.getElementById("last_name").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const attendance = document.querySelector('input[name="attendance"]:checked').value;
+
+  if (attendance === 'attending') {
+    const adultInputs = [
+      ...Array.from(document.querySelectorAll(".family-adult-name-input")),
+      ...Array.from(document.querySelectorAll(".plus-one-name-input"))
+    ];
+
+    for (const inp of adultInputs) {
+      const val = inp.value.trim();
+      if (!isFullNameTwoWords(val)) {
+        showRsvpValidationError(
+          dict.err_adult_full_name_required || "Укажите полное имя и фамилию (2 слова) для всех гостей, кроме детей.",
+          inp
+        );
+        return;
+      }
+    }
+
+    const seenNames = new Map();
+    const primaryFull = `${firstName} ${lastName}`.trim();
+    const primaryNorm = normalizeFullNameClient(primaryFull);
+    if (primaryNorm) seenNames.set(primaryNorm, primaryFull);
+
+    for (const inp of adultInputs) {
+      const rawVal = inp.value.trim();
+      const normVal = normalizeFullNameClient(rawVal);
+      if (normVal && seenNames.has(normVal)) {
+        const msg = (dict.err_duplicate_guest_in_form || "Человек «{name}» уже указан — этот человек уже записан!")
+          .replace("{name}", rawVal);
+        showRsvpValidationError(msg, inp);
+        return;
+      }
+      if (normVal) seenNames.set(normVal, rawVal);
+    }
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="animate-spin mr-2">⏳</span> ${dict.btn_submitting || 'Отправка...'}`;
 
   const childrenCount = getChildrenCount();
   const familyAdultsCount = getFamilyAdultsCount();
@@ -1369,8 +1444,23 @@ async function submitRSVP(event) {
     } else if (response.status === 409 && data.error === 'already_registered') {
       pendingExistingRsvp = data.existing || null;
       showAlreadyRegisteredCard(data.reason, data.existing);
+    } else if ((response.status === 409 || response.status === 400) && (data.error === 'duplicate_guest_name' || data.error === 'invalid_adult_name')) {
+      const fallbackMsg = data.duplicate_name
+        ? (dict.err_duplicate_guest_in_db || "Этот человек («{name}») уже записан в списке гостей!").replace("{name}", data.duplicate_name)
+        : (dict.err_adult_full_name_required || "Укажите полное имя и фамилию.");
+      const serverMsg = currentLang === 'he' ? (data.message_he || fallbackMsg) : (data.message_ru || fallbackMsg);
+      let matchedInput = null;
+      if (data.duplicate_name || data.name) {
+        const targetNorm = normalizeFullNameClient(data.duplicate_name || data.name);
+        const adultInputs = [
+          ...Array.from(document.querySelectorAll(".family-adult-name-input")),
+          ...Array.from(document.querySelectorAll(".plus-one-name-input"))
+        ];
+        matchedInput = adultInputs.find(inp => normalizeFullNameClient(inp.value) === targetNorm) || null;
+      }
+      showRsvpValidationError(serverMsg, matchedInput);
     } else {
-      alert("Ошибка отправки: " + (data.error || "Пожалуйста, проверьте данные"));
+      alert("Ошибка отправки: " + (data.message_ru || data.error || "Пожалуйста, проверьте данные"));
     }
   } catch (err) {
     console.error("Submission failed:", err);
