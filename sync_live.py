@@ -56,33 +56,38 @@ def main():
         with open(os.path.join(UPLOADS_DIR, safe_name), "wb") as f:
             f.write(base64.b64decode(b64))
 
-    rsvps = data.get("rsvps", [])
-    if rsvps:
+    rsvps = data.get("rsvps")
+    if isinstance(rsvps, list):
+        from server import normalize_phone, build_full_name_key, init_db
+        init_db()
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
+        cursor.execute("DELETE FROM rsvps;")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='rsvps';")
         for r in rsvps:
-            cursor.execute(
-                "SELECT id FROM rsvps WHERE first_name = ? AND last_name = ? AND phone = ?",
-                (r.get("first_name", ""), r.get("last_name", ""), r.get("phone", ""))
-            )
-            if not cursor.fetchone():
-                cursor.execute("""
-                    INSERT INTO rsvps (first_name, last_name, phone, attendance, guests_count, message, language, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    r.get("first_name", ""),
-                    r.get("last_name", ""),
-                    r.get("phone", ""),
-                    r.get("attendance", "attending"),
-                    int(r.get("guests_count", 1)),
-                    r.get("message", ""),
-                    r.get("language", "ru"),
-                    r.get("created_at")
-                ))
+            fn = r.get("first_name", "")
+            ln = r.get("last_name", "")
+            ph = r.get("phone", "")
+            cursor.execute("""
+                INSERT INTO rsvps (first_name, last_name, phone, attendance, guests_count, message, language, custom_answers, phone_normalized, full_name_normalized, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                fn,
+                ln,
+                ph,
+                r.get("attendance", "attending"),
+                int(r.get("guests_count", 1)),
+                r.get("message", ""),
+                r.get("language", "ru"),
+                json.dumps(r.get("custom_answers") or {}, ensure_ascii=False),
+                normalize_phone(ph),
+                build_full_name_key(fn, ln),
+                r.get("created_at")
+            ))
         conn.commit()
         conn.close()
 
-    print(f"Synced live data: {len(uploads)} upload(s), {len(rsvps)} RSVP(s).")
+    print(f"Synced live data: {len(uploads)} upload(s), {len(rsvps or [])} RSVP(s).")
 
 
 if __name__ == "__main__":

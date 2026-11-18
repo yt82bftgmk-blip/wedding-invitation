@@ -1107,7 +1107,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
                     print(f"Restore upload error ({safe_name}): {e}")
 
         rsvps = payload.get("rsvps", [])
-        if isinstance(rsvps, list) and rsvps:
+        if isinstance(rsvps, list) and (rsvps or payload.get("replace_rsvps")):
             conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
             if payload.get("replace_rsvps"):
