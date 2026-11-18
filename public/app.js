@@ -83,8 +83,8 @@ const translations = {
     field_plus_one_count: "Имя и фамилия",
     count_none: "Нет (0)",
     child_placeholder: "Имя ребёнка",
-    family_adult_placeholder: "Имя и фамилия *",
-    plus_one_placeholder: "Имя и фамилия *",
+    family_adult_placeholder: "Имя и фамилия",
+    plus_one_placeholder: "Имя и фамилия",
     err_adult_full_name_required: "Укажите полное имя и фамилию (2 слова) для всех гостей, кроме детей.",
     err_duplicate_guest_in_form: "Человек «{name}» уже указан — этот человек уже записан!",
     err_duplicate_guest_in_db: "Этот человек («{name}») уже записан в списке гостей!",
@@ -206,8 +206,8 @@ const translations = {
     field_plus_one_count: "שם פרטי ומשפחה",
     count_none: "ללא (0)",
     child_placeholder: "שם הילד/ה",
-    family_adult_placeholder: "שם פרטי ומשפחה *",
-    plus_one_placeholder: "שם פרטי ומשפחה *",
+    family_adult_placeholder: "שם פרטי ומשפחה",
+    plus_one_placeholder: "שם פרטי ומשפחה",
     err_adult_full_name_required: "יש להזין שם פרטי ושם משפחה מלאים (2 מילים) לכל האורחים (למעט ילדים).",
     err_duplicate_guest_in_form: "האורח/ת «{name}» כבר מופיע/ה ברשימה — לא ניתן לרשום פעמיים!",
     err_duplicate_guest_in_db: "אורח/ת זה («{name}») כבר רשום/ה ברשימת האורחים!",
@@ -1091,7 +1091,7 @@ function renderDynamicNameRows(containerId, count, inputClass, placeholderBase, 
     const input = document.createElement("input");
     input.type = "text";
     input.className = `${inputClass} flex-1 px-3.5 py-2.5 rounded-xl border border-stone-200 bg-[#FAF7F2]/40 focus:bg-white text-sm focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all`;
-    input.placeholder = `${placeholderBase} ${i + 1}`;
+    input.placeholder = placeholderBase;
     if (existingValues[i] !== undefined) {
       input.value = existingValues[i];
     }
