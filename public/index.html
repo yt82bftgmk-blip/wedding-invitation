@@ -473,7 +473,7 @@
   </section>
 
   <!-- Dedicated Full-Screen RSVP Page Overlay -->
-  <div id="rsvp-page-overlay" class="rsvp-page-overlay fixed inset-0 z-50 hidden overflow-y-auto rsvp-page-bg" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="rsvp-page-heading">
+  <div id="rsvp-page-overlay" class="rsvp-page-overlay fixed inset-0 z-50 hidden overflow-y-auto overflow-x-hidden rsvp-page-bg" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="rsvp-page-heading">
     <!-- Subtle Luxury Pattern & Ambient Glows -->
     <div class="fixed inset-0 rsvp-page-pattern pointer-events-none opacity-80"></div>
     <div class="fixed -top-24 -left-24 w-80 h-80 rounded-full bg-[#C5A059]/20 blur-3xl pointer-events-none ambient-orb-1"></div>
@@ -494,33 +494,33 @@
     </svg>
 
     <!-- Sticky Top Navigation Bar -->
-    <div class="sticky top-0 z-20 bg-[#FAF7F2]/80 backdrop-blur-md border-b border-[#E8DFC9]/80">
-      <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-        <button type="button" onclick="closeRsvpSection()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/80 hover:bg-white border border-[#E8DFC9] text-stone-800 text-xs sm:text-sm font-medium shadow-sm transition-all cursor-pointer">
-          <i data-lucide="arrow-left" class="w-4 h-4 text-champagne-gold rtl:rotate-180"></i>
+    <div class="sticky top-0 z-20 bg-[#FAF7F2]/95 sm:bg-[#FAF7F2]/85 backdrop-blur-md border-b border-[#E8DFC9]/80">
+      <div class="max-w-3xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3">
+        <button type="button" onclick="closeRsvpSection()" class="min-w-0 inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl sm:rounded-full bg-white/90 hover:bg-white border border-[#E8DFC9] text-stone-800 text-xs sm:text-sm font-medium leading-tight text-left rtl:text-right shadow-sm transition-all cursor-pointer">
+          <i data-lucide="arrow-left" class="w-4 h-4 text-champagne-gold rtl:rotate-180 shrink-0"></i>
           <span data-i18n="btn_back_to_invite">Назад к приглашению</span>
         </button>
 
-        <div class="font-serif text-lg sm:text-xl font-bold text-stone-800 tracking-wide flex items-center gap-1.5">
+        <div class="font-serif text-lg sm:text-xl font-bold text-stone-800 tracking-wide flex items-center gap-1.5 shrink-0 whitespace-nowrap">
           <span>N</span>
           <span class="text-champagne-gold text-sm">&amp;</span>
           <span>S</span>
         </div>
 
-        <button type="button" onclick="closeRsvpSection()" aria-label="Закрыть" class="w-9 h-9 rounded-full bg-white/80 hover:bg-white border border-[#E8DFC9] text-stone-600 hover:text-stone-900 flex items-center justify-center shadow-sm transition-all cursor-pointer">
+        <button type="button" onclick="closeRsvpSection()" aria-label="Закрыть" class="w-9 h-9 rounded-full bg-white/90 hover:bg-white border border-[#E8DFC9] text-stone-600 hover:text-stone-900 flex items-center justify-center shadow-sm transition-all cursor-pointer shrink-0">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
 
     <!-- Centered RSVP Page Content -->
-    <div class="rsvp-page-content relative z-10 max-w-2xl mx-auto px-4 pt-8 pb-16 space-y-7">
+    <div class="rsvp-page-content relative z-10 max-w-2xl mx-auto px-2.5 sm:px-4 pt-5 sm:pt-8 pb-14 sm:pb-16 space-y-5 sm:space-y-7 min-w-0">
       <div class="text-center space-y-3">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-[#E8DFC9] shadow-sm text-champagne-gold text-xs font-semibold uppercase tracking-widest">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 shrink-0"></i>
           <span data-i18n="rsvp_tag">Будем счастливы вас видеть</span>
         </div>
-        <h2 id="rsvp-page-heading" class="font-serif text-4xl sm:text-5xl iridescent-title leading-tight" data-i18n="rsvp_title">Подтверждение присутствия</h2>
+        <h2 id="rsvp-page-heading" class="font-serif text-3xl sm:text-5xl iridescent-title leading-tight break-words" data-i18n="rsvp_title">Подтверждение присутствия</h2>
         <div class="gold-divider"></div>
         <p class="text-stone-600 max-w-md mx-auto text-sm leading-relaxed" data-i18n="rsvp_desc">
           Пожалуйста, ответьте на приглашение, чтобы мы могли позаботиться о вашем комфорте!
@@ -528,18 +528,18 @@
       </div>
 
       <!-- Ornate Gold Corner Wrapper around RSVP Card -->
-      <div class="relative p-1.5 sm:p-2 rounded-[2rem] bg-gradient-to-br from-[#E5C98B]/40 via-white/50 to-[#C28285]/30 shadow-[0_24px_60px_-15px_rgba(140,104,54,0.28)]">
+      <div class="relative p-1 sm:p-2 rounded-[1.75rem] sm:rounded-[2rem] bg-gradient-to-br from-[#E5C98B]/40 via-white/50 to-[#C28285]/30 shadow-[0_24px_60px_-15px_rgba(140,104,54,0.28)]">
         <span class="pointer-events-none absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-[#C5A059]/60 rounded-tl-xl"></span>
         <span class="pointer-events-none absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-[#C5A059]/60 rounded-tr-xl"></span>
         <span class="pointer-events-none absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-[#C5A059]/60 rounded-bl-xl"></span>
         <span class="pointer-events-none absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-[#C5A059]/60 rounded-br-xl"></span>
 
         <!-- RSVP Card with warm luxury styling -->
-        <div class="iridescent-card backdrop-blur-md p-6 sm:p-10 rounded-3xl border border-[#E8DFC9] shadow-xl relative">
+        <div class="iridescent-card backdrop-blur-md p-4 sm:p-10 rounded-2xl sm:rounded-3xl border border-[#E8DFC9] shadow-xl relative">
         <form id="rsvp-form" onsubmit="submitRSVP(event)" class="space-y-6">
           
           <!-- Edit Mode Banner -->
-          <div id="rsvp-edit-banner" class="hidden p-4 rounded-2xl bg-amber-50/90 border border-amber-200 flex items-center justify-between gap-3">
+          <div id="rsvp-edit-banner" class="hidden p-4 rounded-2xl bg-amber-50/90 border border-amber-200 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-2.5 text-amber-900 text-xs sm:text-sm font-medium">
               <i data-lucide="pencil" class="w-4 h-4 text-amber-600 shrink-0"></i>
               <span data-i18n="edit_mode_banner">Режим редактирования записи — измените количество гостей или данные и сохраните.</span>
@@ -579,9 +579,9 @@
 
           <!-- Phone Number with strict format controls -->
           <div class="space-y-2">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap items-center justify-between gap-2">
               <label class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_phone">Номер телефона *</label>
-              <div class="flex items-center gap-1.5" id="phone-format-selector">
+              <div class="flex flex-wrap items-center gap-1.5" id="phone-format-selector">
                 <button type="button" onclick="setPhoneFormat('il_intl')" id="btn-fmt-il-intl" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-900 text-white transition-all shadow-sm">
                   🇮🇱 +972
                 </button>
@@ -636,31 +636,31 @@
           </div>
 
           <!-- Guest composition (Family: Children & Spouse/Partner + Additional guests) -->
-          <div id="guest-count-container" class="space-y-4 p-4 rounded-2xl border border-[#E8DFC9] bg-[#FAF7F2]/60 transition-all">
+          <div id="guest-count-container" class="space-y-3.5 sm:space-y-4 p-3 sm:p-4 rounded-2xl border border-[#E8DFC9] bg-[#FAF7F2]/60 transition-all">
             <div class="flex items-center justify-between gap-2">
               <div class="text-xs font-semibold uppercase tracking-wider text-stone-700" data-i18n="field_guests_count">Количество человек</div>
             </div>
 
             <!-- Section 1: Family (Children + Spouse / Adult family) -->
-            <div class="space-y-3.5 p-3.5 sm:p-4 rounded-2xl bg-white/90 border border-[#E8DFC9]/90 shadow-sm">
-              <div class="flex items-center justify-between gap-2 pb-2 border-b border-[#F1EAE0]">
-                <span class="text-xs font-semibold uppercase tracking-wider text-champagne-gold" data-i18n="family_section_title">Семья</span>
-                <span class="text-[11px] text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
+            <div class="space-y-3.5 p-3 sm:p-4 rounded-2xl bg-white/90 border border-[#E8DFC9]/90 shadow-sm">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5 pb-2 border-b border-[#F1EAE0]">
+                <span class="text-xs font-semibold uppercase tracking-wider text-champagne-gold min-w-0" data-i18n="family_section_title">Семья</span>
+                <span class="text-[11px] text-stone-400 font-normal lowercase shrink-0" data-i18n="optional_tag">(по желанию)</span>
               </div>
 
               <!-- 1.1 Children (up to 12) -->
               <div class="space-y-2">
-                <label for="children_count" class="text-xs font-semibold tracking-wide text-stone-800 flex flex-wrap items-baseline gap-1.5">
+                <label for="children_count" class="text-xs font-semibold tracking-wide text-stone-800 flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
                   <span class="uppercase tracking-wider" data-i18n="field_children_names">Дети</span>
                   <span class="text-[11px] text-stone-400 font-normal lowercase" data-i18n="children_age_note">(только дети до 12 лет)</span>
                 </label>
-                <div class="flex items-center justify-between gap-3">
-                  <span class="text-xs text-stone-600" data-i18n="field_children_count">Имя</span>
-                  <div class="flex items-center gap-1.5 shrink-0">
+                <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                  <span class="text-xs text-stone-600 min-w-0" data-i18n="field_children_count">Имя</span>
+                  <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
                     <button
                       type="button"
                       onclick="stepChildrenCount(-1)"
-                      class="w-9 h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
+                      class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
                       aria-label="Уменьшить"
                     >−</button>
                     <input
@@ -670,12 +670,12 @@
                       value="0"
                       inputmode="numeric"
                       oninput="renderChildrenInputs()"
-                      class="w-16 sm:w-20 px-2 py-2 rounded-xl border border-stone-200 bg-white text-center text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
+                      class="w-14 sm:w-20 px-1.5 sm:px-2 py-1.5 sm:py-2 rounded-xl border border-stone-200 bg-white text-center text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
                     >
                     <button
                       type="button"
                       onclick="stepChildrenCount(1)"
-                      class="w-9 h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
+                      class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
                       aria-label="Увеличить"
                     >+</button>
                   </div>
@@ -687,20 +687,20 @@
 
               <!-- 1.2 Spouse / Teens 12+ / Adult family -->
               <div class="space-y-2">
-                <label for="family_adults_count" class="text-xs font-semibold tracking-wide text-stone-800 flex items-center justify-between gap-2">
-                  <span class="flex flex-wrap items-baseline gap-1.5">
+                <label for="family_adults_count" class="text-xs font-semibold tracking-wide text-stone-800 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+                  <span class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 min-w-0">
                     <span class="uppercase tracking-wider" data-i18n="field_family_adults">Муж / Жена и родные</span>
                     <span class="text-[11px] text-stone-400 font-normal lowercase" data-i18n="family_adults_note">(подростки 12+ и взрослые)</span>
                   </span>
                   <span class="text-[11px] text-stone-400 font-normal lowercase shrink-0" data-i18n="optional_tag">(по желанию)</span>
                 </label>
-                <div class="flex items-center justify-between gap-3">
-                  <span class="text-xs text-stone-600" data-i18n="field_family_adults_count">Имя и фамилия</span>
-                  <div class="flex items-center gap-1.5 shrink-0">
+                <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                  <span class="text-xs text-stone-600 min-w-0" data-i18n="field_family_adults_count">Имя и фамилия</span>
+                  <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
                     <button
                       type="button"
                       onclick="stepFamilyAdultsCount(-1)"
-                      class="w-9 h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
+                      class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
                       aria-label="Уменьшить"
                     >−</button>
                     <input
@@ -710,12 +710,12 @@
                       value="0"
                       inputmode="numeric"
                       oninput="renderFamilyAdultsInputs()"
-                      class="w-16 sm:w-20 px-2 py-2 rounded-xl border border-stone-200 bg-white text-center text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
+                      class="w-14 sm:w-20 px-1.5 sm:px-2 py-1.5 sm:py-2 rounded-xl border border-stone-200 bg-white text-center text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
                     >
                     <button
                       type="button"
                       onclick="stepFamilyAdultsCount(1)"
-                      class="w-9 h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
+                      class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
                       aria-label="Увеличить"
                     >+</button>
                   </div>
@@ -725,18 +725,18 @@
             </div>
 
             <!-- Section 2: Additional guests (+1 / friends) -->
-            <div class="space-y-2 p-3.5 sm:p-4 rounded-2xl bg-white/90 border border-[#E8DFC9]/90 shadow-sm">
-              <label for="plus_one_count" class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between gap-2">
-                <span data-i18n="field_plus_one">Дополнительные гости</span>
-                <span class="text-[11px] text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
+            <div class="space-y-2 p-3 sm:p-4 rounded-2xl bg-white/90 border border-[#E8DFC9]/90 shadow-sm">
+              <label for="plus_one_count" class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+                <span class="min-w-0" data-i18n="field_plus_one">Дополнительные гости</span>
+                <span class="text-[11px] text-stone-400 font-normal lowercase shrink-0" data-i18n="optional_tag">(по желанию)</span>
               </label>
-              <div class="flex items-center justify-between gap-3">
-                <span class="text-xs text-stone-600" data-i18n="field_plus_one_count">Имя и фамилия</span>
-                <div class="flex items-center gap-1.5 shrink-0">
+              <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                <span class="text-xs text-stone-600 min-w-0" data-i18n="field_plus_one_count">Имя и фамилия</span>
+                <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
                   <button
                     type="button"
                     onclick="stepPlusOneCount(-1)"
-                    class="w-9 h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
+                    class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
                     aria-label="Уменьшить"
                   >−</button>
                   <input
@@ -746,12 +746,12 @@
                     value="0"
                     inputmode="numeric"
                     oninput="renderPlusOneInputs()"
-                    class="w-16 sm:w-20 px-2 py-2 rounded-xl border border-stone-200 bg-white text-center text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
+                    class="w-14 sm:w-20 px-1.5 sm:px-2 py-1.5 sm:py-2 rounded-xl border border-stone-200 bg-white text-center text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-champagne-gold/50 focus:border-champagne-gold transition-all"
                   >
                   <button
                     type="button"
                     onclick="stepPlusOneCount(1)"
-                    class="w-9 h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
+                    class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-stone-200 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 font-bold text-base flex items-center justify-center transition-all"
                     aria-label="Увеличить"
                   >+</button>
                 </div>
@@ -765,9 +765,9 @@
 
           <!-- Warm Congratulations / Wishes -->
           <div class="space-y-1.5">
-            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex items-center justify-between">
-              <span data-i18n="field_message">Тёплые слова молодожёнам (мини-поздравление)</span>
-              <span class="text-stone-400 font-normal lowercase" data-i18n="optional_tag">(по желанию)</span>
+            <label class="text-xs font-semibold uppercase tracking-wider text-stone-700 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+              <span class="min-w-0" data-i18n="field_message">Тёплые слова молодожёнам (мини-поздравление)</span>
+              <span class="text-stone-400 font-normal lowercase shrink-0" data-i18n="optional_tag">(по желанию)</span>
             </label>
             <textarea 
               id="message" 
