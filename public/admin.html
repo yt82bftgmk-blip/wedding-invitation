@@ -390,7 +390,7 @@
           <div class="photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row items-center gap-8">
             <div class="w-full md:w-1/2 space-y-2 shrink-0">
               <div class="relative h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md group">
-                <img id="story-img-2" src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80" alt="Она сказала Да" class="w-full h-full object-cover">
+                <img id="story-img-2" src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80" alt="Встреча после долгой разлуки" class="w-full h-full object-cover">
                 <div class="absolute top-3 right-3 z-20 flex items-center gap-1.5">
                   <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 hover:bg-white text-stone-900 text-xs font-semibold shadow-lg border border-[#E8DFC9] transition-all">
                     <i data-lucide="camera" class="w-3.5 h-3.5 text-champagne-gold"></i>
@@ -411,11 +411,46 @@
             </div>
             <div class="w-full md:w-1/2 space-y-3 text-left">
               <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
-                <i data-lucide="gem" class="w-3.5 h-3.5"></i>
+                <i data-lucide="heart" class="w-3.5 h-3.5"></i>
                 <span data-i18n="story_event3_date">2025 год • Глава III</span>
               </div>
-              <h3 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900" data-i18n="story_event3_title">Она сказала «Да!»</h3>
+              <h3 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900" data-i18n="story_event3_title">Встреча после долгой разлуки</h3>
               <p class="text-stone-600 text-sm sm:text-base leading-relaxed" data-i18n="story_event3_text">
+                Два года разлуки только укрепили наши чувства. И вот мы снова рядом — с первой секунды стало ясно, что время не властно над нашей любовью.
+              </p>
+            </div>
+          </div>
+
+          <!-- Chapter 4 -->
+          <div class="photo-story-card bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E8DFC9] shadow-lg flex flex-col md:flex-row-reverse items-center gap-8">
+            <div class="w-full md:w-1/2 space-y-2 shrink-0">
+              <div class="relative h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md group">
+                <img id="story-img-3" src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80" alt="Она сказала Да" class="w-full h-full object-cover">
+                <div class="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+                  <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 hover:bg-white text-stone-900 text-xs font-semibold shadow-lg border border-[#E8DFC9] transition-all">
+                    <i data-lucide="camera" class="w-3.5 h-3.5 text-champagne-gold"></i>
+                    <span>Сменить фото</span>
+                    <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto(this, 'story', 3)">
+                  </label>
+                  <button type="button" onclick="toggleStoryUrlInput(3)" class="p-1.5 rounded-full bg-white/95 hover:bg-white text-stone-700 shadow-lg border border-[#E8DFC9] transition-all" title="Вставить ссылку на фото">
+                    <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="story-url-box-3" class="hidden bg-white/95 p-2 rounded-xl border border-[#E8DFC9] shadow-sm">
+                <div class="flex items-center gap-2">
+                  <input type="text" id="cms-photo-story-3" placeholder="https://..." oninput="updateStoryPhoto(3, this.value)" class="flex-1 px-3 py-1 rounded-lg border border-stone-200 text-xs font-mono bg-[#FAF7F2]">
+                  <button type="button" onclick="toggleStoryUrlInput(3)" class="text-xs text-stone-500 hover:text-stone-900 px-2 py-1">OK</button>
+                </div>
+              </div>
+            </div>
+            <div class="w-full md:w-1/2 space-y-3 text-left">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
+                <i data-lucide="gem" class="w-3.5 h-3.5"></i>
+                <span data-i18n="story_event4_date">2026 год • Глава IV</span>
+              </div>
+              <h3 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900" data-i18n="story_event4_title">Она сказала «Да!»</h3>
+              <p class="text-stone-600 text-sm sm:text-base leading-relaxed" data-i18n="story_event4_text">
                 Самый романтический вечер, трепетное биение сердец и самое главное слово, открывшее новую главу нашей семьи.
               </p>
             </div>
@@ -1027,8 +1062,11 @@
         story_event2_title: "Первое путешествие",
         story_event2_text: "Незабываемые закаты, тысячи фотографий, смех и понимание того, что мы идеальная команда в любом уголке мира.",
         story_event3_date: "2025 год",
-        story_event3_title: "Она сказала «Да!»",
-        story_event3_text: "Самый романтический вечер, трепетное биение сердец и самое главное слово, открывшее новую главу нашей семьи.",
+        story_event3_title: "Встреча после долгой разлуки",
+        story_event3_text: "Два года разлуки только укрепили наши чувства. И вот мы снова рядом — с первой секунды стало ясно, что время не властно над нашей любовью.",
+        story_event4_date: "2026 год",
+        story_event4_title: "Она сказала «Да!»",
+        story_event4_text: "Самый романтический вечер, трепетное биение сердец и самое главное слово, открывшее новую главу нашей семьи.",
         gallery_tag: "Наши моменты",
         gallery_title: "Фотоальбом любви",
         gallery_subtitle: "Нажмите на фото, чтобы прочитать историю, или добавьте новые кадры",
@@ -1106,8 +1144,11 @@
         story_event2_title: "הטיול הראשון ביחד",
         story_event2_text: "שקיעות בלתי נשכחות, אינספור תמונות וצחוק, וההבנה שאנחנו הצוות המושלם בכל מקום בעולם.",
         story_event3_date: "שנת 2025",
-        story_event3_title: "היא אמרה כן!",
-        story_event3_text: "ערב רומנטי ומרגש במיוחד, פעימות לב מואצות והמילה המיוחלת שפתחה את הפרק המרגש ביותר בחיינו.",
+        story_event3_title: "המפגש אחרי פרידה ארוכה",
+        story_event3_text: "שנתיים של געגועים רק חיזקו את האהבה שלנו. והנה אנחנו שוב יחד — מהרגע הראשון היה ברור שהזמן לא יכול לנצח את מה שיש בינינו.",
+        story_event4_date: "שנת 2026",
+        story_event4_title: "היא אמרה כן!",
+        story_event4_text: "ערב רומנטי ומרגש במיוחד, פעימות לב מואצות והמילה המיוחלת שפתחה את הפרק המרגש ביותר בחיינו.",
         gallery_tag: "רגעים שלנו",
         gallery_title: "גלריית תמונות",
         gallery_subtitle: "לחצו על תמונה כדי לקרוא את הסיפור, או הוסיפו תמונות חדשות",
@@ -1277,6 +1318,7 @@
       const DEFAULT_STORY_PHOTOS = [
         "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
         "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80",
         "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80"
       ];
       const loadedStory = (cfg.photos && Array.isArray(cfg.photos.story)) ? cfg.photos.story : [];

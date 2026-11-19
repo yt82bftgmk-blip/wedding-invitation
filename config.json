@@ -18,7 +18,10 @@
         "story_event2_title": "Первая разлука",
         "story_event2_text": "Нас внезапно разделили разные страны, но мы не сдались. Трудности лишь закалили нас и повели дальше."
       },
-      "he": {}
+      "he": {
+        "story_event2_title": "הפרידה הראשונה",
+        "story_event2_text": "לפתע הופרדנו על ידי מדינות שונות, אך לא ויתרנו. הקשיים רק חיזקו אותנו ודחפו אותנו להמשיך הלאה."
+      }
     },
     "bit_link": "https://www.bitpay.co.il/app/share-info?i=UCynIUdj&j=true",
     "rsvp_custom_fields": []
@@ -39,6 +42,7 @@
     "story": [
       "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80"
     ]
   },
