@@ -42,7 +42,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="/style.css?v=11">
+  <link rel="stylesheet" href="/style.css?v=12">
 </head>
 <body class="bg-[#FAF7F2] text-[#2D2926] font-sans antialiased selection:bg-champagne selection:text-white">
 
@@ -842,21 +842,21 @@
   </footer>
 
   <!-- Photo Story Lightbox Modal with Blurred Background & Close Cross -->
-  <div id="photo-story-modal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xl flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none">
-    <div class="bg-white/95 backdrop-blur-md rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#E8DFC9] space-y-4 transform scale-95 transition-all duration-300 relative text-left" id="photo-story-card">
-      <!-- Close Cross Button (Крестик) -->
-      <button type="button" onclick="closePhotoStory()" class="absolute -top-3 -right-3 sm:top-4 sm:right-4 w-10 h-10 bg-white text-stone-700 hover:text-stone-950 hover:bg-rose-50 hover:border-rose-200 rounded-full shadow-2xl flex items-center justify-center border border-stone-200 transition-all z-20 cursor-pointer" title="Закрыть">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-
-      <!-- Badge -->
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8]">
-        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-        <span id="modal-badge-text">Воспоминание Назара и Софии</span>
+  <div id="photo-story-modal" onclick="if (event.target === this) closePhotoStory()" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xl flex items-center justify-center overflow-y-auto overscroll-contain p-3 sm:p-4 transition-all duration-300 opacity-0 pointer-events-none">
+    <div class="bg-white/95 backdrop-blur-md rounded-3xl max-w-lg w-full my-auto max-h-[88dvh] overflow-y-auto overscroll-contain p-5 sm:p-8 shadow-2xl border border-[#E8DFC9] space-y-4 transform scale-95 transition-all duration-300 relative text-left" id="photo-story-card">
+      <!-- Top Bar: Badge + Always-Visible Close Button -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF7F2] text-champagne-gold text-[11px] sm:text-xs font-semibold uppercase tracking-wider border border-[#EBE4D8] min-w-0">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 shrink-0"></i>
+          <span id="modal-badge-text" class="truncate">Воспоминание Назара и Софии</span>
+        </div>
+        <button type="button" onclick="closePhotoStory()" class="w-9 h-9 bg-[#FAF7F2] text-stone-700 hover:text-stone-950 hover:bg-rose-50 hover:border-rose-200 rounded-full shadow-sm flex items-center justify-center border border-[#E8DFC9] transition-all shrink-0 cursor-pointer" title="Закрыть" aria-label="Закрыть">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
       </div>
 
       <!-- Photo with subtle zoom -->
-      <div class="w-full h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md">
+      <div class="w-full h-48 sm:h-72 rounded-2xl overflow-hidden shadow-md">
         <img id="modal-photo-img" src="" alt="Story" class="w-full h-full object-cover">
       </div>
 
@@ -867,9 +867,9 @@
       </div>
 
       <!-- Footer Note -->
-      <div class="pt-3 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-400">
+      <div class="pt-3 border-t border-stone-100 flex items-center justify-between gap-2 text-xs text-stone-400">
         <span>❤️ Назар & София</span>
-        <button type="button" onclick="closePhotoStory()" class="text-champagne-gold hover:underline font-semibold flex items-center gap-1">
+        <button type="button" onclick="closePhotoStory()" class="px-4 py-1.5 rounded-full bg-[#FAF7F2] hover:bg-stone-100 border border-[#E8DFC9] text-stone-800 font-semibold inline-flex items-center gap-1.5 transition-all cursor-pointer">
           <span>Закрыть</span>
           <i data-lucide="x" class="w-3.5 h-3.5"></i>
         </button>
