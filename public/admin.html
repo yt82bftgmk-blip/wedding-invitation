@@ -1238,6 +1238,179 @@
     let activeStoryIndex = 0;
     let weddingTargetDate = new Date("2027-09-15T18:00:00").getTime();
     let hasUnsavedChanges = false;
+    let lastSyncedRuSnapshot = null;
+
+    function buildRuSnapshot() {
+      const w = editableConfig.wedding || {};
+      const textsRu = (w.texts && w.texts.ru) ? w.texts.ru : {};
+      return {
+        groom_ru: w.groom_ru || "",
+        bride_ru: w.bride_ru || "",
+        venue_name_ru: w.venue_name_ru || "",
+        venue_city_ru: w.venue_city_ru || "",
+        bit_reason_ru: w.bit_reason_ru || "",
+        texts_ru: Object.assign({}, textsRu),
+        rsvp_custom_fields: (w.rsvp_custom_fields || []).map(f => ({
+          id: f.id,
+          label_ru: f.label_ru || "",
+          placeholder_ru: f.placeholder_ru || "",
+          options: (f.options || []).map(o => o.label_ru || "")
+        })),
+        guest_options: (w.guest_options || []).map(o => o.label_ru || ""),
+        stories: (photoStories || []).map(s => ({
+          title_ru: s.title_ru || "",
+          story_ru: s.story_ru || ""
+        }))
+      };
+    }
+
+    function applyServerConfigToAdmin(cfg) {
+      if (!cfg) return;
+      editableConfig.wedding = Object.assign({ texts: { ru: {}, he: {} } }, cfg.wedding || {});
+      if (!editableConfig.wedding.texts) editableConfig.wedding.texts = { ru: {}, he: {} };
+      ['ru', 'he'].forEach(l => {
+        if (editableConfig.wedding.texts[l]) {
+          Object.assign(translations[l], editableConfig.wedding.texts[l]);
+        }
+      });
+
+      const DEFAULT_STORY_PHOTOS = [
+        "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80"
+      ];
+      const loadedStory = (cfg.photos && Array.isArray(cfg.photos.story)) ? cfg.photos.story : [];
+      editableConfig.photos = {
+        hero: (cfg.photos && cfg.photos.hero) || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+        story: DEFAULT_STORY_PHOTOS.map((def, i) => loadedStory[i] || def),
+        gallery: Array.isArray(cfg.photos && cfg.photos.gallery) ? [...cfg.photos.gallery] : [],
+        stories: Array.isArray(cfg.photos && cfg.photos.stories) ? cfg.photos.stories : []
+      };
+      editableConfig.photos.stories.forEach((customStory, idx) => {
+        if (customStory && photoStories[idx]) {
+          Object.assign(photoStories[idx], customStory);
+        } else if (customStory) {
+          photoStories[idx] = customStory;
+        }
+      });
+      lastSyncedRuSnapshot = buildRuSnapshot();
+    }
+
+    async function syncDraftRuToHe() {
+      if (!adminPass || !lastSyncedRuSnapshot) return;
+      const prev = lastSyncedRuSnapshot;
+      const w = editableConfig.wedding || {};
+      const tasks = [];
+
+      const queueTask = (text, applyFn) => {
+        const clean = (text || "").trim();
+        if (!clean) return;
+        tasks.push({ text: clean, apply: applyFn });
+      };
+
+      const scalarPairs = [
+        ["groom_ru", "groom_he"],
+        ["bride_ru", "bride_he"],
+        ["venue_name_ru", "venue_name_he"],
+        ["venue_city_ru", "venue_city_he"],
+        ["bit_reason_ru", "bit_reason_he"]
+      ];
+      scalarPairs.forEach(([ruKey, heKey]) => {
+        if ((w[ruKey] || "") !== (prev[ruKey] || "")) {
+          queueTask(w[ruKey], (tr) => { w[heKey] = tr; });
+        }
+      });
+
+      const textsRu = (w.texts && w.texts.ru) ? w.texts.ru : {};
+      if (!w.texts) w.texts = { ru: {}, he: {} };
+      if (!w.texts.he) w.texts.he = {};
+      Object.keys(textsRu).forEach(key => {
+        if ((textsRu[key] || "") !== ((prev.texts_ru && prev.texts_ru[key]) || "")) {
+          queueTask(textsRu[key], (tr) => {
+            w.texts.he[key] = tr;
+            translations.he[key] = tr;
+          });
+        }
+      });
+
+      const prevFieldsById = {};
+      (prev.rsvp_custom_fields || []).forEach(f => { if (f.id) prevFieldsById[f.id] = f; });
+      (w.rsvp_custom_fields || []).forEach(f => {
+        const pf = prevFieldsById[f.id];
+        if (!pf) {
+          if (f.label_ru && f.label_ru !== "Новый пункт") {
+            queueTask(f.label_ru, (tr) => { f.label_he = tr; });
+          }
+          if (f.placeholder_ru) {
+            queueTask(f.placeholder_ru, (tr) => { f.placeholder_he = tr; });
+          }
+          (f.options || []).forEach(o => {
+            if (o.label_ru && !/^Вариант \d+$/.test(o.label_ru.trim())) {
+              queueTask(o.label_ru, (tr) => { o.label_he = tr; });
+            }
+          });
+        } else {
+          if ((f.label_ru || "") !== (pf.label_ru || "")) {
+            queueTask(f.label_ru, (tr) => { f.label_he = tr; });
+          }
+          if ((f.placeholder_ru || "") !== (pf.placeholder_ru || "")) {
+            queueTask(f.placeholder_ru, (tr) => { f.placeholder_he = tr; });
+          }
+          (f.options || []).forEach((o, oIdx) => {
+            const prevOpt = (pf.options && pf.options[oIdx]) || "";
+            if ((o.label_ru || "") !== prevOpt) {
+              queueTask(o.label_ru, (tr) => { o.label_he = tr; });
+            }
+          });
+        }
+      });
+
+      (w.guest_options || []).forEach((o, idx) => {
+        const prevGo = (prev.guest_options && prev.guest_options[idx]) || "";
+        if ((o.label_ru || "") !== prevGo) {
+          queueTask(o.label_ru, (tr) => { o.label_he = tr; });
+        }
+      });
+
+      (photoStories || []).forEach((st, idx) => {
+        const ps = (prev.stories && prev.stories[idx]) || {};
+        if ((st.title_ru || "") !== (ps.title_ru || "")) {
+          queueTask(st.title_ru, (tr) => {
+            st.title_he = tr;
+            syncStoriesToConfig();
+          });
+        }
+        if ((st.story_ru || "") !== (ps.story_ru || "")) {
+          queueTask(st.story_ru, (tr) => {
+            st.story_he = tr;
+            syncStoriesToConfig();
+          });
+        }
+      });
+
+      if (tasks.length === 0) return;
+
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminPass}`
+          },
+          body: JSON.stringify({ texts: tasks.map(t => t.text) })
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data.translations)) {
+          data.translations.forEach((tr, i) => {
+            if (tr && tasks[i]) tasks[i].apply(tr);
+          });
+          lastSyncedRuSnapshot = buildRuSnapshot();
+        }
+      } catch (e) {
+        console.warn("Draft translation failed:", e);
+      }
+    }
     let isMusicPlaying = false;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -1433,39 +1606,13 @@
         renderTable();
 
         const cfg = data.config || {};
-        editableConfig.wedding = Object.assign({ texts: { ru: {}, he: {} } }, cfg.wedding || {});
-        if (!editableConfig.wedding.texts) editableConfig.wedding.texts = { ru: {}, he: {} };
-        ['ru', 'he'].forEach(l => {
-          if (editableConfig.wedding.texts[l]) {
-            Object.assign(translations[l], editableConfig.wedding.texts[l]);
-          }
-        });
-
-        const DEFAULT_STORY_PHOTOS = [
-          "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=80"
-        ];
-        const loadedStory = (cfg.photos && Array.isArray(cfg.photos.story)) ? cfg.photos.story : [];
-        editableConfig.photos = {
-          hero: (cfg.photos && cfg.photos.hero) || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-          story: DEFAULT_STORY_PHOTOS.map((def, i) => loadedStory[i] || def),
-          gallery: Array.isArray(cfg.photos && cfg.photos.gallery) ? [...cfg.photos.gallery] : [],
-          stories: Array.isArray(cfg.photos && cfg.photos.stories) ? cfg.photos.stories : []
-        };
-        editableConfig.photos.stories.forEach((customStory, idx) => {
-          if (customStory && photoStories[idx]) {
-            Object.assign(photoStories[idx], customStory);
-          } else if (customStory) {
-            photoStories[idx] = customStory;
-          }
-        });
+        applyServerConfigToAdmin(cfg);
 
         if (cfg.telegram) {
           document.getElementById("tg-chat-id").value = cfg.telegram.chat_id || "";
         }
 
-        setLanguage(currentLang);
+        await setLanguage(currentLang);
         if (window.lucide) lucide.createIcons();
       } catch (err) {
         console.error("Failed to load admin data:", err);
@@ -1574,7 +1721,10 @@
       }
     }
 
-    function setLanguage(lang) {
+    async function setLanguage(lang) {
+      if (lang === 'he' && hasUnsavedChanges) {
+        await syncDraftRuToHe();
+      }
       currentLang = lang;
       const html = document.documentElement;
       const dict = translations[lang];
@@ -2111,9 +2261,19 @@
         });
 
         if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (data.config) {
+            applyServerConfigToAdmin(data.config);
+            await setLanguage(currentLang);
+          } else {
+            lastSyncedRuSnapshot = buildRuSnapshot();
+          }
           clearDirty();
           saveLocalAutoBackup();
-          alert("🎉 Изменения сохранены! Гостевой сайт сразу обновился.");
+          const trCount = data.translated_count || 0;
+          alert(trCount > 0
+            ? "🎉 Изменения сохранены и переведены на иврит! Гостевой сайт сразу обновился."
+            : "🎉 Изменения сохранены! Гостевой сайт сразу обновился.");
         } else {
           alert("Ошибка сохранения настроек.");
         }

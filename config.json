@@ -14,32 +14,14 @@
     "bit_phone": "0586331035",
     "bit_name": "Nazar & Sofia",
     "texts": {
-      "ru": {},
+      "ru": {
+        "story_event2_title": "Первая разлука",
+        "story_event2_text": "Нас внезапно разделили разные страны, но мы не сдались. Трудности лишь закалили нас и повели дальше."
+      },
       "he": {}
     },
     "bit_link": "https://www.bitpay.co.il/app/share-info?i=UCynIUdj&j=true",
-    "rsvp_custom_fields": [
-      {
-        "id": "custom_1795039820858",
-        "type": "select",
-        "label_ru": "Новый пункт",
-        "label_he": "שדה חדש",
-        "placeholder_ru": "",
-        "placeholder_he": "",
-        "show_when": "attending",
-        "required": false,
-        "options": [
-          {
-            "label_ru": "Вариант 1",
-            "label_he": "אפשרות 1"
-          },
-          {
-            "label_ru": "Вариант 2",
-            "label_he": "אפשרות 2"
-          }
-        ]
-      }
-    ]
+    "rsvp_custom_fields": []
   },
   "photos": {
     "hero": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",

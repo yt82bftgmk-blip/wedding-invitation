@@ -73,6 +73,233 @@ def save_config(cfg):
         json.dump(cfg, f, ensure_ascii=False, indent=2)
 
 
+_TRANSLATION_CACHE = {}
+_TRANSLATION_LOCK = threading.Lock()
+
+
+def translate_ru_to_he(text):
+    """Translate Russian text to Hebrew using Google Translate with MyMemory fallback."""
+    if not isinstance(text, str):
+        return None
+    cleaned = text.strip()
+    if not cleaned:
+        return ""
+
+    with _TRANSLATION_LOCK:
+        cached = _TRANSLATION_CACHE.get(cleaned)
+    if cached is not None:
+        return cached
+
+    translated = None
+
+    # Primary: Google Translate unofficial endpoint (stdlib urllib)
+    try:
+        q = urllib.parse.quote(cleaned)
+        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=he&dt=t&q={q}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if isinstance(data, list) and data and isinstance(data[0], list):
+                parts = [part[0] for part in data[0] if isinstance(part, list) and part and part[0]]
+                candidate = "".join(parts).strip()
+                if candidate:
+                    translated = candidate
+    except Exception as e:
+        print(f"Google translate error: {e}")
+
+    # Fallback: MyMemory API
+    if not translated:
+        try:
+            q = urllib.parse.quote(cleaned)
+            url = f"https://api.mymemory.translated.net/get?q={q}&langpair=ru|he"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=6) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                candidate = (data.get("responseData") or {}).get("translatedText", "").strip()
+                if candidate and "MYMEMORY WARNING" not in candidate.upper():
+                    translated = candidate
+        except Exception as e:
+            print(f"MyMemory translate error: {e}")
+
+    if translated:
+        with _TRANSLATION_LOCK:
+            if len(_TRANSLATION_CACHE) > 2000:
+                _TRANSLATION_CACHE.clear()
+            _TRANSLATION_CACHE[cleaned] = translated
+    return translated
+
+
+def _translate_pair_if_needed(new_ru, new_he, old_ru, old_he, default_ru=None, default_he=None):
+    """Return translated Hebrew string if Russian changed and Hebrew was not manually edited."""
+    if not isinstance(new_ru, str):
+        return None
+    ru_clean = new_ru.strip()
+    if not ru_clean:
+        return None
+
+    old_ru_clean = old_ru.strip() if isinstance(old_ru, str) else None
+    old_he_clean = old_he.strip() if isinstance(old_he, str) else None
+    new_he_clean = new_he.strip() if isinstance(new_he, str) else ""
+
+    if old_ru_clean is not None:
+        ru_changed = (ru_clean != old_ru_clean)
+        he_untouched = (new_he_clean == (old_he_clean or ""))
+        if (ru_changed and he_untouched) or (not new_he_clean):
+            return translate_ru_to_he(ru_clean)
+    else:
+        # New item/key
+        is_default_ru = (default_ru is not None and ru_clean == default_ru)
+        is_default_he = (default_he is not None and new_he_clean == default_he)
+        if (not new_he_clean) or (is_default_he and not is_default_ru):
+            return translate_ru_to_he(ru_clean)
+    return None
+
+
+def auto_translate_config_ru_to_he(old_cfg, new_cfg):
+    """Automatically translate changed/new Russian fields in config to Hebrew."""
+    count = 0
+    old_w = old_cfg.get("wedding") or {}
+    new_w = new_cfg.get("wedding") or {}
+
+    for ru_key, he_key in (
+        ("groom_ru", "groom_he"),
+        ("bride_ru", "bride_he"),
+        ("venue_name_ru", "venue_name_he"),
+        ("venue_city_ru", "venue_city_he"),
+        ("bit_reason_ru", "bit_reason_he"),
+    ):
+        tr = _translate_pair_if_needed(
+            new_w.get(ru_key),
+            new_w.get(he_key),
+            old_w.get(ru_key),
+            old_w.get(he_key),
+        )
+        if tr:
+            new_w[he_key] = tr
+            count += 1
+
+    # wedding.texts.ru -> wedding.texts.he
+    old_texts = old_w.get("texts") or {}
+    old_ru_texts = old_texts.get("ru") or {}
+    old_he_texts = old_texts.get("he") or {}
+    if isinstance(new_w.get("texts"), dict):
+        new_ru_texts = new_w["texts"].setdefault("ru", {})
+        new_he_texts = new_w["texts"].setdefault("he", {})
+        for key, ru_val in list(new_ru_texts.items()):
+            if not isinstance(ru_val, str) or not ru_val.strip():
+                continue
+            tr = _translate_pair_if_needed(
+                ru_val,
+                new_he_texts.get(key),
+                old_ru_texts.get(key),
+                old_he_texts.get(key),
+            )
+            if tr:
+                new_he_texts[key] = tr
+                count += 1
+
+    # wedding.rsvp_custom_fields
+    old_fields = old_w.get("rsvp_custom_fields") or []
+    old_fields_by_id = {f.get("id"): f for f in old_fields if isinstance(f, dict) and f.get("id")}
+    if isinstance(new_w.get("rsvp_custom_fields"), list):
+        for f in new_w["rsvp_custom_fields"]:
+            if not isinstance(f, dict):
+                continue
+            old_f = old_fields_by_id.get(f.get("id"), {})
+            tr_label = _translate_pair_if_needed(
+                f.get("label_ru"),
+                f.get("label_he"),
+                old_f.get("label_ru") if old_f else None,
+                old_f.get("label_he") if old_f else None,
+                default_ru="Новый пункт",
+                default_he="שדה חדש",
+            )
+            if tr_label:
+                f["label_he"] = tr_label
+                count += 1
+
+            tr_ph = _translate_pair_if_needed(
+                f.get("placeholder_ru"),
+                f.get("placeholder_he"),
+                old_f.get("placeholder_ru") if old_f else None,
+                old_f.get("placeholder_he") if old_f else None,
+            )
+            if tr_ph:
+                f["placeholder_he"] = tr_ph
+                count += 1
+
+            old_opts = old_f.get("options") if isinstance(old_f.get("options"), list) else []
+            if isinstance(f.get("options"), list):
+                for idx, opt in enumerate(f["options"]):
+                    if not isinstance(opt, dict):
+                        continue
+                    old_opt = old_opts[idx] if idx < len(old_opts) and isinstance(old_opts[idx], dict) else {}
+                    ru_opt = (opt.get("label_ru") or "").strip()
+                    he_opt = (opt.get("label_he") or "").strip()
+                    if old_opt:
+                        tr_opt = _translate_pair_if_needed(
+                            ru_opt, he_opt, old_opt.get("label_ru"), old_opt.get("label_he")
+                        )
+                    else:
+                        is_def_ru = bool(re.match(r"^Вариант \d+$", ru_opt))
+                        is_def_he = bool(re.match(r"^אפשרות \d+$", he_opt))
+                        tr_opt = translate_ru_to_he(ru_opt) if (ru_opt and ((not he_opt) or (is_def_he and not is_def_ru))) else None
+                    if tr_opt:
+                        opt["label_he"] = tr_opt
+                        count += 1
+
+    # wedding.guest_options
+    old_guest_opts = old_w.get("guest_options") or []
+    if isinstance(new_w.get("guest_options"), list):
+        for idx, opt in enumerate(new_w["guest_options"]):
+            if not isinstance(opt, dict):
+                continue
+            old_opt = old_guest_opts[idx] if idx < len(old_guest_opts) and isinstance(old_guest_opts[idx], dict) else {}
+            tr_go = _translate_pair_if_needed(
+                opt.get("label_ru"),
+                opt.get("label_he"),
+                old_opt.get("label_ru") if old_opt else None,
+                old_opt.get("label_he") if old_opt else None,
+            )
+            if tr_go:
+                opt["label_he"] = tr_go
+                count += 1
+
+    # photos.stories
+    old_stories = (old_cfg.get("photos") or {}).get("stories") or []
+    new_stories = (new_cfg.get("photos") or {}).get("stories")
+    if isinstance(new_stories, list):
+        for idx, st in enumerate(new_stories):
+            if not isinstance(st, dict):
+                continue
+            old_st = old_stories[idx] if idx < len(old_stories) and isinstance(old_stories[idx], dict) else {}
+            tr_title = _translate_pair_if_needed(
+                st.get("title_ru"),
+                st.get("title_he"),
+                old_st.get("title_ru") if old_st else None,
+                old_st.get("title_he") if old_st else None,
+                default_ru="Наше маленькое чудо",
+                default_he="הנס הקטן שלנו",
+            )
+            if tr_title:
+                st["title_he"] = tr_title
+                count += 1
+
+            tr_story = _translate_pair_if_needed(
+                st.get("story_ru"),
+                st.get("story_he"),
+                old_st.get("story_ru") if old_st else None,
+                old_st.get("story_he") if old_st else None,
+                default_ru="Особенное мгновение нашей любви, наполненное теплом, нежностью и искренней радостью.",
+                default_he="רגע מיוחד של אהבה, מלא בחום, רוך ושמחה כנה.",
+            )
+            if tr_story:
+                st["story_he"] = tr_story
+                count += 1
+
+    return count
+
+
 def normalize_phone(phone):
     """Normalize Israeli (+972 / 05X) and Russian (+7 / 8) phone numbers to a canonical digit form."""
     digits = re.sub(r"\D", "", str(phone or ""))
@@ -608,6 +835,8 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             self.handle_setup_webhook()
         elif path == "/api/settings":
             self.handle_save_settings(payload)
+        elif path == "/api/translate":
+            self.handle_translate(payload)
         elif path == "/api/upload-photo":
             self.handle_upload_photo(payload)
         elif path == "/api/test-telegram":
@@ -1017,12 +1246,34 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(csv_data)
 
+    def handle_translate(self, payload):
+        if not self.check_admin():
+            self.send_json({"error": "Unauthorized"}, status=401)
+            return
+
+        texts = payload.get("texts")
+        if isinstance(texts, list):
+            results = []
+            for item in texts[:100]:
+                if isinstance(item, str) and item.strip():
+                    tr = translate_ru_to_he(item)
+                    results.append(tr if tr is not None else "")
+                else:
+                    results.append("")
+            self.send_json({"success": True, "translations": results})
+            return
+
+        text = payload.get("text", "")
+        tr = translate_ru_to_he(text) if isinstance(text, str) and text.strip() else ""
+        self.send_json({"success": True, "translation": tr if tr is not None else ""})
+
     def handle_save_settings(self, payload):
         if not self.check_admin():
             self.send_json({"error": "Unauthorized"}, status=401)
             return
 
-        cfg = load_config()
+        old_cfg = load_config()
+        cfg = json.loads(json.dumps(old_cfg, ensure_ascii=False))
 
         if "wedding" in payload:
             cfg["wedding"].update(payload["wedding"])
@@ -1031,8 +1282,14 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         if "telegram" in payload:
             cfg["telegram"].update(payload["telegram"])
 
+        translated_count = auto_translate_config_ru_to_he(old_cfg, cfg)
         save_config(cfg)
-        self.send_json({"success": True, "message": "Settings saved successfully", "config": cfg})
+        self.send_json({
+            "success": True,
+            "message": "Settings saved successfully",
+            "translated_count": translated_count,
+            "config": cfg
+        })
 
     def handle_backup(self):
         if not self.check_admin():
