@@ -13,7 +13,7 @@
 - **`public/index.html`, `public/app.js`, `public/style.css`** — двуязычный гостевой сайт (RU / HE RTL), сейчас подключены `style.css?v=12` и `app.js?v=24`:
   - Случайный музыкальный плеер из 5 мелодий (`public/music/track_1.mp3`–`track_5.mp3`, включая обновлённые `track_2.mp3` — *Jeon Su Yeon — Breeze* и `track_5.mp3` — *Jermaine Gordon — Better Together*).
   - **Адаптация под телефоны и плавные анимации при скролле:**
-    - Зафиксирован `font-size: 16px` и `text-size-adjust: 100%` на `html`, чтобы на телефонах с увеличенным системным шрифтом вёрстка не разъезжалась.
+    - Зафиксирован `font-size: 16px` и `text-size-adjust: 100%` на `html`, чтобы на телефонах с увеличенным системным шрифтом вёрстка не разъезжалась; в `#rsvp-page-overlay` добавлена защита от вылета на узких/увеличенных экранах (`flex-wrap` у счётчиков, заголовков `(по желанию)` и селектора телефона, компактные отступы на мобильных, непрозрачная шапка и `overflow-x-hidden`).
     - На мобильных (`<= 768px`) отключены тяжёлые `backdrop-blur-*` и `blur-3xl`, чтобы не падала вкладка при приближении (pinch-to-zoom).
     - Плавное появление элементов при скролле через `IntersectionObserver` (`observeRevealElements`): `.reveal-on-scroll`, `.reveal-left`, `.reveal-right` (чередование глав истории), `.reveal-photo` (каскадное появление фото и альбома), `.reveal-scale` (карточки места и Bit), `.reveal-icon`.
     - Единый тёплый перелив в гамме шампань / слоновая кость / перламутр / розовое золото (`gradient-drift`: `.bg-iridescent-hero`, `.bg-iridescent-ivory`, `.bg-iridescent-blush`, `.iridescent-title`, `.iridescent-card`, `.countdown-tile`, `.bit-card-iridescent`, `.gold-divider`).
