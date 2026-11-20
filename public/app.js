@@ -1944,12 +1944,7 @@ function closeWelcomeModal() {
 
 function goToStoryFromWelcome() {
   closeWelcomeModal();
-  const storySection = document.getElementById("story");
-  if (storySection) {
-    setTimeout(() => {
-      storySection.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 150);
-  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 document.addEventListener("keydown", (e) => {
