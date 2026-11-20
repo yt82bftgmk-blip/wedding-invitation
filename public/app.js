@@ -126,6 +126,13 @@ const translations = {
     inline_dup_phone: "Этот номер телефона уже зарегистрирован в списке гостей.",
     inline_dup_name: "Гость с таким именем и фамилией уже зарегистрирован.",
 
+    welcome_badge: "Добро пожаловать",
+    welcome_title: "Дорогие друзья и близкие!",
+    welcome_p1: "Мы бесконечно рады видеть вас на странице нашего свадебного приглашения! Вы попали на сайт записи на наше торжество — подтвердить своё присутствие и оставить нам тёплые пожелания вы сможете в самом низу страницы.",
+    welcome_p2: "А перед этим мы хотим вкратце рассказать вам нашу историю — о том, как всё начиналось и какие счастливые моменты привели нас к этому дню.",
+    welcome_btn_story: "Читать нашу историю",
+    welcome_btn_site: "Обратно на сайт",
+
     footer_love: "С любовью и благодарностью к каждому гостю ❤️"
   },
 
@@ -255,6 +262,13 @@ const translations = {
     inline_dup_phone: "מספר הטלפון הזה כבר רשום ברשימת האורחים.",
     inline_dup_name: "אורח עם שם פרטי ומשפחה זה כבר רשום.",
 
+    welcome_badge: "ברוכים הבאים",
+    welcome_title: "חברים ומשפחה יקרים!",
+    welcome_p1: "אנו שמחים ונרגשים לראות אתכם בדף ההזמנה לחתונה שלנו! הגעתם לדף אישור ההגעה לאירוע — תוכלו לאשר את הגעתכם ולהשאיר לנו ברכה חמה בתחתית העמוד.",
+    welcome_p2: "ולפני כן, נשמח לספר לכם בקצרה את הסיפור שלנו — איך הכול התחיל ואילו רגעים מאושרים הובילו אותנו ליום המיוחד הזה.",
+    welcome_btn_story: "לקרוא את הסיפור שלנו",
+    welcome_btn_site: "חזרה לאתר",
+
     footer_love: "באהבה והערכה רבה לכל אחד ואחת מכם ❤️"
   }
 };
@@ -277,6 +291,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initScrollAnimations();
   if (window.location.hash === "#rsvp") {
     openRsvpSection();
+  } else {
+    openWelcomeModal();
   }
 });
 
@@ -700,16 +716,23 @@ function setLanguage(lang) {
   const html = document.documentElement;
   const dict = translations[lang];
 
+  const wRu = document.getElementById('welcome-lang-ru');
+  const wHe = document.getElementById('welcome-lang-he');
+
   if (lang === 'he') {
     html.setAttribute('dir', 'rtl');
     html.setAttribute('lang', 'he');
     document.getElementById('btn-lang-he').className = "px-3 py-1 text-xs font-medium rounded-full transition-all bg-white text-stone-900 shadow-sm";
     document.getElementById('btn-lang-ru').className = "px-3 py-1 text-xs font-medium rounded-full transition-all text-stone-600 hover:text-stone-900";
+    if (wHe) wHe.className = "px-2.5 py-0.5 text-[11px] font-semibold rounded-full transition-all bg-white text-stone-900 shadow-sm";
+    if (wRu) wRu.className = "px-2.5 py-0.5 text-[11px] font-semibold rounded-full transition-all text-stone-600 hover:text-stone-900";
   } else {
     html.setAttribute('dir', 'ltr');
     html.setAttribute('lang', 'ru');
     document.getElementById('btn-lang-ru').className = "px-3 py-1 text-xs font-medium rounded-full transition-all bg-white text-stone-900 shadow-sm";
     document.getElementById('btn-lang-he').className = "px-3 py-1 text-xs font-medium rounded-full transition-all text-stone-600 hover:text-stone-900";
+    if (wRu) wRu.className = "px-2.5 py-0.5 text-[11px] font-semibold rounded-full transition-all bg-white text-stone-900 shadow-sm";
+    if (wHe) wHe.className = "px-2.5 py-0.5 text-[11px] font-semibold rounded-full transition-all text-stone-600 hover:text-stone-900";
   }
 
   document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -1891,8 +1914,53 @@ function closeRsvpSection() {
   setRsvpSectionOpen(false);
 }
 
+let isWelcomeModalOpen = false;
+
+function openWelcomeModal() {
+  const modal = document.getElementById("welcome-modal");
+  const card = document.getElementById("welcome-modal-card");
+  if (!modal || !card) return;
+  isWelcomeModalOpen = true;
+  modal.classList.remove("opacity-0", "pointer-events-none");
+  modal.classList.add("opacity-100", "pointer-events-auto");
+  modal.setAttribute("aria-hidden", "false");
+  card.classList.remove("scale-95");
+  card.classList.add("scale-100");
+  document.body.style.overflow = "hidden";
+  if (window.lucide) lucide.createIcons();
+}
+
+function closeWelcomeModal() {
+  const modal = document.getElementById("welcome-modal");
+  const card = document.getElementById("welcome-modal-card");
+  if (!modal || !card) return;
+  isWelcomeModalOpen = false;
+  modal.classList.remove("opacity-100", "pointer-events-auto");
+  modal.classList.add("opacity-0", "pointer-events-none");
+  modal.setAttribute("aria-hidden", "true");
+  card.classList.remove("scale-100");
+  card.classList.add("scale-95");
+  if (!isRsvpSectionOpen) {
+    document.body.style.overflow = "";
+  }
+}
+
+function goToStoryFromWelcome() {
+  closeWelcomeModal();
+  const storySection = document.getElementById("story");
+  if (storySection) {
+    setTimeout(() => {
+      storySection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+  }
+}
+
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && isRsvpSectionOpen) {
-    closeRsvpSection();
+  if (e.key === "Escape") {
+    if (isWelcomeModalOpen) {
+      closeWelcomeModal();
+    } else if (isRsvpSectionOpen) {
+      closeRsvpSection();
+    }
   }
 });

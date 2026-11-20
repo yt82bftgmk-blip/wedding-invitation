@@ -894,6 +894,70 @@
     </div>
   </div>
 
-  <script src="/app.js?v=26"></script>
+  <!-- Welcome Modal (Shown on Initial Visit) -->
+  <div id="welcome-modal" onclick="if (event.target === this) closeWelcomeModal()" class="fixed inset-0 z-[60] bg-stone-900/65 backdrop-blur-md flex items-center justify-center overflow-y-auto overscroll-contain p-3 sm:p-4 transition-all duration-300 opacity-0 pointer-events-none" aria-hidden="true">
+    <div id="welcome-modal-card" class="iridescent-card rounded-3xl max-w-lg w-full my-auto max-h-[90dvh] overflow-y-auto overscroll-contain p-5 sm:p-8 shadow-2xl border border-[#E8DFC9] space-y-5 transform scale-95 transition-all duration-300 relative text-center">
+      <!-- Top Bar: Badge, Quick Lang Switcher & Close Cross -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/85 text-champagne-gold text-[11px] sm:text-xs font-semibold uppercase tracking-wider border border-[#E8DFC9] min-w-0">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 shrink-0"></i>
+          <span data-i18n="welcome_badge" class="truncate">Добро пожаловать</span>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <div class="flex items-center gap-1 bg-[#EFE9DE] p-0.5 rounded-full border border-[#DFD6C4]">
+            <button type="button" id="welcome-lang-ru" onclick="setLanguage('ru')" class="px-2.5 py-0.5 text-[11px] font-semibold rounded-full transition-all bg-white text-stone-900 shadow-sm">
+              🇷🇺 Рус
+            </button>
+            <button type="button" id="welcome-lang-he" onclick="setLanguage('he')" class="px-2.5 py-0.5 text-[11px] font-semibold rounded-full transition-all text-stone-600 hover:text-stone-900">
+              🇮🇱 עבר
+            </button>
+          </div>
+          <button type="button" onclick="closeWelcomeModal()" class="w-9 h-9 bg-white/90 text-stone-700 hover:text-stone-950 hover:bg-rose-50 hover:border-rose-200 rounded-full shadow-sm flex items-center justify-center border border-[#E8DFC9] transition-all shrink-0 cursor-pointer" title="Закрыть" aria-label="Закрыть">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Decorative Icon & Title -->
+      <div class="space-y-3 pt-1">
+        <div class="w-14 h-14 mx-auto rounded-full bg-white/90 border border-[#E8DFC9] shadow-sm flex items-center justify-center text-champagne-gold">
+          <i data-lucide="heart" class="w-7 h-7 fill-champagne-gold/20 text-champagne-gold"></i>
+        </div>
+        <div class="space-y-1">
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900 leading-tight" data-i18n="welcome_title">
+            Дорогие друзья и близкие!
+          </h2>
+          <p class="font-serif text-base sm:text-lg text-champagne-gold font-semibold tracking-wide" data-i18n="names_title">
+            Назар & София
+          </p>
+        </div>
+        <div class="gold-divider"></div>
+      </div>
+
+      <!-- Welcome Message Text -->
+      <div class="space-y-3 text-stone-700 text-sm sm:text-base leading-relaxed bg-white/65 rounded-2xl p-4 sm:p-5 border border-[#E8DFC9]/80 shadow-inner">
+        <p data-i18n="welcome_p1">
+          Мы бесконечно рады видеть вас на странице нашего свадебного приглашения! Вы попали на сайт записи на наше торжество — подтвердить своё присутствие и оставить нам тёплые пожелания вы сможете в самом низу страницы.
+        </p>
+        <p data-i18n="welcome_p2" class="text-stone-600">
+          А перед этим мы хотим вкратце рассказать вам нашу историю — о том, как всё начиналось и какие счастливые моменты привели нас к этому дню.
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 pt-1">
+        <button type="button" onclick="goToStoryFromWelcome()" class="btn-shimmer flex-1 py-3 px-5 rounded-full bg-stone-900 hover:bg-champagne-gold text-white text-xs sm:text-sm font-semibold uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="book-open-text" class="w-4 h-4 shrink-0"></i>
+          <span data-i18n="welcome_btn_story">Читать нашу историю</span>
+        </button>
+        <button type="button" onclick="closeWelcomeModal()" class="py-3 px-5 rounded-full bg-white/90 hover:bg-stone-100 border border-[#DFD6C4] text-stone-800 text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <span data-i18n="welcome_btn_site">Обратно на сайт</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js?v=27"></script>
 </body>
 </html>
