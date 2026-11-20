@@ -297,7 +297,6 @@ document.addEventListener("DOMContentLoaded", () => {
 const MUSIC_TRACKS = [
   "/music/track_1.mp3",
   "/music/track_2.mp3",
-  "/music/track_3.mp3",
   "/music/track_4.mp3",
   "/music/track_5.mp3"
 ];
