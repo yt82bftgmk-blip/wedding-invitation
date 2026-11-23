@@ -62,6 +62,12 @@ def load_config():
             "bot_token": "",
             "chat_id": ""
         },
+        "google_sheets": {
+            "enabled": False,
+            "spreadsheet_id": "1zveZY_w_MAsfhQ8R6Dofp_bpJMpsL-371qN8LoimJyE",
+            "webhook_url": "",
+            "secret": ""
+        },
         "admin": {
             "password": "wedding2027admin"
         }
@@ -623,6 +629,131 @@ def send_telegram_notification(rsvp_data, is_update=False, prev_guests_count=Non
     return success_any
 
 
+_GSHEETS_SYNC_LOCK = threading.Lock()
+
+
+def build_gsheets_rows():
+    """Build 2D array of all RSVPs formatted for the 'Гости' Google Sheet tab."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, first_name, last_name, phone, attendance, guests_count,
+               message, language, custom_answers, created_at
+        FROM rsvps
+        ORDER BY id ASC
+    """)
+    db_rows = cursor.fetchall()
+    conn.close()
+
+    rows = []
+    for r in db_rows:
+        rsvp_id, fn, ln, ph, att, g_count, msg, lang, ca_raw, created_at = r
+        try:
+            ca = json.loads(ca_raw) if ca_raw else {}
+            if not isinstance(ca, dict):
+                ca = {}
+        except Exception:
+            ca = {}
+
+        is_attending = (att == "attending")
+        status_label = "Придёт 🎉" if is_attending else "Не сможет 💔"
+
+        def extract_group(key):
+            entry = ca.get(key)
+            if not isinstance(entry, dict):
+                return 0, ""
+            cnt = int(entry.get("count") or 0)
+            val = str(entry.get("value") or "").strip()
+            if cnt == 0 and val:
+                cnt = 1
+            # If value is just the numeric count string, leave names blank
+            if val == str(cnt):
+                val = ""
+            return cnt, val
+
+        children_cnt, children_names = extract_group("children_names") if is_attending else (0, "")
+        family_cnt, family_names = extract_group("family_adults") if is_attending else (0, "")
+        plus_cnt, plus_names = extract_group("companion_name") if is_attending else (0, "")
+
+        extra_parts = []
+        for k, v in ca.items():
+            if k in ("children_names", "family_adults", "companion_name"):
+                continue
+            if isinstance(v, dict):
+                label = v.get("label_ru") or v.get("label_he") or k
+                val = str(v.get("value") or "").strip()
+            else:
+                label = k
+                val = str(v or "").strip()
+            if val:
+                extra_parts.append(f"{label}: {val}")
+
+        rows.append([
+            rsvp_id,
+            fn or "",
+            ln or "",
+            ph or "",
+            status_label,
+            int(g_count or 0) if is_attending else 0,
+            children_cnt,
+            children_names,
+            family_cnt,
+            family_names,
+            plus_cnt,
+            plus_names,
+            "; ".join(extra_parts),
+            msg or "",
+            (lang or "ru").upper(),
+            str(created_at or "")
+        ])
+    return rows
+
+
+def sync_google_sheet(async_mode=True):
+    """Push current RSVP list to Google Apps Script webhook so Google Sheet stays 1:1 in real time."""
+    cfg = load_config()
+    gs = cfg.get("google_sheets") or {}
+    webhook_url = (gs.get("webhook_url") or "").strip()
+    if not gs.get("enabled") or not webhook_url:
+        return False, "Google Sheets sync is not configured"
+
+    secret = (gs.get("secret") or "").strip()
+
+    def _do_sync():
+        with _GSHEETS_SYNC_LOCK:
+            rows = build_gsheets_rows()
+            payload = {
+                "secret": secret,
+                "rows": rows
+            }
+            data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+            req = urllib.request.Request(
+                webhook_url,
+                data=data,
+                headers={"Content-Type": "application/json; charset=utf-8"},
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                resp_text = resp.read().decode("utf-8", errors="replace")
+                return True, len(rows), resp_text
+
+    if async_mode:
+        def _bg():
+            try:
+                _do_sync()
+            except Exception as e:
+                print(f"Google Sheets background sync error: {e}")
+
+        threading.Thread(target=_bg, daemon=True).start()
+        return True, "Sync started"
+
+    try:
+        ok, count, resp_text = _do_sync()
+        return ok, {"synced_rows": count, "response": resp_text}
+    except Exception as e:
+        return False, str(e)
+
+
 def get_stats_message():
     try:
         conn = sqlite3.connect(DB_PATH)
@@ -841,6 +972,8 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             self.handle_upload_photo(payload)
         elif path == "/api/test-telegram":
             self.handle_test_telegram(payload)
+        elif path == "/api/gsheets/sync":
+            self.handle_sync_gsheets()
         elif path == "/api/rsvps/clear":
             self.handle_clear_rsvps()
         elif path == "/api/rsvps/delete":
@@ -989,6 +1122,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         telegram_sent = send_telegram_notification(
             rsvp_data, is_update=True, prev_guests_count=prev_guests_count
         )
+        sync_google_sheet(async_mode=True)
 
         self.send_json({
             "success": True,
@@ -1066,6 +1200,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         }
 
         telegram_sent = send_telegram_notification(rsvp_data)
+        sync_google_sheet(async_mode=True)
 
         self.send_json({
             "success": True,
@@ -1146,6 +1281,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         cursor.execute("DELETE FROM sqlite_sequence WHERE name='rsvps';")
         conn.commit()
         conn.close()
+        sync_google_sheet(async_mode=True)
         self.send_json({"success": True, "message": "All RSVPs cleared"})
 
     def handle_delete_rsvp(self, payload):
@@ -1161,6 +1297,7 @@ class WeddingHandler(SimpleHTTPRequestHandler):
         cursor.execute("DELETE FROM rsvps WHERE id = ?;", (rsvp_id,))
         conn.commit()
         conn.close()
+        sync_google_sheet(async_mode=True)
         self.send_json({"success": True, "message": "RSVP deleted"})
 
     def handle_upload_photo(self, payload):
@@ -1281,6 +1418,10 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             cfg["photos"].update(payload["photos"])
         if "telegram" in payload:
             cfg["telegram"].update(payload["telegram"])
+        if "google_sheets" in payload:
+            if "google_sheets" not in cfg or not isinstance(cfg["google_sheets"], dict):
+                cfg["google_sheets"] = {}
+            cfg["google_sheets"].update(payload["google_sheets"])
 
         translated_count = auto_translate_config_ru_to_he(old_cfg, cfg)
         save_config(cfg)
@@ -1397,7 +1538,18 @@ class WeddingHandler(SimpleHTTPRequestHandler):
             conn.commit()
             conn.close()
 
+        sync_google_sheet(async_mode=True)
         self.send_json({"success": True, "message": "Backup restored successfully"})
+
+    def handle_sync_gsheets(self):
+        if not self.check_admin():
+            self.send_json({"error": "Unauthorized"}, status=401)
+            return
+        ok, info = sync_google_sheet(async_mode=False)
+        if ok:
+            self.send_json({"success": True, **info})
+        else:
+            self.send_json({"success": False, "error": str(info)}, status=400)
 
     def handle_test_telegram(self, payload):
         if not self.check_admin():
