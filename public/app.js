@@ -235,7 +235,7 @@ const translations = {
     guest_opt_3: "3 אורחים",
     guest_opt_4: "4+ אורחים (עם המשפחה)",
     field_message: "ברכה ואיחולים לזוג הצעיר",
-    optional_tag: "(אופציונלי)",
+    optional_tag: "(לבחירה)",
     btn_submit_rsvp: "שליחת אישור הגעה",
     btn_submitting: "שולח...",
 
@@ -757,6 +757,7 @@ function setLanguage(lang) {
   renderFamilyAdultsInputs();
   renderPlusOneInputs();
   updateTotalGuestsBadge();
+  setPhoneFormat(currentPhoneFormat);
 
   applyConfig();
   applyPhotos();
@@ -843,13 +844,13 @@ function setPhoneFormat(format) {
   if (hint) {
     if (format === 'il_intl') {
       input.placeholder = "+972 50-123-4567";
-      hint.textContent = isHe ? "הזינו 9 ספרות אחרי 972+ (לדוגמה: 50-123-4567)" : "Введите 9 цифр после +972 (например: 50-123-4567)";
+      hint.innerHTML = isHe ? 'הזינו 9 ספרות אחרי <span dir="ltr">+972</span> (לדוגמה: <span dir="ltr">50-123-4567</span>)' : "Введите 9 цифр после +972 (например: 50-123-4567)";
     } else if (format === 'il_local') {
       input.placeholder = "058-123-4567";
-      hint.textContent = isHe ? "הזינו 10 ספרות (לדוגמה: 058-123-4567)" : "Введите 10 цифр (начиная с 05X, например: 058-123-4567)";
+      hint.innerHTML = isHe ? 'הזינו 10 ספרות (לדוגמה: <span dir="ltr">058-123-4567</span>)' : "Введите 10 цифр (начиная с 05X, например: 058-123-4567)";
     } else if (format === 'ru') {
       input.placeholder = "+7 (912) 345-67-89";
-      hint.textContent = isHe ? "הזינו 10 ספרות אחרי 7+ (רוסיה)" : "Введите 10 цифр после +7 (например: 912 345-67-89)";
+      hint.innerHTML = isHe ? 'הזינו 10 ספרות אחרי <span dir="ltr">+7</span> (רוסיה)' : "Введите 10 цифр после +7 (например: 912 345-67-89)";
     }
   }
 
